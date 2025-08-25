@@ -97,127 +97,113 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .water-chart {
+        .simple-chart {
             width: 100%;
-            padding: 20px 0;
         }
         
-        .chart-value-display {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+        .current-level {
+            background: linear-gradient(135deg, #00b894, #00cec9);
             color: white;
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 10px;
             text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .level-value {
+            font-size: 32px;
             font-weight: bold;
-            min-height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
+            margin-bottom: 5px;
         }
         
-        .chart-bars {
-            display: flex;
-            align-items: end;
-            height: 200px;
-            border-bottom: 2px solid #333;
-            margin-bottom: 10px;
-            padding: 0 5px;
-            gap: 3px;
-            overflow-x: auto;
-        }
-        
-        .chart-bar {
-            background: linear-gradient(to top, #667eea, #764ba2);
-            border-radius: 3px 3px 0 0;
-            min-height: 20px;
-            min-width: 25px;
-            flex: 1 0 25px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            opacity: 0.8;
-        }
-        
-        .chart-bar:hover,
-        .chart-bar:active,
-        .chart-bar.selected {
-            opacity: 1;
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(102, 126, 234, 0.7);
-            z-index: 5;
-        }
-        
-        .chart-bar-value {
-            display: none; /* On n'utilise plus les tooltips sur les barres */
-        }
-        
-        .chart-info {
-            display: block;
-            margin-top: 15px;
+        .level-time {
             font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .chart-graph {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        .data-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .data-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .data-table tr:hover {
+            background: #e3f2fd;
+        }
+        
+        .level-high {
+            color: #d63031;
+            font-weight: bold;
+        }
+        
+        .level-normal {
+            color: #00b894;
+            font-weight: bold;
+        }
+        
+        .level-low {
+            color: #fdcb6e;
+            font-weight: bold;
+        }
+        
+        .chart-footer {
+            font-size: 12px;
             color: #666;
             text-align: center;
-        }
-        
-        .chart-legend {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 3px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-        }
-        
-        .chart-stats {
-            background: #f8f9fa;
             padding: 10px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 13px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .trend-up {
+            color: #d63031;
+        }
+        
+        .trend-down {
+            color: #00b894;
+        }
+        
+        .trend-stable {
+            color: #fdcb6e;
         }
         
         @media (max-width: 480px) {
-            .chart-bars {
-                height: 180px;
-                gap: 2px;
-                padding: 0 3px;
+            .level-value {
+                font-size: 28px;
             }
             
-            .chart-bar {
-                min-width: 20px;
-                flex: 1 0 20px;
-            }
-            
-            .chart-bar-value {
-                font-size: 11px;
-                padding: 6px 8px;
-            }
-            
-            .chart-info {
+            .data-table {
                 font-size: 12px;
             }
             
-            .legend-item {
-                font-size: 12px;
-            }
-            
-            .chart-stats {
-                font-size: 12px;
+            .data-table th,
+            .data-table td {
+                padding: 8px 6px;
             }
         }
         
@@ -320,14 +306,12 @@
             </a>
             
             <div class="chart-container">
-                <h3>📈 Niveaux d'eau Pont Morand (48h)</h3>
+                <h3>📈 Station V300 0020 01 - Niveaux d'eau (48h)</h3>
                 <div id="loadingChart" class="loading">🔄 Chargement des données...</div>
-                <div id="waterChart" class="water-chart" style="display:none;">
-                    <div class="chart-value-display" id="chartValueDisplay">
-                        💡 <span id="instructions">Cliquez sur une barre pour voir les détails</span>
-                    </div>
-                    <div class="chart-bars" id="chartBars"></div>
-                    <div class="chart-info" id="chartInfo"></div>
+                <div id="waterChart" class="simple-chart" style="display:none;">
+                    <div class="current-level" id="currentLevel"></div>
+                    <div class="chart-graph" id="chartGraph"></div>
+                    <div class="chart-footer" id="chartFooter"></div>
                 </div>
             </div>
         </div>
@@ -348,102 +332,122 @@
             document.getElementById('currentDate').textContent = now.toLocaleDateString('fr-FR', options);
         }
         
-        // Fonction pour créer le graphique (VERSION AVEC AFFICHAGE FIXE)
+        // Fonction pour créer le graphique standard
         function createWaterChart(data) {
             if (data.length === 0) {
-                document.getElementById('loadingChart').textContent = 'Aucune donnée disponible';
+                document.getElementById('loadingChart').textContent = 'Aucune donnée disponible pour la station V300 0020 01';
                 return;
             }
             
-            // Détection mobile
-            const isMobile = window.innerWidth <= 480;
-            const maxPoints = isMobile ? 8 : 12;
+            // Trier les données par date (plus récent en premier)
+            const sortedData = data.sort((a, b) => new Date(b.date_obs) - new Date(a.date_obs));
             
-            // Prendre un échantillon de données pour la lisibilité
-            const step = Math.max(1, Math.floor(data.length / maxPoints));
-            const filteredData = data.filter((_, index) => index % step === 0);
+            // Données pour affichage (limiter à 12 points pour la lisibilité)
+            const displayData = sortedData.slice(0, 12);
             
-            const values = filteredData.map(item => parseFloat(item.resultat_obs) || 0);
-            const maxValue = Math.max(...values);
-            const minValue = Math.min(...values);
-            const range = maxValue - minValue || 1;
+            // Valeur la plus récente
+            const latestReading = sortedData[0];
+            const latestValue = parseFloat(latestReading.resultat_obs);
+            const latestDate = new Date(latestReading.date_obs);
             
-            // Références aux éléments
-            const chartBars = document.getElementById('chartBars');
-            const valueDisplay = document.getElementById('chartValueDisplay');
-            const instructions = document.getElementById('instructions');
-            
-            chartBars.innerHTML = '';
-            
-            filteredData.forEach((item, index) => {
-                const value = parseFloat(item.resultat_obs) || 0;
-                const height = Math.max(20, ((value - minValue) / range) * 160 + 20);
-                const date = new Date(item.date_obs);
-                
-                const timeLabel = date.toLocaleDateString('fr-FR', {
-                    weekday: 'short',
-                    day: '2-digit',
-                    month: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                
-                const bar = document.createElement('div');
-                bar.className = 'chart-bar';
-                bar.style.height = height + 'px';
-                bar.dataset.value = value.toFixed(2);
-                bar.dataset.time = timeLabel;
-                
-                // Gestion du clic/survol
-                const showValue = () => {
-                    // Enlever la sélection des autres barres
-                    document.querySelectorAll('.chart-bar').forEach(b => b.classList.remove('selected'));
-                    bar.classList.add('selected');
-                    
-                    // Afficher la valeur dans l'encart fixe
-                    valueDisplay.innerHTML = `
-                        <strong>📊 ${value.toFixed(2)} mètres</strong><br>
-                        <small>📅 ${timeLabel}</small>
-                    `;
-                };
-                
-                // Événements
-                if (isMobile) {
-                    bar.addEventListener('click', showValue);
-                } else {
-                    bar.addEventListener('mouseenter', showValue);
-                    bar.addEventListener('mouseleave', () => {
-                        bar.classList.remove('selected');
-                        valueDisplay.innerHTML = `💡 <span id="instructions">Survolez une barre pour voir les détails</span>`;
-                    });
-                }
-                
-                chartBars.appendChild(bar);
-            });
-            
-            // Afficher les informations
-            const chartInfo = document.getElementById('chartInfo');
-            chartInfo.innerHTML = `
-                <div class="chart-legend">
-                    <div class="legend-item">
-                        <div class="legend-color"></div>
-                        <span>Niveau d'eau Pont Morand</span>
-                    </div>
+            // Afficher la valeur actuelle
+            const currentLevel = document.getElementById('currentLevel');
+            currentLevel.innerHTML = `
+                <div class="level-value">${latestValue.toFixed(2)} m</div>
+                <div class="level-time">
+                    📅 ${latestDate.toLocaleDateString('fr-FR', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}
                 </div>
-                <div class="chart-stats">
-                    <strong>📊 Statistiques (${filteredData.length} points):</strong><br>
-                    Minimum: <strong>${minValue.toFixed(2)}m</strong> | 
-                    Maximum: <strong>${maxValue.toFixed(2)}m</strong> | 
-                    Variation: <strong>${(maxValue - minValue).toFixed(2)}m</strong>
+                <div style="margin-top: 10px; font-size: 14px;">
+                    📍 Station hydrométrique V300 0020 01
                 </div>
             `;
             
-            // Instructions selon l'appareil
-            if (isMobile) {
-                instructions.textContent = 'Cliquez sur une barre pour voir les détails';
-            } else {
-                instructions.textContent = 'Survolez une barre pour voir les détails';
-            }
+            // Créer le tableau des données
+            const chartGraph = document.getElementById('chartGraph');
+            let tableHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>📅 Date & Heure</th>
+                            <th>💧 Niveau (m)</th>
+                            <th>📊 Tendance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            displayData.forEach((item, index) => {
+                const value = parseFloat(item.resultat_obs);
+                const date = new Date(item.date_obs);
+                const nextValue = index < displayData.length - 1 ? parseFloat(displayData[index + 1].resultat_obs) : value;
+                
+                // Déterminer la tendance
+                let trend = '';
+                let trendClass = 'trend-stable';
+                if (index < displayData.length - 1) {
+                    const diff = value - nextValue;
+                    if (diff > 0.01) {
+                        trend = '📈 Hausse';
+                        trendClass = 'trend-up';
+                    } else if (diff < -0.01) {
+                        trend = '📉 Baisse';
+                        trendClass = 'trend-down';
+                    } else {
+                        trend = '➡️ Stable';
+                        trendClass = 'trend-stable';
+                    }
+                }
+                
+                // Classe de couleur selon le niveau
+                let levelClass = 'level-normal';
+                if (value > 2.0) levelClass = 'level-high';
+                else if (value < 1.0) levelClass = 'level-low';
+                
+                tableHTML += `
+                    <tr>
+                        <td>
+                            ${date.toLocaleDateString('fr-FR', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}
+                        </td>
+                        <td class="${levelClass}">${value.toFixed(2)} m</td>
+                        <td class="${trendClass}">${trend}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            chartGraph.innerHTML = tableHTML;
+            
+            // Calculer les statistiques
+            const values = displayData.map(item => parseFloat(item.resultat_obs));
+            const maxValue = Math.max(...values);
+            const minValue = Math.min(...values);
+            const avgValue = values.reduce((a, b) => a + b, 0) / values.length;
+            
+            // Pied du graphique avec statistiques
+            const chartFooter = document.getElementById('chartFooter');
+            chartFooter.innerHTML = `
+                📊 <strong>Statistiques sur 12 derniers relevés:</strong><br>
+                Minimum: <strong>${minValue.toFixed(2)} m</strong> | 
+                Maximum: <strong>${maxValue.toFixed(2)} m</strong> | 
+                Moyenne: <strong>${avgValue.toFixed(2)} m</strong><br>
+                <em>Source: API Hub'Eau - Station V300 0020 01</em>
+            `;
             
             document.getElementById('loadingChart').style.display = 'none';
             document.getElementById('waterChart').style.display = 'block';
