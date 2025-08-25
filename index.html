@@ -97,9 +97,93 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        #waterChart {
+        .water-chart {
             width: 100%;
-            height: 300px;
+            padding: 20px 0;
+        }
+        
+        .chart-bars {
+            display: flex;
+            align-items: end;
+            height: 200px;
+            border-bottom: 2px solid #333;
+            margin-bottom: 10px;
+            padding: 0 10px;
+            gap: 2px;
+        }
+        
+        .chart-bar {
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 3px 3px 0 0;
+            min-height: 10px;
+            flex: 1;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .chart-bar:hover {
+            transform: scaleY(1.05);
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+        
+        .chart-bar-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .chart-bar:hover .chart-bar-value {
+            opacity: 1;
+        }
+        
+        .chart-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .chart-legend {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+        
+        @media (max-width: 480px) {
+            .chart-bars {
+                height: 150px;
+                gap: 1px;
+            }
+            
+            .chart-bar-value {
+                font-size: 9px;
+                padding: 1px 4px;
+            }
         }
         
         .loading {
@@ -203,7 +287,10 @@
             <div class="chart-container">
                 <h3>📈 Niveaux d'eau Pont Morand (48h)</h3>
                 <div id="loadingChart" class="loading">🔄 Chargement des données...</div>
-                <canvas id="waterChart" style="display:none;"></canvas>
+                <div id="waterChart" class="water-chart" style="display:none;">
+                    <div class="chart-bars" id="chartBars"></div>
+                    <div class="chart-info" id="chartInfo"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -223,86 +310,63 @@
             document.getElementById('currentDate').textContent = now.toLocaleDateString('fr-FR', options);
         }
         
-        // Fonction pour créer le graphique
+        // Fonction pour créer le graphique (VERSION CSS SIMPLE)
         function createWaterChart(data) {
-            const canvas = document.getElementById('waterChart');
-            const ctx = canvas.getContext('2d');
-            
             if (data.length === 0) {
                 document.getElementById('loadingChart').textContent = 'Aucune donnée disponible';
                 return;
             }
             
-            // Préparer les données
-            const labels = data.map(item => {
-                const date = new Date(item.date_obs);
-                return date.toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
-            });
+            // Prendre un échantillon de données pour la lisibilité (max 12 points)
+            const step = Math.max(1, Math.floor(data.length / 12));
+            const filteredData = data.filter((_, index) => index % step === 0);
             
-            const values = data.map(item => parseFloat(item.resultat_obs) || 0);
-            
-            // Configuration du graphique
+            const values = filteredData.map(item => parseFloat(item.resultat_obs) || 0);
             const maxValue = Math.max(...values);
             const minValue = Math.min(...values);
             const range = maxValue - minValue || 1;
-            const padding = 20;
-            const chartHeight = canvas.height - 60;
-            const chartWidth = canvas.width - 80;
             
-            // Effacer le canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Créer les barres
+            const chartBars = document.getElementById('chartBars');
+            chartBars.innerHTML = '';
             
-            // Style
-            ctx.font = '12px Arial';
-            ctx.strokeStyle = '#667eea';
-            ctx.fillStyle = '#667eea';
-            ctx.lineWidth = 2;
-            
-            // Dessiner le graphique en barres
-            const barWidth = chartWidth / data.length;
-            
-            for (let i = 0; i < data.length; i++) {
-                const value = values[i];
-                const barHeight = ((value - minValue) / range) * chartHeight;
-                const x = 40 + (i * barWidth);
-                const y = canvas.height - 40 - barHeight;
+            filteredData.forEach((item, index) => {
+                const value = parseFloat(item.resultat_obs) || 0;
+                const height = Math.max(5, ((value - minValue) / range) * 180 + 20);
+                const date = new Date(item.date_obs);
+                const timeLabel = date.toLocaleDateString('fr-FR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
                 
-                // Barre
-                ctx.fillStyle = `rgba(102, 126, 234, ${0.3 + (value - minValue) / range * 0.7})`;
-                ctx.fillRect(x, y, barWidth - 2, barHeight);
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = height + 'px';
+                bar.innerHTML = `<div class="chart-bar-value">${value.toFixed(2)}m<br>${timeLabel}</div>`;
                 
-                // Bordure
-                ctx.strokeStyle = '#667eea';
-                ctx.strokeRect(x, y, barWidth - 2, barHeight);
-                
-                // Valeur au-dessus de la barre
-                ctx.fillStyle = '#2c3e50';
-                ctx.font = '10px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(value.toFixed(2) + 'm', x + (barWidth - 2) / 2, y - 5);
-            }
+                chartBars.appendChild(bar);
+            });
             
-            // Axes
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(40, 20);
-            ctx.lineTo(40, canvas.height - 40);
-            ctx.lineTo(canvas.width - 20, canvas.height - 40);
-            ctx.stroke();
-            
-            // Labels des axes
-            ctx.fillStyle = '#666';
-            ctx.font = '12px Arial';
-            ctx.textAlign = 'center';
-            
-            // Titre
-            ctx.fillStyle = '#2c3e50';
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('Niveau d\'eau (m)', canvas.width / 2, 15);
+            // Afficher les informations
+            const chartInfo = document.getElementById('chartInfo');
+            chartInfo.innerHTML = `
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color"></div>
+                        <span>Niveau d'eau (mètres)</span>
+                    </div>
+                </div>
+                <div>
+                    <strong>Min:</strong> ${minValue.toFixed(2)}m | 
+                    <strong>Max:</strong> ${maxValue.toFixed(2)}m | 
+                    <strong>Points:</strong> ${filteredData.length}
+                </div>
+            `;
             
             document.getElementById('loadingChart').style.display = 'none';
-            canvas.style.display = 'block';
+            document.getElementById('waterChart').style.display = 'block';
         }
         
         // Charger les données de l'API (VERSION UNIQUE ET CORRIGÉE)
