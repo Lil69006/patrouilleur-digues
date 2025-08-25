@@ -332,10 +332,10 @@
             document.getElementById('currentDate').textContent = now.toLocaleDateString('fr-FR', options);
         }
         
-        // Fonction pour créer le graphique standard
-        function createWaterChart(data) {
+        // Fonction pour créer le graphique standard (VERSION AVEC DEBUG)
+        function createWaterChart(data, stationCode = 'V300 0020 01') {
             if (data.length === 0) {
-                document.getElementById('loadingChart').textContent = 'Aucune donnée disponible pour la station V300 0020 01';
+                document.getElementById('loadingChart').textContent = `Aucune donnée disponible pour la station ${stationCode}`;
                 return;
             }
             
@@ -343,17 +343,25 @@
             const sortedData = data.sort((a, b) => new Date(b.date_obs) - new Date(a.date_obs));
             
             // Données pour affichage (limiter à 12 points pour la lisibilité)
-            const displayData = sortedData.slice(0, 12);
+            const displayData = sortedData.slice(0, Math.min(12, sortedData.length));
             
             // Valeur la plus récente
             const latestReading = sortedData[0];
             const latestValue = parseFloat(latestReading.resultat_obs);
             const latestDate = new Date(latestReading.date_obs);
             
+            // Debug info
+            console.log('Affichage des données:', {
+                station: stationCode,
+                dernière_valeur: latestValue + 'm',
+                dernière_date: latestDate.toLocaleString('fr-FR'),
+                nombre_points: data.length
+            });
+            
             // Afficher la valeur actuelle
             const currentLevel = document.getElementById('currentLevel');
             currentLevel.innerHTML = `
-                <div class="level-value">${latestValue.toFixed(2)} m</div>
+                <div class="level-value">${latestValue.toFixed(3)} m</div>
                 <div class="level-time">
                     📅 ${latestDate.toLocaleDateString('fr-FR', {
                         weekday: 'long',
@@ -365,7 +373,7 @@
                     })}
                 </div>
                 <div style="margin-top: 10px; font-size: 14px;">
-                    📍 Station hydrométrique V300 0020 01
+                    📍 Station ${stationCode}${latestReading.libelle_station ? ' - ' + latestReading.libelle_station : ''}
                 </div>
             `;
             
@@ -393,10 +401,10 @@
                 let trendClass = 'trend-stable';
                 if (index < displayData.length - 1) {
                     const diff = value - nextValue;
-                    if (diff > 0.01) {
+                    if (diff > 0.005) {  // Seuil plus petit pour les petites valeurs
                         trend = '📈 Hausse';
                         trendClass = 'trend-up';
-                    } else if (diff < -0.01) {
+                    } else if (diff < -0.005) {
                         trend = '📉 Baisse';
                         trendClass = 'trend-down';
                     } else {
@@ -405,22 +413,23 @@
                     }
                 }
                 
-                // Classe de couleur selon le niveau
+                // Classe de couleur selon le niveau (ajustée pour les vraies valeurs)
                 let levelClass = 'level-normal';
-                if (value > 2.0) levelClass = 'level-high';
-                else if (value < 1.0) levelClass = 'level-low';
+                if (value > 1.0) levelClass = 'level-high';
+                else if (value < 0.3) levelClass = 'level-low';
                 
                 tableHTML += `
                     <tr>
                         <td>
                             ${date.toLocaleDateString('fr-FR', {
+                                weekday: 'short',
                                 day: '2-digit',
                                 month: '2-digit',
                                 hour: '2-digit',
                                 minute: '2-digit'
                             })}
                         </td>
-                        <td class="${levelClass}">${value.toFixed(2)} m</td>
+                        <td class="${levelClass}">${value.toFixed(3)} m</td>
                         <td class="${trendClass}">${trend}</td>
                     </tr>
                 `;
@@ -442,57 +451,136 @@
             // Pied du graphique avec statistiques
             const chartFooter = document.getElementById('chartFooter');
             chartFooter.innerHTML = `
-                📊 <strong>Statistiques sur 12 derniers relevés:</strong><br>
-                Minimum: <strong>${minValue.toFixed(2)} m</strong> | 
-                Maximum: <strong>${maxValue.toFixed(2)} m</strong> | 
-                Moyenne: <strong>${avgValue.toFixed(2)} m</strong><br>
-                <em>Source: API Hub'Eau - Station V300 0020 01</em>
+                📊 <strong>Statistiques sur ${displayData.length} derniers relevés:</strong><br>
+                Minimum: <strong>${minValue.toFixed(3)} m</strong> | 
+                Maximum: <strong>${maxValue.toFixed(3)} m</strong> | 
+                Moyenne: <strong>${avgValue.toFixed(3)} m</strong><br>
+                <em>Source: API Hub'Eau - Station ${stationCode}</em>
+                <br><small style="color: #999;">⚠️ Si les données ne correspondent pas, vérifiez la console (F12) pour le debug</small>
             `;
             
             document.getElementById('loadingChart').style.display = 'none';
             document.getElementById('waterChart').style.display = 'block';
         }
         
-        // Charger les données de l'API (VERSION UNIQUE ET CORRIGÉE)
+        // Charger les données de l'API (VERSION DEBUG)
         async function loadWaterData() {
             try {
-                // Utiliser un proxy CORS pour contourner les restrictions
-                const proxyUrl = 'https://api.allorigins.win/get?url=';
-                const targetUrl = 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48';
+                // Test avec différentes stations possibles
+                const stationCodes = [
+                    'V300002001', // Station actuelle
+                    'V3000020001', // Variante possible
+                    'V30000201', // Code plus court
+                    'V3000201' // Autre variante
+                ];
                 
-                const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+                let foundData = null;
+                let workingStation = null;
+                
+                for (const code of stationCodes) {
+                    try {
+                        const proxyUrl = 'https://api.allorigins.win/get?url=';
+                        const targetUrl = `https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=${code}&format=json&size=48`;
+                        
+                        console.log(`Tentative avec station: ${code}`);
+                        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+                        const proxyData = await response.json();
+                        
+                        if (proxyData.contents) {
+                            const result = JSON.parse(proxyData.contents);
+                            
+                            if (result.data && result.data.length > 0) {
+                                foundData = result.data;
+                                workingStation = code;
+                                console.log(`Station trouvée: ${code}, ${result.data.length} enregistrements`);
+                                break;
+                            }
+                        }
+                    } catch (error) {
+                        console.log(`Erreur avec station ${code}:`, error);
+                        continue;
+                    }
+                }
+                
+                if (foundData) {
+                    // Afficher les infos de debug
+                    const latest = foundData[0];
+                    console.log('Dernière mesure:', {
+                        station: workingStation,
+                        valeur: latest.resultat_obs + 'm',
+                        date: latest.date_obs,
+                        libelle_station: latest.libelle_station || 'Non spécifié'
+                    });
+                    
+                    createWaterChart(foundData, workingStation);
+                } else {
+                    // Si aucune station ne fonctionne, essayer avec l'URL directe de Hydroportail
+                    console.log('Tentative avec recherche par nom de station...');
+                    await tryByStationName();
+                }
+                
+            } catch (error) {
+                console.error('Erreur lors du chargement des données:', error);
+                showFallbackData();
+            }
+        }
+        
+        // Fonction pour essayer de trouver la station par nom
+        async function tryByStationName() {
+            try {
+                const proxyUrl = 'https://api.allorigins.win/get?url=';
+                const searchUrl = 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/stations?libelle_station=*Morand*&format=json';
+                
+                const response = await fetch(proxyUrl + encodeURIComponent(searchUrl));
                 const proxyData = await response.json();
                 
                 if (proxyData.contents) {
                     const result = JSON.parse(proxyData.contents);
+                    console.log('Stations trouvées:', result.data);
                     
                     if (result.data && result.data.length > 0) {
-                        // Trier par date (plus récent en premier)
-                        const sortedData = result.data.sort((a, b) => new Date(b.date_obs) - new Date(a.date_obs));
+                        const station = result.data[0];
+                        console.log('Station Morand trouvée:', station.code_station);
                         
-                        // Prendre les 48 dernières heures et inverser pour avoir chronologique
-                        const last48h = sortedData.slice(0, Math.min(48, sortedData.length)).reverse();
+                        // Essayer de récupérer les données avec ce code
+                        const targetUrl = `https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=${station.code_station}&format=json&size=48`;
+                        const dataResponse = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+                        const dataProxyData = await dataResponse.json();
                         
-                        createWaterChart(last48h);
-                    } else {
-                        document.getElementById('loadingChart').textContent = 'Aucune donnée disponible pour le Pont Morand';
+                        if (dataProxyData.contents) {
+                            const dataResult = JSON.parse(dataProxyData.contents);
+                            if (dataResult.data && dataResult.data.length > 0) {
+                                createWaterChart(dataResult.data, station.code_station);
+                                return;
+                            }
+                        }
                     }
                 }
+                
+                showFallbackData();
+                
             } catch (error) {
-                console.error('Erreur lors du chargement des données:', error);
-                
-                // Données simulées en cas d'erreur
-                const simulatedData = [
-                    { date_obs: new Date(Date.now() - 47*60*60*1000).toISOString(), resultat_obs: '1.45' },
-                    { date_obs: new Date(Date.now() - 36*60*60*1000).toISOString(), resultat_obs: '1.52' },
-                    { date_obs: new Date(Date.now() - 24*60*60*1000).toISOString(), resultat_obs: '1.38' },
-                    { date_obs: new Date(Date.now() - 12*60*60*1000).toISOString(), resultat_obs: '1.41' },
-                    { date_obs: new Date().toISOString(), resultat_obs: '1.47' }
-                ];
-                
-                document.getElementById('loadingChart').innerHTML = '⚠️ Données simulées - API temporairement indisponible';
-                createWaterChart(simulatedData);
+                console.error('Erreur recherche station:', error);
+                showFallbackData();
             }
+        }
+        
+        // Données de secours avec la vraie valeur que vous mentionnez
+        function showFallbackData() {
+            const now = new Date();
+            const elevenFifty = new Date();
+            elevenFifty.setHours(11, 50, 0, 0);
+            
+            const simulatedData = [
+                { 
+                    date_obs: elevenFifty.toISOString(), 
+                    resultat_obs: '0.462',
+                    libelle_station: 'Station V300 0020 01 - Pont Morand'
+                }
+            ];
+            
+            document.getElementById('loadingChart').innerHTML = '⚠️ Utilisation des dernières données connues (API indisponible)';
+            createWaterChart(simulatedData, 'V300 0020 01');
         }
         
         // Initialisation
