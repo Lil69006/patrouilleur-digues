@@ -329,29 +329,43 @@
         }
         
         // Initialisation
-        document.addEventListener('deviceready', function() {
-            updateCurrentDate();
-            loadWaterData();
-            
-            // Mise à jour toutes les 30 minutes
-            setInterval(() => {
-                updateCurrentDate();
-                loadWaterData();
-            }, 30 * 60 * 1000);
-        });
+       async function loadWaterData() {
+    try {
+        // Utiliser un proxy CORS pour contourner les restrictions
+        const proxyUrl = 'https://api.allorigins.win/get?url=';
+        const targetUrl = 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48';
         
-        // Pour les tests dans le navigateur
-        if (typeof cordova === 'undefined') {
-            updateCurrentDate();
-            loadWaterData();
+        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+        const proxyData = await response.json();
+        
+        if (proxyData.contents) {
+            const result = JSON.parse(proxyData.contents);
             
-            setInterval(() => {
-                updateCurrentDate();
-                loadWaterData();
-            }, 30 * 60 * 1000);
+            if (result.data && result.data.length > 0) {
+                // Trier par date (plus récent en premier)
+                const sortedData = result.data.sort((a, b) => new Date(b.date_obs) - new Date(a.date_obs));
+                
+                // Prendre les 48 dernières heures et inverser pour avoir chronologique
+                const last48h = sortedData.slice(0, 48).reverse();
+                
+                createWaterChart(last48h);
+            } else {
+                document.getElementById('loadingChart').textContent = 'Aucune donnée disponible pour le Pont Morand';
+            }
         }
-    </script>
-    
-    <script type="text/javascript" src="cordova.js"></script>
-</body>
-</html>
+    } catch (error) {
+        console.error('Erreur lors du chargement des données:', error);
+        
+        // Données simulées en cas d'erreur
+        const simulatedData = [
+            { date_obs: new Date(Date.now() - 47*60*60*1000).toISOString(), resultat_obs: '1.45' },
+            { date_obs: new Date(Date.now() - 36*60*60*1000).toISOString(), resultat_obs: '1.52' },
+            { date_obs: new Date(Date.now() - 24*60*60*1000).toISOString(), resultat_obs: '1.38' },
+            { date_obs: new Date(Date.now() - 12*60*60*1000).toISOString(), resultat_obs: '1.41' },
+            { date_obs: new Date().toISOString(), resultat_obs: '1.47' }
+        ];
+        
+        document.getElementById('loadingChart').innerHTML = '⚠️ Données simulées - API temporairement indisponible';
+        createWaterChart(simulatedData);
+    }
+}
