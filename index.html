@@ -108,57 +108,67 @@
             height: 200px;
             border-bottom: 2px solid #333;
             margin-bottom: 10px;
-            padding: 0 10px;
-            gap: 2px;
+            padding: 0 5px;
+            gap: 3px;
+            overflow-x: auto;
         }
         
         .chart-bar {
             background: linear-gradient(to top, #667eea, #764ba2);
             border-radius: 3px 3px 0 0;
-            min-height: 10px;
-            flex: 1;
+            min-height: 20px;
+            min-width: 25px;
+            flex: 1 0 25px;
             position: relative;
             cursor: pointer;
             transition: all 0.3s ease;
         }
         
-        .chart-bar:hover {
+        .chart-bar:hover,
+        .chart-bar:active {
             transform: scaleY(1.05);
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.7);
         }
         
         .chart-bar-value {
             position: absolute;
-            top: -25px;
+            bottom: 100%;
             left: 50%;
             transform: translateX(-50%);
-            background: #333;
+            background: rgba(0,0,0,0.9);
             color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 10px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
             white-space: nowrap;
             opacity: 0;
             transition: opacity 0.3s ease;
+            z-index: 10;
+            margin-bottom: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         
-        .chart-bar:hover .chart-bar-value {
+        .chart-bar:hover .chart-bar-value,
+        .chart-bar:active .chart-bar-value,
+        .chart-bar.show-value .chart-bar-value {
             opacity: 1;
         }
         
         .chart-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
+            display: block;
+            margin-top: 15px;
             font-size: 14px;
             color: #666;
+            text-align: center;
         }
         
         .chart-legend {
             display: flex;
+            justify-content: center;
             gap: 15px;
             flex-wrap: wrap;
+            margin-bottom: 10px;
         }
         
         .legend-item {
@@ -168,21 +178,47 @@
         }
         
         .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
             background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+        
+        .chart-stats {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 13px;
         }
         
         @media (max-width: 480px) {
             .chart-bars {
-                height: 150px;
-                gap: 1px;
+                height: 180px;
+                gap: 2px;
+                padding: 0 3px;
+            }
+            
+            .chart-bar {
+                min-width: 20px;
+                flex: 1 0 20px;
             }
             
             .chart-bar-value {
-                font-size: 9px;
-                padding: 1px 4px;
+                font-size: 11px;
+                padding: 6px 8px;
+            }
+            
+            .chart-info {
+                font-size: 12px;
+            }
+            
+            .legend-item {
+                font-size: 12px;
+            }
+            
+            .chart-stats {
+                font-size: 12px;
             }
         }
         
@@ -310,15 +346,19 @@
             document.getElementById('currentDate').textContent = now.toLocaleDateString('fr-FR', options);
         }
         
-        // Fonction pour créer le graphique (VERSION CSS SIMPLE)
+        // Fonction pour créer le graphique (VERSION MOBILE OPTIMISÉE)
         function createWaterChart(data) {
             if (data.length === 0) {
                 document.getElementById('loadingChart').textContent = 'Aucune donnée disponible';
                 return;
             }
             
-            // Prendre un échantillon de données pour la lisibilité (max 12 points)
-            const step = Math.max(1, Math.floor(data.length / 12));
+            // Détection mobile
+            const isMobile = window.innerWidth <= 480;
+            const maxPoints = isMobile ? 8 : 12; // Moins de points sur mobile
+            
+            // Prendre un échantillon de données pour la lisibilité
+            const step = Math.max(1, Math.floor(data.length / maxPoints));
             const filteredData = data.filter((_, index) => index % step === 0);
             
             const values = filteredData.map(item => parseFloat(item.resultat_obs) || 0);
@@ -332,19 +372,39 @@
             
             filteredData.forEach((item, index) => {
                 const value = parseFloat(item.resultat_obs) || 0;
-                const height = Math.max(5, ((value - minValue) / range) * 180 + 20);
+                const height = Math.max(20, ((value - minValue) / range) * 160 + 20);
                 const date = new Date(item.date_obs);
-                const timeLabel = date.toLocaleDateString('fr-FR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
+                
+                // Format de date adaptatif
+                const timeLabel = isMobile ? 
+                    date.toLocaleDateString('fr-FR', { day: '2-digit', hour: '2-digit' }) + 'h' :
+                    date.toLocaleDateString('fr-FR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
                 
                 const bar = document.createElement('div');
                 bar.className = 'chart-bar';
                 bar.style.height = height + 'px';
                 bar.innerHTML = `<div class="chart-bar-value">${value.toFixed(2)}m<br>${timeLabel}</div>`;
+                
+                // Sur mobile, afficher la valeur au clic
+                if (isMobile) {
+                    bar.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        // Enlever la classe de toutes les autres barres
+                        document.querySelectorAll('.chart-bar').forEach(b => b.classList.remove('show-value'));
+                        // Ajouter la classe à cette barre
+                        this.classList.add('show-value');
+                        
+                        // Cacher après 3 secondes
+                        setTimeout(() => {
+                            this.classList.remove('show-value');
+                        }, 3000);
+                    });
+                }
                 
                 chartBars.appendChild(bar);
             });
@@ -355,13 +415,15 @@
                 <div class="chart-legend">
                     <div class="legend-item">
                         <div class="legend-color"></div>
-                        <span>Niveau d'eau (mètres)</span>
+                        <span>Niveau d'eau Pont Morand</span>
                     </div>
                 </div>
-                <div>
-                    <strong>Min:</strong> ${minValue.toFixed(2)}m | 
-                    <strong>Max:</strong> ${maxValue.toFixed(2)}m | 
-                    <strong>Points:</strong> ${filteredData.length}
+                <div class="chart-stats">
+                    <strong>📊 Statistiques:</strong><br>
+                    Minimum: <strong>${minValue.toFixed(2)}m</strong> | 
+                    Maximum: <strong>${maxValue.toFixed(2)}m</strong><br>
+                    Points affichés: <strong>${filteredData.length}</strong>
+                    ${isMobile ? '<br><em>💡 Appuyez sur une barre pour voir les détails</em>' : ''}
                 </div>
             `;
             
