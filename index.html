@@ -471,152 +471,82 @@
             document.getElementById('waterChart').style.display = 'block';
         }
         
-        // Charger les données de l'API (VERSION DEBUG)
+        // Charger les données de l'API EXACTE spécifiée
         async function loadWaterData() {
+            const exactApiUrl = 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=10';
+            
             try {
-                // Test avec différentes stations possibles
-                const stationCodes = [
-                    'V300002001', // Station actuelle
-                    'V3000020001', // Variante possible
-                    'V30000201', // Code plus court
-                    'V3000201' // Autre variante
-                ];
+                console.log('🔍 Test direct de l\'API:', exactApiUrl);
                 
-                let foundData = null;
-                let workingStation = null;
-                
-                for (const code of stationCodes) {
-                    try {
-                        const proxyUrl = 'https://api.allorigins.win/get?url=';
-                        const targetUrl = `https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=${code}&format=json&size=48`;
+                // Essayer d'abord directement (sans proxy)
+                try {
+                    const directResponse = await fetch(exactApiUrl);
+                    if (directResponse.ok) {
+                        const directResult = await directResponse.json();
+                        console.log('✅ API directe réussie:', directResult);
                         
-                        console.log(`Tentative avec station: ${code}`);
-                        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
-                        const proxyData = await response.json();
-                        
-                        if (proxyData.contents) {
-                            const result = JSON.parse(proxyData.contents);
-                            
-                            if (result.data && result.data.length > 0) {
-                                foundData = result.data;
-                                workingStation = code;
-                                console.log(`Station trouvée: ${code}, ${result.data.length} enregistrements`);
-                                break;
-                            }
+                        if (directResult.data && directResult.data.length > 0) {
+                            console.log('📊 Données reçues:', {
+                                nombre: directResult.data.length,
+                                premiere: directResult.data[0],
+                                station: directResult.data[0].libelle_station,
+                                derniere_mesure: directResult.data[0].resultat_obs + 'm',
+                                date: directResult.data[0].date_obs
+                            });
+                            createWaterChart(directResult.data, 'V300002001');
+                            return;
                         }
-                    } catch (error) {
-                        console.log(`Erreur avec station ${code}:`, error);
-                        continue;
                     }
+                } catch (directError) {
+                    console.log('❌ API directe échouée (CORS attendu):', directError.message);
                 }
                 
-                if (foundData) {
-                    // Afficher les infos de debug
-                    const latest = foundData[0];
-                    console.log('Dernière mesure:', {
-                        station: workingStation,
-                        valeur: latest.resultat_obs + 'm',
-                        date: latest.date_obs,
-                        libelle_station: latest.libelle_station || 'Non spécifié'
-                    });
-                    
-                    createWaterChart(foundData, workingStation);
-                } else {
-                    // Si aucune station ne fonctionne, essayer avec l'URL directe de Hydroportail
-                    console.log('Tentative avec recherche par nom de station...');
-                    await tryByStationName();
-                }
-                
-            } catch (error) {
-                console.error('Erreur lors du chargement des données:', error);
-                showFallbackData();
-            }
-        }
-        
-        // Fonction pour essayer de trouver la station par nom
-        async function tryByStationName() {
-            try {
+                // Essayer avec le proxy CORS
+                console.log('🔄 Tentative avec proxy CORS...');
                 const proxyUrl = 'https://api.allorigins.win/get?url=';
-                const searchUrl = 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/stations?libelle_station=*Morand*&format=json';
+                const response = await fetch(proxyUrl + encodeURIComponent(exactApiUrl));
                 
-                const response = await fetch(proxyUrl + encodeURIComponent(searchUrl));
+                if (!response.ok) {
+                    throw new Error(`Proxy response not ok: ${response.status}`);
+                }
+                
                 const proxyData = await response.json();
+                console.log('📡 Réponse proxy brute:', proxyData);
                 
                 if (proxyData.contents) {
                     const result = JSON.parse(proxyData.contents);
-                    console.log('Stations trouvées:', result.data);
+                    console.log('✅ Données parsées:', result);
                     
                     if (result.data && result.data.length > 0) {
-                        const station = result.data[0];
-                        console.log('Station Morand trouvée:', station.code_station);
+                        console.log('📊 Détail des données reçues:');
+                        console.table(result.data.map(item => ({
+                            Date: new Date(item.date_obs).toLocaleString('fr-FR'),
+                            Valeur: item.resultat_obs + 'm',
+                            Station: item.libelle_station || 'Non spécifiée'
+                        })));
                         
-                        // Essayer de récupérer les données avec ce code
-                        const targetUrl = `https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=${station.code_station}&format=json&size=48`;
-                        const dataResponse = await fetch(proxyUrl + encodeURIComponent(targetUrl));
-                        const dataProxyData = await dataResponse.json();
-                        
-                        if (dataProxyData.contents) {
-                            const dataResult = JSON.parse(dataProxyData.contents);
-                            if (dataResult.data && dataResult.data.length > 0) {
-                                createWaterChart(dataResult.data, station.code_station);
-                                return;
-                            }
-                        }
+                        createWaterChart(result.data, 'V300002001');
+                    } else {
+                        console.error('❌ Aucune donnée dans la réponse:', result);
+                        document.getElementById('loadingChart').innerHTML = 
+                            `⚠️ API accessible mais aucune donnée retournée<br>
+                             <small>Réponse: ${JSON.stringify(result, null, 2)}</small>`;
                     }
+                } else {
+                    console.error('❌ Pas de contenu dans la réponse proxy:', proxyData);
+                    document.getElementById('loadingChart').innerHTML = 
+                        `⚠️ Proxy accessible mais pas de contenu<br>
+                         <small>Réponse: ${JSON.stringify(proxyData, null, 2)}</small>`;
                 }
                 
-                showFallbackData();
-                
             } catch (error) {
-                console.error('Erreur recherche station:', error);
-                showFallbackData();
+                console.error('💥 Erreur complète:', error);
+                document.getElementById('loadingChart').innerHTML = 
+                    `❌ Erreur lors de l'accès à l'API:<br>
+                     <code>${exactApiUrl}</code><br>
+                     <small>Erreur: ${error.message}</small><br>
+                     <em>Consultez la console (F12) pour plus de détails</em>`;
             }
-        }
-        
-        // Données de secours avec valeurs réalistes basées sur la mesure de référence
-        function showFallbackData() {
-            const now = new Date();
-            
-            // Créer des données réalistes autour de 0.462m avec des variations naturelles
-            const baseValue = 0.462;
-            const simulatedData = [];
-            
-            // Générer 12 points de données sur les dernières 24h
-            for (let i = 0; i < 12; i++) {
-                const hoursAgo = i * 2; // Toutes les 2 heures
-                const timestamp = new Date(now.getTime() - (hoursAgo * 60 * 60 * 1000));
-                
-                // Variations réalistes : ±0.05m avec tendance légère
-                const variation = (Math.sin(i * 0.5) * 0.03) + (Math.random() - 0.5) * 0.02;
-                const value = Math.max(0.3, baseValue + variation); // Minimum 0.3m
-                
-                simulatedData.push({
-                    date_obs: timestamp.toISOString(),
-                    resultat_obs: value.toFixed(3),
-                    libelle_station: 'Pont Morand - Lyon',
-                    source: 'Données basées sur le relevé Hydroportail du 25/08/2025 11h50'
-                });
-            }
-            
-            // Assurer que la première valeur est exactement 0.462m à 11h50
-            const elevenFifty = new Date();
-            elevenFifty.setHours(11, 50, 0, 0);
-            simulatedData[0] = {
-                date_obs: elevenFifty.toISOString(),
-                resultat_obs: '0.462',
-                libelle_station: 'Pont Morand - Lyon',
-                source: 'Relevé Hydroportail officiel'
-            };
-            
-            document.getElementById('loadingChart').innerHTML = `
-                <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                    ⚠️ <strong>API Hub'Eau indisponible</strong><br>
-                    <small>Utilisation des données basées sur le dernier relevé Hydroportail officiel.<br>
-                    Valeur de référence: 0.462m relevée le 25/08/2025 à 11h50</small>
-                </div>
-            `;
-            
-            createWaterChart(simulatedData, 'V300 0020 01 (Hydroportail)');
         }
         
         // Initialisation
