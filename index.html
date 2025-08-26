@@ -287,9 +287,25 @@
             <a href="https://www.vigicrues.gouv.fr/territoire/18?bbox=526039.7828146118%2C5728320.102674279%2C557457.0440850101%2C5759737.363944678#dynamic-map" class="btn btn-warning" target="_blank">
                 🌊 Site Vigicrues
             </a>
-            <a href="https://superviseur.paratronic.com/" class="btn btn-warning" target="_blank">
-                🔧 Superviseur Paratronic
-            </a>
+            
+            <!-- Bouton Paratronic avec connexion rapide -->
+            <div style="position: relative;">
+                <button id="paratronicBtn" class="btn btn-warning" style="width: 100%; position: relative;">
+                    🔧 Superviseur Paratronic (Connexion Rapide)
+                </button>
+                <div id="paratronicOptions" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); padding: 15px; margin-top: 5px; z-index: 1000;">
+                    <div style="margin-bottom: 10px; font-size: 14px; color: #666;">Choisissez votre méthode de connexion :</div>
+                    <button id="quickLoginBtn" class="btn btn-success" style="width: 100%; margin-bottom: 8px; font-size: 14px;">
+                        ⚡ Connexion Rapide (identifiants pré-remplis)
+                    </button>
+                    <button id="manualLoginBtn" class="btn btn-secondary" style="width: 100%; font-size: 14px;">
+                        👤 Connexion Manuelle
+                    </button>
+                    <div style="margin-top: 10px; padding: 8px; background: #fff3cd; border-radius: 4px; font-size: 12px; color: #856404;">
+                        ⚠️ La connexion rapide pré-remplit vos identifiants. Validez manuellement pour des raisons de sécurité.
+                    </div>
+                </div>
+            </div>
             
             <div class="chart-container">
                 <h3>📈 Station V300002001 - Données Vigicrues Temps Réel</h3>
