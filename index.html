@@ -288,21 +288,27 @@
                 🌊 Site Vigicrues
             </a>
             
-            <!-- Bouton Paratronic avec connexion rapide -->
-            <div style="position: relative;">
-                <button id="paratronicBtn" class="btn btn-warning" style="width: 100%; position: relative;">
-                    🔧 Superviseur Paratronic (Connexion Rapide)
+            <!-- Paratronic avec options de connexion -->
+            <div class="paratronic-container" style="position: relative;">
+                <button id="paratronicToggle" class="btn btn-warning" style="width: 100%;">
+                    🔧 Superviseur Paratronic
                 </button>
-                <div id="paratronicOptions" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); padding: 15px; margin-top: 5px; z-index: 1000;">
-                    <div style="margin-bottom: 10px; font-size: 14px; color: #666;">Choisissez votre méthode de connexion :</div>
-                    <button id="quickLoginBtn" class="btn btn-success" style="width: 100%; margin-bottom: 8px; font-size: 14px;">
-                        ⚡ Connexion Rapide (identifiants pré-remplis)
+                
+                <div id="paratronicMenu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); padding: 15px; margin-top: 5px; z-index: 1000; border: 1px solid #ddd;">
+                    <div style="margin-bottom: 12px; font-size: 14px; color: #666; text-align: center;">
+                        Choisissez votre méthode de connexion :
+                    </div>
+                    
+                    <button id="quickLogin" class="btn btn-success" style="width: 100%; margin-bottom: 8px; padding: 12px; font-size: 14px;">
+                        ⚡ Connexion Rapide
                     </button>
-                    <button id="manualLoginBtn" class="btn btn-secondary" style="width: 100%; font-size: 14px;">
-                        👤 Connexion Manuelle
-                    </button>
-                    <div style="margin-top: 10px; padding: 8px; background: #fff3cd; border-radius: 4px; font-size: 12px; color: #856404;">
-                        ⚠️ La connexion rapide pré-remplit vos identifiants. Validez manuellement pour des raisons de sécurité.
+                    
+                    <a href="https://superviseur.paratronic.com/" target="_blank" class="btn btn-secondary" style="width: 100%; display: block; text-decoration: none; text-align: center; padding: 12px; font-size: 14px;">
+                        👤 Connexion Standard
+                    </a>
+                    
+                    <div style="margin-top: 12px; padding: 8px; background: #e8f4fd; border-radius: 4px; font-size: 12px; color: #0c5460; text-align: center;">
+                        💡 Identifiants : <strong>gemapilyon</strong> / <strong>lyon</strong>
                     </div>
                 </div>
             </div>
