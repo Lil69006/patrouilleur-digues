@@ -292,12 +292,42 @@
             </a>
             
             <div class="chart-container">
-                <h3>📈 Station V300 0020 01 - Niveaux d'eau (10 derniers relevés)</h3>
-                <div id="loadingChart" class="loading">🔄 Chargement des données...</div>
-                <div id="waterChart" class="simple-chart" style="display:none;">
-                    <div class="current-level" id="currentLevel"></div>
-                    <div class="chart-graph" id="chartGraph"></div>
-                    <div class="chart-footer" id="chartFooter"></div>
+                <h3>📈 Station V300 0020 01 - Surveillance Vigicrues</h3>
+                
+                <!-- Tentative d'intégration directe -->
+                <div id="vigicruesTool" style="margin-bottom: 20px;">
+                    <div style="background: #e3f2fd; border: 1px solid #2196f3; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <h4 style="margin: 0 0 10px 0; color: #1976d2;">Graphique Vigicrues Temps Réel</h4>
+                        <div id="vigicrueBrowser" style="position: relative;">
+                            <iframe 
+                                id="vigicruFrame"
+                                src="https://www.vigicrues.gouv.fr/station/V300002001"
+                                width="100%" 
+                                height="600"
+                                style="border: none; border-radius: 5px;"
+                                sandbox="allow-scripts allow-same-origin"
+                                loading="lazy">
+                            </iframe>
+                            <div id="iframeError" style="display: none; text-align: center; padding: 20px; background: #fff3e0; border-radius: 5px;">
+                                ⚠️ <strong>Chargement du graphique Vigicrues impossible</strong><br>
+                                <small>Restrictions de sécurité du site web</small><br>
+                                <a href="https://www.vigicrues.gouv.fr/station/V300002001" target="_blank" class="btn" style="margin-top: 10px; display: inline-block;">
+                                    🌊 Ouvrir Vigicrues dans un nouvel onglet
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Graphique de secours avec données API -->
+                <div id="fallbackChart">
+                    <h4 style="margin-bottom: 15px;">Données API Hub'Eau (Secours)</h4>
+                    <div id="loadingChart" class="loading">🔄 Chargement des données...</div>
+                    <div id="waterChart" class="simple-chart" style="display:none;">
+                        <div class="current-level" id="currentLevel"></div>
+                        <div class="chart-graph" id="chartGraph"></div>
+                        <div class="chart-footer" id="chartFooter"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -432,19 +462,60 @@
             
             // Pied du graphique avec statistiques
             const chartFooter = document.getElementById('chartFooter');
+            
+            // Vérifier si ce sont des données Vigicrues ou Hub'Eau
+            const isVigicrues = stationCode.includes('Vigicrues');
+            
             chartFooter.innerHTML = `
                 📊 <strong>Statistiques sur ${displayData.length} derniers relevés:</strong><br>
                 Minimum: <strong>${minValue.toFixed(3)} m</strong> | 
                 Maximum: <strong>${maxValue.toFixed(3)} m</strong> | 
                 Moyenne: <strong>${avgValue.toFixed(3)} m</strong><br>
-                <em>Source: API Hub'Eau - Station ${stationCode}</em>
+                <em>Source: ${isVigicrues ? 'API Vigicrues Officielle' : 'API Hub\'Eau'} - Station ${stationCode}</em>
             `;
             
             document.getElementById('loadingChart').style.display = 'none';
             document.getElementById('waterChart').style.display = 'block';
         }
         
-        // Charger les données de l'API EXACTE spécifiée
+        // Script pour gérer l'iframe Vigicrues
+        function initializeVigicrues() {
+            const iframe = document.getElementById('vigicruFrame');
+            const errorDiv = document.getElementById('iframeError');
+            
+            // Détecter si l'iframe n'arrive pas à charger
+            iframe.onload = function() {
+                try {
+                    // Test d'accès (échouera si bloqué par CORS)
+                    iframe.contentDocument;
+                    console.log('Vigicrues chargé avec succès');
+                } catch (e) {
+                    console.log('Vigicrues bloqué par les restrictions CORS');
+                    showIframeError();
+                }
+            };
+            
+            iframe.onerror = function() {
+                console.log('Erreur de chargement Vigicrues');
+                showIframeError();
+            };
+            
+            // Timeout de sécurité
+            setTimeout(() => {
+                try {
+                    if (!iframe.contentDocument || iframe.contentDocument.title === '') {
+                        showIframeError();
+                    }
+                } catch (e) {
+                    showIframeError();
+                }
+            }, 10000); // 10 secondes
+            
+            function showIframeError() {
+                iframe.style.display = 'none';
+                errorDiv.style.display = 'block';
+            }
+        }
         async function loadWaterData() {
             const exactApiUrl = 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=10';
             
@@ -525,6 +596,7 @@
         // Initialisation
         document.addEventListener('deviceready', function() {
             updateCurrentDate();
+            initializeVigicrues();
             loadWaterData();
             
             // Mise à jour toutes les 30 minutes
@@ -537,6 +609,7 @@
         // Pour les tests dans le navigateur
         if (typeof cordova === 'undefined') {
             updateCurrentDate();
+            initializeVigicrues();
             loadWaterData();
             
             setInterval(() => {
