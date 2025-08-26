@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: gap: https://ssl.gstatic.com https://maps.googleapis.com https://hubeau.eaufrance.fr https://docs.google.com https://drive.google.com https://www.vigicrues.gouv.fr https://superviseur.paratronic.com https://api.allorigins.win; style-src 'self' 'unsafe-inline'; media-src *;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: gap: https://ssl.gstatic.com https://maps.googleapis.com https://hubeau.eaufrance.fr https://docs.google.com https://drive.google.com https://www.vigicrues.gouv.fr https://superviseur.paratronic.com; style-src 'self' 'unsafe-inline'; media-src *;">
     <title>Patrouilleur des Digues</title>
     <link rel="manifest" href="manifest.json">
     <style>
@@ -97,114 +97,9 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .simple-chart {
+        #waterChart {
             width: 100%;
-        }
-        
-        .current-level {
-            background: linear-gradient(135deg, #00b894, #00cec9);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        
-        .level-value {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .level-time {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-        .chart-graph {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
-        }
-        
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-        
-        .data-table th {
-            background: #667eea;
-            color: white;
-            padding: 12px 8px;
-            text-align: left;
-            font-weight: bold;
-        }
-        
-        .data-table td {
-            padding: 10px 8px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .data-table tr:nth-child(even) {
-            background: #f8f9fa;
-        }
-        
-        .data-table tr:hover {
-            background: #e3f2fd;
-        }
-        
-        .level-high {
-            color: #d63031;
-            font-weight: bold;
-        }
-        
-        .level-normal {
-            color: #00b894;
-            font-weight: bold;
-        }
-        
-        .level-low {
-            color: #fdcb6e;
-            font-weight: bold;
-        }
-        
-        .chart-footer {
-            font-size: 12px;
-            color: #666;
-            text-align: center;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-        
-        .trend-up {
-            color: #d63031;
-        }
-        
-        .trend-down {
-            color: #00b894;
-        }
-        
-        .trend-stable {
-            color: #fdcb6e;
-        }
-        
-        @media (max-width: 480px) {
-            .level-value {
-                font-size: 28px;
-            }
-            
-            .data-table {
-                font-size: 12px;
-            }
-            
-            .data-table th,
-            .data-table td {
-                padding: 8px 6px;
-            }
+            height: 300px;
         }
         
         .loading {
@@ -256,10 +151,10 @@
         <!-- Section Itinéraires -->
         <div class="section">
             <h2>🗺️ Itinéraires Préétablis</h2>
-            <a href="https://www.google.com/maps/d/edit?mid=1Ss3l_BWgc8yQB2TRXtMxFobuIlsA9PU&usp=drive_link" class="btn" target="_blank">
+            <a href="https://www.google.com/maps/d/edit?mid=1Ss3l_BWgc8yQB2TRXtMxFobuIlsA9PU&usp=sharing">
                 📍 Itinéraire 1: Triangle → Parking des Saules
             </a>
-            <a href="https://www.google.com/maps/d/edit?mid=1FXGfXu9ZXQ6v0BT7j1ganR-BI1smD2E&usp=drive_link">
+            <a href="https://www.google.com/maps/d/edit?mid=1FXGfXu9ZXQ6v0BT7j1ganR-BI1smD2E&usp=drive_link" class="btn" target="_blank">
                 📍 Itinéraire 2: Parking des Saules → Rue Louis Duclos
             </a>
             <a href="https://www.google.com/maps/d/edit?mid=1-jG504darrlvK7GmD9JHe41UyJSwP7s&usp=drive_link" class="btn" target="_blank">
@@ -306,13 +201,9 @@
             </a>
             
             <div class="chart-container">
-                <h3>📈 Station V300 0020 01 - Niveaux d'eau (48h)</h3>
+                <h3>📈 Niveaux d'eau Pont Morand (48h)</h3>
                 <div id="loadingChart" class="loading">🔄 Chargement des données...</div>
-                <div id="waterChart" class="simple-chart" style="display:none;">
-                    <div class="current-level" id="currentLevel"></div>
-                    <div class="chart-graph" id="chartGraph"></div>
-                    <div class="chart-footer" id="chartFooter"></div>
-                </div>
+                <canvas id="waterChart" style="display:none;"></canvas>
             </div>
         </div>
     </div>
@@ -332,220 +223,108 @@
             document.getElementById('currentDate').textContent = now.toLocaleDateString('fr-FR', options);
         }
         
-        // Fonction pour créer le graphique standard (VERSION AVEC DEBUG)
-        function createWaterChart(data, stationCode = 'V300 0020 01') {
+        // Fonction pour créer le graphique
+        function createWaterChart(data) {
+            const canvas = document.getElementById('waterChart');
+            const ctx = canvas.getContext('2d');
+            
             if (data.length === 0) {
-                document.getElementById('loadingChart').textContent = `Aucune donnée disponible pour la station ${stationCode}`;
+                document.getElementById('loadingChart').textContent = 'Aucune donnée disponible';
                 return;
             }
             
-            // Trier les données par date (plus récent en premier)
-            const sortedData = data.sort((a, b) => new Date(b.date_obs) - new Date(a.date_obs));
-            
-            // Données pour affichage (limiter à 12 points pour la lisibilité)
-            const displayData = sortedData.slice(0, Math.min(12, sortedData.length));
-            
-            // Valeur la plus récente
-            const latestReading = sortedData[0];
-            const latestValue = parseFloat(latestReading.resultat_obs);
-            const latestDate = new Date(latestReading.date_obs);
-            
-            // Debug info
-            console.log('Affichage des données:', {
-                station: stationCode,
-                dernière_valeur: latestValue + 'm',
-                dernière_date: latestDate.toLocaleString('fr-FR'),
-                nombre_points: data.length
-            });
-            
-            // Afficher la valeur actuelle
-            const currentLevel = document.getElementById('currentLevel');
-            currentLevel.innerHTML = `
-                <div class="level-value">${latestValue.toFixed(3)} m</div>
-                <div class="level-time">
-                    📅 ${latestDate.toLocaleDateString('fr-FR', {
-                        weekday: 'long',
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })}
-                </div>
-                <div style="margin-top: 10px; font-size: 14px;">
-                    📍 Station ${stationCode}${latestReading.libelle_station ? ' - ' + latestReading.libelle_station : ''}
-                    ${latestReading.source ? `<br><small style="color: #e17055;">📡 ${latestReading.source}</small>` : ''}
-                </div>
-            `;
-            
-            // Créer le tableau des données
-            const chartGraph = document.getElementById('chartGraph');
-            let tableHTML = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>📅 Date & Heure</th>
-                            <th>💧 Niveau (m)</th>
-                            <th>📊 Tendance</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-            
-            displayData.forEach((item, index) => {
-                const value = parseFloat(item.resultat_obs);
+            // Préparer les données
+            const labels = data.map(item => {
                 const date = new Date(item.date_obs);
-                const nextValue = index < displayData.length - 1 ? parseFloat(displayData[index + 1].resultat_obs) : value;
-                
-                // Déterminer la tendance
-                let trend = '';
-                let trendClass = 'trend-stable';
-                if (index < displayData.length - 1) {
-                    const diff = value - nextValue;
-                    if (diff > 0.005) {  // Seuil plus petit pour les petites valeurs
-                        trend = '📈 Hausse';
-                        trendClass = 'trend-up';
-                    } else if (diff < -0.005) {
-                        trend = '📉 Baisse';
-                        trendClass = 'trend-down';
-                    } else {
-                        trend = '➡️ Stable';
-                        trendClass = 'trend-stable';
-                    }
-                }
-                
-                // Classe de couleur selon le niveau (ajustée pour les vraies valeurs)
-                let levelClass = 'level-normal';
-                if (value > 1.0) levelClass = 'level-high';
-                else if (value < 0.3) levelClass = 'level-low';
-                
-                tableHTML += `
-                    <tr>
-                        <td>
-                            ${date.toLocaleDateString('fr-FR', {
-                                weekday: 'short',
-                                day: '2-digit',
-                                month: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            })}
-                        </td>
-                        <td class="${levelClass}">${value.toFixed(3)} m</td>
-                        <td class="${trendClass}">${trend}</td>
-                    </tr>
-                `;
+                return date.toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
             });
             
-            tableHTML += `
-                    </tbody>
-                </table>
-            `;
+            const values = data.map(item => parseFloat(item.resultat_obs) || 0);
             
-            chartGraph.innerHTML = tableHTML;
-            
-            // Calculer les statistiques
-            const values = displayData.map(item => parseFloat(item.resultat_obs));
+            // Configuration du graphique
             const maxValue = Math.max(...values);
             const minValue = Math.min(...values);
-            const avgValue = values.reduce((a, b) => a + b, 0) / values.length;
+            const range = maxValue - minValue;
+            const padding = 20;
+            const chartHeight = canvas.height - 60;
+            const chartWidth = canvas.width - 80;
             
-            // Pied du graphique avec statistiques
-            const chartFooter = document.getElementById('chartFooter');
+            // Effacer le canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Vérifier si ce sont des données simulées
-            const isSimulated = displayData[0].source !== undefined;
+            // Style
+            ctx.font = '12px Arial';
+            ctx.strokeStyle = '#667eea';
+            ctx.fillStyle = '#667eea';
+            ctx.lineWidth = 2;
             
-            chartFooter.innerHTML = `
-                📊 <strong>Statistiques sur ${displayData.length} derniers relevés:</strong><br>
-                Minimum: <strong>${minValue.toFixed(3)} m</strong> | 
-                Maximum: <strong>${maxValue.toFixed(3)} m</strong> | 
-                Moyenne: <strong>${avgValue.toFixed(3)} m</strong><br>
-                ${isSimulated ? 
-                    `<em style="color: #e17055;">📡 Données estimées basées sur Hydroportail - Station ${stationCode}</em><br>
-                     <small>Valeur de référence officielle: 0.462m (25/08/2025 11h50)</small>` :
-                    `<em>Source: API Hub'Eau - Station ${stationCode}</em>`
-                }
-            `;
+            // Dessiner le graphique en barres
+            const barWidth = chartWidth / data.length;
+            
+            for (let i = 0; i < data.length; i++) {
+                const value = values[i];
+                const barHeight = ((value - minValue) / range) * chartHeight;
+                const x = 40 + (i * barWidth);
+                const y = canvas.height - 40 - barHeight;
+                
+                // Barre
+                ctx.fillStyle = `rgba(102, 126, 234, ${0.3 + (value - minValue) / range * 0.7})`;
+                ctx.fillRect(x, y, barWidth - 2, barHeight);
+                
+                // Bordure
+                ctx.strokeStyle = '#667eea';
+                ctx.strokeRect(x, y, barWidth - 2, barHeight);
+                
+                // Valeur au-dessus de la barre
+                ctx.fillStyle = '#2c3e50';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(value.toFixed(2) + 'm', x + (barWidth - 2) / 2, y - 5);
+            }
+            
+            // Axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(40, 20);
+            ctx.lineTo(40, canvas.height - 40);
+            ctx.lineTo(canvas.width - 20, canvas.height - 40);
+            ctx.stroke();
+            
+            // Labels des axes
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            
+            // Titre
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Niveau d\'eau (m)', canvas.width / 2, 15);
             
             document.getElementById('loadingChart').style.display = 'none';
-            document.getElementById('waterChart').style.display = 'block';
+            canvas.style.display = 'block';
         }
         
-        // Charger les données de l'API EXACTE spécifiée
+        // Charger les données de l'API
         async function loadWaterData() {
-            const exactApiUrl = 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=10';
-            
             try {
-                console.log('🔍 Test direct de l\'API:', exactApiUrl);
+                const response = await fetch('https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48');
+                const result = await response.json();
                 
-                // Essayer d'abord directement (sans proxy)
-                try {
-                    const directResponse = await fetch(exactApiUrl);
-                    if (directResponse.ok) {
-                        const directResult = await directResponse.json();
-                        console.log('✅ API directe réussie:', directResult);
-                        
-                        if (directResult.data && directResult.data.length > 0) {
-                            console.log('📊 Données reçues:', {
-                                nombre: directResult.data.length,
-                                premiere: directResult.data[0],
-                                station: directResult.data[0].libelle_station,
-                                derniere_mesure: directResult.data[0].resultat_obs + 'm',
-                                date: directResult.data[0].date_obs
-                            });
-                            createWaterChart(directResult.data, 'V300002001');
-                            return;
-                        }
-                    }
-                } catch (directError) {
-                    console.log('❌ API directe échouée (CORS attendu):', directError.message);
-                }
-                
-                // Essayer avec le proxy CORS
-                console.log('🔄 Tentative avec proxy CORS...');
-                const proxyUrl = 'https://api.allorigins.win/get?url=';
-                const response = await fetch(proxyUrl + encodeURIComponent(exactApiUrl));
-                
-                if (!response.ok) {
-                    throw new Error(`Proxy response not ok: ${response.status}`);
-                }
-                
-                const proxyData = await response.json();
-                console.log('📡 Réponse proxy brute:', proxyData);
-                
-                if (proxyData.contents) {
-                    const result = JSON.parse(proxyData.contents);
-                    console.log('✅ Données parsées:', result);
+                if (result.data && result.data.length > 0) {
+                    // Trier par date (plus récent en premier)
+                    const sortedData = result.data.sort((a, b) => new Date(b.date_obs) - new Date(a.date_obs));
                     
-                    if (result.data && result.data.length > 0) {
-                        console.log('📊 Détail des données reçues:');
-                        console.table(result.data.map(item => ({
-                            Date: new Date(item.date_obs).toLocaleString('fr-FR'),
-                            Valeur: item.resultat_obs + 'm',
-                            Station: item.libelle_station || 'Non spécifiée'
-                        })));
-                        
-                        createWaterChart(result.data, 'V300002001');
-                    } else {
-                        console.error('❌ Aucune donnée dans la réponse:', result);
-                        document.getElementById('loadingChart').innerHTML = 
-                            `⚠️ API accessible mais aucune donnée retournée<br>
-                             <small>Réponse: ${JSON.stringify(result, null, 2)}</small>`;
-                    }
+                    // Prendre les 48 dernières heures et inverser pour avoir chronologique
+                    const last48h = sortedData.slice(0, 48).reverse();
+                    
+                    createWaterChart(last48h);
                 } else {
-                    console.error('❌ Pas de contenu dans la réponse proxy:', proxyData);
-                    document.getElementById('loadingChart').innerHTML = 
-                        `⚠️ Proxy accessible mais pas de contenu<br>
-                         <small>Réponse: ${JSON.stringify(proxyData, null, 2)}</small>`;
+                    document.getElementById('loadingChart').textContent = 'Aucune donnée disponible pour le Pont Morand';
                 }
-                
             } catch (error) {
-                console.error('💥 Erreur complète:', error);
-                document.getElementById('loadingChart').innerHTML = 
-                    `❌ Erreur lors de l'accès à l'API:<br>
-                     <code>${exactApiUrl}</code><br>
-                     <small>Erreur: ${error.message}</small><br>
-                     <em>Consultez la console (F12) pour plus de détails</em>`;
+                console.error('Erreur lors du chargement des données:', error);
+                document.getElementById('loadingChart').textContent = 'Erreur de chargement des données';
             }
         }
         
@@ -570,13 +349,6 @@
                 updateCurrentDate();
                 loadWaterData();
             }, 30 * 60 * 1000);
-        }
-        
-        // Service Worker pour PWA
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(() => {
-                console.log('Service Worker non disponible');
-            });
         }
     </script>
     
