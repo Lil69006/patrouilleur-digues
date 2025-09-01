@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: gap: https://ssl.gstatic.com https://maps.googleapis.com https://hubeau.eaufrance.fr https://docs.google.com https://drive.google.com https://www.vigicrues.gouv.fr https://superviseur.paratronic.com https://api.allorigins.win; style-src 'self' 'unsafe-inline'; media-src *;">
     <title>Patrouilleur des Digues</title>
-    <link rel="manifest" href="manifest.json">
     <style>
         * {
             margin: 0;
@@ -91,112 +89,6 @@
             background: linear-gradient(45deg, #fdcb6e, #e17055);
         }
         
-        .chart-container {
-            margin-top: 20px;
-            padding: 15px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .simple-chart {
-            width: 100%;
-        }
-        
-        .current-level {
-            background: linear-gradient(135deg, #00b894, #00cec9);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        
-        .level-value {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .level-time {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-        .chart-graph {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
-        }
-        
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-        
-        .data-table th {
-            background: #667eea;
-            color: white;
-            padding: 12px 8px;
-            text-align: left;
-            font-weight: bold;
-        }
-        
-        .data-table td {
-            padding: 10px 8px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .data-table tr:nth-child(even) {
-            background: #f8f9fa;
-        }
-        
-        .data-table tr:hover {
-            background: #e3f2fd;
-        }
-        
-        .level-high {
-            color: #d63031;
-            font-weight: bold;
-        }
-        
-        .level-normal {
-            color: #00b894;
-            font-weight: bold;
-        }
-        
-        .level-low {
-            color: #fdcb6e;
-            font-weight: bold;
-        }
-        
-        .chart-footer {
-            font-size: 12px;
-            color: #666;
-            text-align: center;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-        
-        .loading {
-            text-align: center;
-            color: #666;
-            padding: 20px;
-        }
-        
-        .status-bar {
-            background: rgba(0,0,0,0.05);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 14px;
-            color: #555;
-        }
-        
         .emergency-button {
             background: linear-gradient(45deg, #e74c3c, #c0392b) !important;
             color: white;
@@ -249,7 +141,27 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Modal pour l'alerte d'urgence */
+        .status-bar {
+            background: rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            color: #495057;
+        }
+
+        /* Modal simple */
         .modal {
             display: none;
             position: fixed;
@@ -259,85 +171,33 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0,0,0,0.8);
-            animation: fadeIn 0.3s;
         }
 
         .modal-content {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            background: #e74c3c;
             color: white;
-            margin: 5% auto;
+            margin: 10% auto;
             padding: 30px;
             border-radius: 15px;
             width: 90%;
             max-width: 500px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             text-align: center;
-            animation: slideIn 0.3s;
         }
 
         .modal h2 {
             color: white;
             margin-bottom: 20px;
-            font-size: 28px;
         }
 
-        .incident-info {
-            background: rgba(255,255,255,0.2);
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: left;
-        }
-
-        .close-modal {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 2px solid white;
-            padding: 15px 30px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 10px;
-            transition: all 0.3s;
-        }
-
-        .close-modal:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-2px);
-        }
-
-        .confirm-emergency {
+        .modal button {
             background: #27ae60;
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 15px 25px;
             border-radius: 10px;
             cursor: pointer;
             font-size: 16px;
-            font-weight: bold;
             margin: 10px;
-            transition: all 0.3s;
-        }
-
-        .confirm-emergency:hover {
-            background: #219a52;
-            transform: translateY(-2px);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from { 
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to { 
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
         
         @media (max-width: 480px) {
@@ -352,29 +212,6 @@
             .header h1 {
                 font-size: 20px;
             }
-            
-            .level-value {
-                font-size: 28px;
-            }
-            
-            .data-table {
-                font-size: 12px;
-            }
-            
-            .data-table th,
-            .data-table td {
-                padding: 8px 6px;
-            }
-
-            .modal-content {
-                margin: 10% auto;
-                padding: 20px;
-                width: 95%;
-            }
-
-            .modal h2 {
-                font-size: 24px;
-            }
         }
     </style>
 </head>
@@ -385,15 +222,38 @@
     
     <div class="container">
         <div class="status-bar">
-            📅 <span id="currentDate"></span> | 📍 Lyon - Région Auvergne-Rhône-Alpes
+            📅 <span id="currentDate">Chargement...</span> | 📍 Lyon - Région Auvergne-Rhône-Alpes
         </div>
         
-        <!-- Bouton d'urgence Déclaration Incident -->
+        <div class="debug-info" id="debugInfo">
+            🔍 Debug: Script en cours de chargement...
+        </div>
+        
+        <!-- Bouton d'urgence TEST -->
         <div class="section">
-            <button id="emergencyButton" class="btn emergency-button" style="width: 100%; padding: 20px; margin-bottom: 10px;">
-                Déclaration Incident
+            <h2>🚨 Test d'Urgence</h2>
+            
+            <!-- Test 1: Alert simple -->
+            <button onclick="alert('TEST 1 RÉUSSI!')" class="btn" style="background: green;">
+                TEST 1: Alert Simple
             </button>
-            <div style="text-align: center; font-size: 12px; color: #666; margin-top: 5px;">
+            
+            <!-- Test 2: Console.log -->
+            <button onclick="console.log('TEST 2 RÉUSSI'); debugLog('TEST 2: Console log fonctionne')" class="btn" style="background: blue;">
+                TEST 2: Console Log
+            </button>
+            
+            <!-- Test 3: Fonction personnalisée -->
+            <button onclick="testCustomFunction()" class="btn" style="background: orange;">
+                TEST 3: Fonction Custom
+            </button>
+            
+            <!-- BOUTON D'URGENCE PRINCIPAL -->
+            <button id="emergencyButton" class="btn emergency-button" style="width: 100%; padding: 20px; margin: 20px 0;">
+                🚨 DÉCLARATION INCIDENT 🚨
+            </button>
+            
+            <div style="text-align: center; font-size: 12px; color: #666;">
                 Enregistrement automatique : GPS + Date/Heure
             </div>
         </div>
@@ -410,12 +270,6 @@
             <a href="https://www.google.com/maps/d/edit?mid=1-jG504darrlvK7GmD9JHe41UyJSwP7s&usp=sharing" class="btn" target="_blank">
                 📍 Itinéraire 3: Rue Duclos → Rue du Canal
             </a>
-            <a href="https://www.google.com/maps/d/edit?mid=1TScm_4bW-ogoKfY1x2ySLCAf7y07ysM&usp=drive_link" class="btn" target="_blank">
-                📍 Itinéraire 4: Trajet Supplémentaire 1
-            </a>
-            <a href="https://www.google.com/maps/d/edit?mid=1KTcVxRP5L-GsPFniZyd6sjX-82wl51o&usp=drive_link" class="btn" target="_blank">
-                📍 Itinéraire 5: Trajet Supplémentaire 2
-            </a>
         </div>
         
         <!-- Section Formulaires -->
@@ -424,719 +278,182 @@
             <a href="https://docs.google.com/spreadsheets/d/1wV50ZsyoDJhcf5Lja5rl1S9TxsOauadMHmyo9slFQGs/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
                 💧 Formulaire "Visite des Eaux Bleues"
             </a>
-            <a href="https://docs.google.com/spreadsheets/d/1Tsigd9S-qpZfZDQUeLgkA7RIWOTEeDww-NVUIempBMU/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
-                🏗️ Formulaire "Visite Digue Duclos"
+            <a href="https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit" class="btn btn-warning" target="_blank">
+                📝 Rapport d'Incident
             </a>
-            <a href="https://docs.google.com/spreadsheets/d/1kBdOQFZrZ260ah69D6JFvHmQXbumgkTNcgMYXsYQoZs/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
-                ⛪ Formulaire "Visite Digue St Jean"
-            </a>
-            <a href="https://docs.google.com/document/d/1GPb6ZJlW7zHiDn3gHAY1aWq4ladftybg8D_5YIGSgyg/edit?tab=t.0" class="btn btn-warning" target="_blank">
-                📝 Vos Notes & Remarques Terrain
-            </a>
-        </div>
-        
-        <!-- Section Documents -->
-        <div class="section">
-            <h2>📚 Documents & Planning</h2>
-            <a href="https://drive.google.com/drive/folders/1deKB9iZ3gYfjndRiJY3Dyod8UQw3kzTA" class="btn btn-success" target="_blank">
-                📄 Documents d'Astreinte
-            </a>
-            <a href="https://docs.google.com/spreadsheets/d/1EcmynZSukPIcAvIW_0W6caUiHGLPUTSP/edit?gid=1203425479#gid=1203425479" class="btn btn-success" target="_blank">
-                📅 Planning d'Astreinte
-            </a>
-        </div>
-        
-        <!-- Section Monitoring -->
-        <div class="section">
-            <h2>📊 Monitoring Temps Réel</h2>
-            <a href="https://www.vigicrues.gouv.fr/territoire/18?bbox=526039.7828146118%2C5728320.102674279%2C557457.0440850101%2C5759737.363944678#dynamic-map" class="btn btn-warning" target="_blank">
-                🌊 Site Vigicrues
-            </a>
-            
-            <!-- Bouton Paratronic simple et fonctionnel -->
-            <div style="position: relative;">
-                <a href="https://superviseur.paratronic.com/" target="_blank" class="btn btn-warning" style="display: block; text-decoration: none;">
-                    🔧 Superviseur Paratronic
-                </a>
-                <div style="background: #e8f4fd; padding: 8px; border-radius: 5px; margin-top: 5px; font-size: 12px; color: #0c5460; text-align: center;">
-                    Identifiants: <strong>gemapilyon</strong> / Mot de passe: <strong>lyon</strong>
-                </div>
-            </div>
-            
-            <div class="chart-container">
-                <h3>📈 Station V300002001 - Données Vigicrues Temps Réel</h3>
-                <div id="loadingChart" class="loading">🔄 Chargement des données...</div>
-                <div id="waterChart" class="simple-chart" style="display:none;">
-                    <div class="current-level" id="currentLevel"></div>
-                    <div class="chart-graph" id="chartGraph"></div>
-                    <div class="chart-footer" id="chartFooter"></div>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- Modal d'alerte d'urgence -->
+    <!-- Modal d'urgence SIMPLE -->
     <div id="emergencyModal" class="modal">
         <div class="modal-content">
-            <h2>🚨 ALERTE D'URGENCE 🚨</h2>
-            <div class="incident-info" id="incidentInfo">
-                <p><strong>📅 Date:</strong> <span id="incidentDate"></span></p>
-                <p><strong>⏰ Heure:</strong> <span id="incidentTime"></span></p>
-                <p><strong>📍 Position GPS:</strong> <span id="incidentGPS">Localisation en cours...</span></p>
-                <p><strong>👤 Patrouilleur:</strong> Agent d'astreinte</p>
-            </div>
-            <div style="margin: 20px 0;">
-                <p><strong>⚠️ INCIDENT SIGNALÉ SUR LES DIGUES</strong></p>
-                <p>Alerte automatiquement enregistrée avec localisation GPS et horodatage.</p>
-            </div>
-            <button class="confirm-emergency" onclick="confirmEmergency()">✅ CONFIRMER L'ALERTE</button>
-            <button class="close-modal" onclick="closeEmergencyModal()">❌ Annuler</button>
+            <h2>🚨 ALERTE D'URGENCE</h2>
+            <p id="incidentDetails">Incident détecté!</p>
+            <p><strong>Date:</strong> <span id="incidentDate"></span></p>
+            <p><strong>Heure:</strong> <span id="incidentTime"></span></p>
+            <p><strong>GPS:</strong> <span id="incidentGPS">Localisation en cours...</span></p>
+            <button onclick="confirmAlert()">✅ CONFIRMER</button>
+            <button onclick="closeAlert()">❌ ANNULER</button>
         </div>
     </div>
 
     <script>
-        // Variables globales
-        let currentIncident = null;
+        // Variables globales SIMPLES
+        let incidentData = null;
         
-        console.log('🚀 Application Patrouilleur des Digues - Démarrage');
+        // Fonction de debug
+        function debugLog(message) {
+            const now = new Date().toLocaleTimeString();
+            const debugDiv = document.getElementById('debugInfo');
+            debugDiv.innerHTML += `<br>[${now}] ${message}`;
+            console.log(`[DEBUG] ${message}`);
+        }
 
-        // === FONCTIONS D'URGENCE (définies en premier) ===
-        
-        function handleEmergencyIncident() {
-            console.log('🚨 ALERTE D\'URGENCE DÉCLENCHÉE!');
+        // Test de fonction personnalisée
+        function testCustomFunction() {
+            debugLog('TEST 3: Fonction personnalisée appelée');
+            alert('TEST 3: Fonction personnalisée RÉUSSIE!');
+        }
+
+        // Fonction d'urgence ULTRA SIMPLE
+        function handleEmergency() {
+            debugLog('🚨 BOUTON D\'URGENCE CLIQUÉ!');
             
             try {
-                // Créer l'objet incident
+                // Créer incident basique
                 const now = new Date();
-                currentIncident = {
-                    id: 'INCIDENT_' + now.getTime(),
+                incidentData = {
+                    id: 'INC_' + now.getTime(),
                     date: now.toLocaleDateString('fr-FR'),
                     time: now.toLocaleTimeString('fr-FR'),
-                    timestamp: now.toISOString(),
-                    gps: 'Localisation en cours...',
-                    status: 'En cours'
+                    gps: 'Localisation en cours...'
                 };
-
-                // Afficher les informations dans la modal
-                document.getElementById('incidentDate').textContent = currentIncident.date;
-                document.getElementById('incidentTime').textContent = currentIncident.time;
-                document.getElementById('incidentGPS').textContent = 'Localisation en cours...';
-
+                
+                debugLog('📄 Incident créé: ' + incidentData.id);
+                
+                // Remplir la modal
+                document.getElementById('incidentDate').textContent = incidentData.date;
+                document.getElementById('incidentTime').textContent = incidentData.time;
+                document.getElementById('incidentGPS').textContent = incidentData.gps;
+                
                 // Afficher la modal
                 document.getElementById('emergencyModal').style.display = 'block';
-                document.body.style.overflow = 'hidden';
-
-                // Obtenir la position GPS
-                getGPSLocation();
-
-                // Vibration si disponible
-                if (navigator.vibrate) {
-                    navigator.vibrate([200, 100, 200, 100, 200]);
-                    console.log('📳 Vibration déclenchée');
-                }
-
-                // Son d'alerte si disponible
-                try {
-                    playAlertSound();
-                    console.log('🔊 Son d\'alerte joué');
-                } catch (e) {
-                    console.log('Son d\'alerte non disponible:', e);
-                }
+                debugLog('✅ Modal affichée');
+                
+                // Obtenir GPS
+                getLocation();
                 
             } catch (error) {
-                console.error('❌ Erreur dans handleEmergencyIncident:', error);
-                alert('Erreur lors du déclenchement de l\'alerte: ' + error.message);
+                debugLog('❌ ERREUR: ' + error.message);
+                alert('ERREUR: ' + error.message);
             }
         }
 
-        function getGPSLocation() {
+        // Géolocalisation simple
+        function getLocation() {
+            debugLog('🔍 Demande géolocalisation...');
+            
             if (navigator.geolocation) {
-                console.log('🔍 Demande de géolocalisation...');
-                
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
                         const lat = position.coords.latitude.toFixed(6);
                         const lon = position.coords.longitude.toFixed(6);
-                        const accuracy = position.coords.accuracy;
-                        
-                        const gpsText = `${lat}, ${lon} (±${Math.round(accuracy)}m)`;
-                        console.log('📍 Position obtenue:', gpsText);
+                        const gpsText = `${lat}, ${lon}`;
                         
                         document.getElementById('incidentGPS').textContent = gpsText;
-                        
-                        if (currentIncident) {
-                            currentIncident.gps = gpsText;
-                            currentIncident.latitude = lat;
-                            currentIncident.longitude = lon;
-                            currentIncident.accuracy = accuracy;
+                        if (incidentData) {
+                            incidentData.gps = gpsText;
                         }
+                        
+                        debugLog('📍 GPS obtenu: ' + gpsText);
                     },
                     function(error) {
-                        console.error('❌ Erreur géolocalisation:', error);
-                        let errorMsg = 'GPS non disponible';
-                        
-                        switch(error.code) {
-                            case error.PERMISSION_DENIED:
-                                errorMsg = 'Permission GPS refusée';
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                errorMsg = 'Position GPS indisponible';
-                                break;
-                            case error.TIMEOUT:
-                                errorMsg = 'Timeout GPS';
-                                break;
-                        }
-                        
+                        const errorMsg = 'GPS non disponible';
                         document.getElementById('incidentGPS').textContent = errorMsg;
-                        if (currentIncident) {
-                            currentIncident.gps = errorMsg;
+                        if (incidentData) {
+                            incidentData.gps = errorMsg;
                         }
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 60000
+                        debugLog('❌ Erreur GPS: ' + error.message);
                     }
                 );
             } else {
-                console.log('❌ Géolocalisation non supportée');
-                document.getElementById('incidentGPS').textContent = 'GPS non supporté par ce dispositif';
-                if (currentIncident) {
-                    currentIncident.gps = 'GPS non supporté par ce dispositif';
+                const noGpsMsg = 'GPS non supporté';
+                document.getElementById('incidentGPS').textContent = noGpsMsg;
+                if (incidentData) {
+                    incidentData.gps = noGpsMsg;
                 }
+                debugLog('❌ Géolocalisation non supportée');
             }
         }
 
-        function playAlertSound() {
-            try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                
-                for (let i = 0; i < 3; i++) {
-                    const oscillator = audioContext.createOscillator();
-                    const gainNode = audioContext.createGain();
-                    
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
-                    
-                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime + i * 0.3);
-                    oscillator.type = 'sine';
-                    
-                    gainNode.gain.setValueAtTime(0, audioContext.currentTime + i * 0.3);
-                    gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + i * 0.3 + 0.01);
-                    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + i * 0.3 + 0.2);
-                    
-                    oscillator.start(audioContext.currentTime + i * 0.3);
-                    oscillator.stop(audioContext.currentTime + i * 0.3 + 0.2);
-                }
-            } catch (e) {
-                console.log('Son d\'alerte non disponible:', e);
-            }
-        }
-
-        function confirmEmergency() {
-            if (!currentIncident) return;
+        // Confirmer l'incident
+        function confirmAlert() {
+            debugLog('✅ Incident confirmé: ' + incidentData.id);
             
-            console.log('✅ INCIDENT CONFIRMÉ:', currentIncident);
+            alert(`INCIDENT CONFIRMÉ!\n\nID: ${incidentData.id}\nDate: ${incidentData.date}\nHeure: ${incidentData.time}\nGPS: ${incidentData.gps}`);
             
-            // Sauvegarder localement
-            saveIncidentLocally(currentIncident);
+            closeAlert();
             
-            // Générer le rapport
-            const incidentReport = generateIncidentReport(currentIncident);
-            
-            // Afficher confirmation
-            alert(`🚨 INCIDENT ENREGISTRÉ!\n\nID: ${currentIncident.id}\nDate: ${currentIncident.date}\nHeure: ${currentIncident.time}\nGPS: ${currentIncident.gps}\n\n⚠️ Contactez immédiatement votre responsable d'astreinte!`);
-            
-            // Fermer la modal
-            closeEmergencyModal();
-            
-            // Proposer d'ouvrir le rapport avec données
+            // Ouvrir le document
             setTimeout(() => {
-                if (confirm('Voulez-vous ouvrir le rapport d\'incident avec les données automatiquement intégrées?')) {
-                    try {
-                        openIncidentReportWithData(currentIncident);
-                    } catch (error) {
-                        console.error('Erreur ouverture rapport:', error);
-                        // Fallback: ouvrir juste le document
-                        window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
-                    }
+                if (confirm('Ouvrir le rapport d\'incident?')) {
+                    window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
                 }
-            }, 1000);
+            }, 500);
         }
 
-        function openIncidentReportWithData(incident) {
-            try {
-                console.log('📄 Ouverture du rapport avec données:', incident.id);
-                
-                // Créer le texte de l'incident formaté
-                const incidentReport = generateIncidentReport(incident);
-                
-                // Essayer de copier dans le presse-papier
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(incidentReport).then(() => {
-                        alert('📋 Les données de l\'incident ont été copiées!\n\nLe document va s\'ouvrir. Collez avec Ctrl+V');
-                        window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
-                    }).catch((error) => {
-                        console.log('Clipboard failed, using fallback:', error);
-                        showReportInNewWindow(incidentReport, incident);
-                    });
-                } else {
-                    // Méthode alternative si clipboard pas supporté
-                    showReportInNewWindow(incidentReport, incident);
-                }
-                
-            } catch (error) {
-                console.error('Erreur dans openIncidentReportWithData:', error);
-                // Fallback simple
-                alert('Erreur lors de la génération du rapport. Ouverture du document simple...');
-                window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
-            }
-        }
-
-        function showReportInNewWindow(reportText, incident) {
-            try {
-                const newWindow = window.open('', '_blank');
-                if (!newWindow) {
-                    alert('Bloqueur de pop-up détecté. Autorisez les pop-ups pour cette fonctionnalité.');
-                    return;
-                }
-
-                newWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>Rapport d'Incident - ${incident.id}</title>
-                        <meta charset="UTF-8">
-                        <style>
-                            body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; }
-                            .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                            .header { color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 10px; margin-bottom: 20px; }
-                            .btn { padding: 15px 25px; margin: 10px 5px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
-                            .copy-btn { background: #27ae60; color: white; }
-                            .doc-btn { background: #3498db; color: white; }
-                            .report { background: #f8f9fa; padding: 15px; border-radius: 5px; white-space: pre-wrap; font-family: monospace; margin: 20px 0; }
-                            .instructions { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="container">
-                            <h1 class="header">🚨 RAPPORT D'INCIDENT</h1>
-                            
-                            <div class="instructions">
-                                <strong>📋 Instructions :</strong><br>
-                                1. Cliquez sur "Copier le Rapport"<br>
-                                2. Cliquez sur "Ouvrir le Document"<br>
-                                3. Dans Google Docs, collez avec Ctrl+V
-                            </div>
-                            
-                            <button class="btn copy-btn" onclick="copyReport()">📋 Copier le Rapport</button>
-                            <button class="btn doc-btn" onclick="openDoc()">📄 Ouvrir le Document</button>
-                            
-                            <div class="report" id="reportContent">${reportText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
-                            
-                            <script>
-                                function copyReport() {
-                                    const textArea = document.createElement('textarea');
-                                    textArea.value = document.getElementById('reportContent').textContent;
-                                    document.body.appendChild(textArea);
-                                    textArea.select();
-                                    try {
-                                        document.execCommand('copy');
-                                        alert('📋 Rapport copié dans le presse-papier!');
-                                    } catch (e) {
-                                        alert('Erreur lors de la copie. Sélectionnez le texte manuellement.');
-                                    }
-                                    document.body.removeChild(textArea);
-                                }
-                                
-                                function openDoc() {
-                                    window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
-                                }
-                            </script>
-                        </div>
-                    </body>
-                    </html>
-                `);
-                
-                console.log('✅ Rapport affiché dans nouvelle fenêtre');
-                
-            } catch (error) {
-                console.error('Erreur showReportInNewWindow:', error);
-                alert('Erreur lors de l\'affichage. Ouverture du document simple...');
-                window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
-            }
-        }
-
-        function generateIncidentReport(incident) {
-            try {
-                const reportTemplate = `🚨 RAPPORT D'INCIDENT - PATROUILLE DES DIGUES
-═══════════════════════════════════════════════
-
-📋 INFORMATIONS GÉNÉRALES
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-• ID Incident: ${incident.id}
-• Date: ${incident.date}
-• Heure: ${incident.time}
-• Statut: ${incident.status}
-
-📍 LOCALISATION
-━━━━━━━━━━━━━━━━━━
-• Position GPS: ${incident.gps}
-${incident.latitude ? `• Latitude: ${incident.latitude}` : ''}
-${incident.longitude ? `• Longitude: ${incident.longitude}` : ''}
-${incident.accuracy ? `• Précision: ±${Math.round(incident.accuracy)}m` : ''}
-• Zone: Lyon - Région Auvergne-Rhône-Alpes
-
-👤 PATROUILLEUR
-━━━━━━━━━━━━━━━━━
-• Agent: Agent d'astreinte
-• Équipement: Application mobile Patrouilleur des Digues
-• Mode de déclaration: Bouton d'urgence automatique
-
-⚠️ DESCRIPTION DE L'INCIDENT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[À COMPLÉTER PAR LE PATROUILLEUR]
-
-□ Fissure sur la digue
-□ Infiltration d'eau
-□ Affaissement du terrain
-□ Déformation visible
-□ Érosion
-□ Obstacle sur le chemin de ronde
-□ Problème d'accès
-□ Autre: _________________________
-
-📊 ÉVALUATION DU RISQUE
-━━━━━━━━━━━━━━━━━━━━━━━━━
-□ Faible - Surveillance renforcée
-□ Moyen - Intervention nécessaire sous 24h
-□ Élevé - Intervention urgente requise
-□ Critique - Alerte immédiate
-
-🔧 ACTIONS ENTREPRISES
-━━━━━━━━━━━━━━━━━━━━━━━
-□ Périmètre sécurisé
-□ Signalisation mise en place
-□ Responsable hiérarchique contacté
-□ Services d'urgence prévenus
-□ Photos prises
-□ Autre: _________________________
-
-📞 CONTACTS EFFECTUÉS
-━━━━━━━━━━━━━━━━━━━━━━━
-□ Responsable d'astreinte: ________________
-□ Services techniques: ___________________
-□ Pompiers: ____________________________
-□ Autre: _______________________________
-
-📝 OBSERVATIONS COMPLÉMENTAIRES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[À COMPLÉTER]
-
-
-
-
-📸 PHOTOGRAPHIES
-━━━━━━━━━━━━━━━━━
-□ Photos jointes: _____ fichiers
-□ Vidéos jointes: _____ fichiers
-
-✍️ SIGNATURE NUMÉRIQUE
-━━━━━━━━━━━━━━━━━━━━━━━
-Rapport généré automatiquement par l'application 
-Patrouilleur des Digues - Version mobile
-Timestamp: ${incident.timestamp}
-
-Nom du patrouilleur: _______________________
-Signature: ________________________________
-Date de validation: ________________________
-
-═══════════════════════════════════════════════
-FIN DU RAPPORT AUTOMATIQUE`;
-
-                return reportTemplate;
-                
-            } catch (error) {
-                console.error('Erreur generateIncidentReport:', error);
-                return `ERREUR lors de la génération du rapport pour l'incident ${incident.id}`;
-            }
-        }
-
-        function saveIncidentLocally(incident) {
-            try {
-                let incidents = JSON.parse(localStorage.getItem('dike_patrol_incidents') || '[]');
-                incidents.push(incident);
-                localStorage.setItem('dike_patrol_incidents', JSON.stringify(incidents));
-                console.log('💾 Incident sauvegardé localement');
-            } catch (e) {
-                console.error('❌ Erreur sauvegarde locale:', e);
-            }
-        }
-
-        function closeEmergencyModal() {
+        // Fermer la modal
+        function closeAlert() {
             document.getElementById('emergencyModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-            currentIncident = null;
+            incidentData = null;
+            debugLog('❌ Modal fermée');
         }
 
-        // === FONCTIONS UTILITAIRES ===
-
-        function updateCurrentDate() {
+        // Mise à jour de la date
+        function updateDate() {
             const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
-            document.getElementById('currentDate').textContent = now.toLocaleDateString('fr-FR', options);
+            document.getElementById('currentDate').textContent = now.toLocaleString('fr-FR');
         }
 
-        // === FONCTIONS MONITORING ===
-
-        function createWaterChart(data, stationCode = 'V300002001') {
-            try {
-                if (data.length === 0) {
-                    document.getElementById('loadingChart').textContent = `Aucune donnée disponible pour la station ${stationCode}`;
-                    return;
-                }
+        // INITIALISATION IMMÉDIATE
+        debugLog('🚀 Script JavaScript chargé');
+        
+        // Test immédiat
+        setTimeout(() => {
+            debugLog('🔍 Test des éléments DOM...');
+            
+            const emergencyBtn = document.getElementById('emergencyButton');
+            if (emergencyBtn) {
+                debugLog('✅ Bouton d\'urgence trouvé');
                 
-                const sortedData = data.sort((a, b) => new Date(b.date_obs) - new Date(a.date_obs));
-                const displayData = sortedData.slice(0, Math.min(10, sortedData.length));
-                const latestReading = sortedData[0];
-                const latestValue = parseFloat(latestReading.resultat_obs);
-                const latestDate = new Date(latestReading.date_obs);
+                // MÉTHODE 1: onclick direct
+                emergencyBtn.onclick = handleEmergency;
+                debugLog('✅ onclick attaché');
                 
-                // Afficher la valeur actuelle
-                const currentLevel = document.getElementById('currentLevel');
-                currentLevel.innerHTML = `
-                    <div class="level-value">${latestValue.toFixed(3)} m</div>
-                    <div class="level-time">
-                        📅 ${latestDate.toLocaleDateString('fr-FR', {
-                            weekday: 'long',
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })}
-                    </div>
-                    <div style="margin-top: 10px; font-size: 14px;">
-                        📍 Station ${stationCode}${latestReading.libelle_station ? ' - ' + latestReading.libelle_station : ''}
-                    </div>
-                `;
-                
-                // Créer le tableau des données
-                const chartGraph = document.getElementById('chartGraph');
-                let tableHTML = `
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>📅 Date & Heure</th>
-                                <th>💧 Niveau (m)</th>
-                                <th>📊 Évolution</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                
-                displayData.forEach((item, index) => {
-                    const value = parseFloat(item.resultat_obs);
-                    const date = new Date(item.date_obs);
-                    const nextValue = index < displayData.length - 1 ? parseFloat(displayData[index + 1].resultat_obs) : value;
-                    
-                    // Déterminer la tendance
-                    let trend = '';
-                    if (index < displayData.length - 1) {
-                        const diff = value - nextValue;
-                        if (diff > 0.005) {
-                            trend = '📈 +' + diff.toFixed(3) + 'm';
-                        } else if (diff < -0.005) {
-                            trend = '📉 ' + diff.toFixed(3) + 'm';
-                        } else {
-                            trend = '➡️ Stable';
-                        }
-                    }
-                    
-                    // Classe de couleur selon le niveau
-                    let levelClass = 'level-normal';
-                    if (value > 1.0) levelClass = 'level-high';
-                    else if (value < 0.3) levelClass = 'level-low';
-                    
-                    tableHTML += `
-                        <tr>
-                            <td>
-                                ${date.toLocaleDateString('fr-FR', {
-                                    weekday: 'short',
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })}
-                            </td>
-                            <td class="${levelClass}">${value.toFixed(3)} m</td>
-                            <td>${trend}</td>
-                        </tr>
-                    `;
+                // MÉTHODE 2: addEventListener
+                emergencyBtn.addEventListener('click', function() {
+                    debugLog('🚨 addEventListener déclenché');
+                    handleEmergency();
                 });
+                debugLog('✅ addEventListener attaché');
                 
-                tableHTML += `
-                        </tbody>
-                    </table>
-                `;
-                
-                chartGraph.innerHTML = tableHTML;
-                
-                // Calculer les statistiques
-                const values = displayData.map(item => parseFloat(item.resultat_obs));
-                const maxValue = Math.max(...values);
-                const minValue = Math.min(...values);
-                const avgValue = values.reduce((a, b) => a + b, 0) / values.length;
-                
-                // Pied du graphique avec statistiques
-                const chartFooter = document.getElementById('chartFooter');
-                const isVigicrues = stationCode.includes('Vigicrues');
-                
-                chartFooter.innerHTML = `
-                    📊 <strong>Statistiques sur ${displayData.length} derniers relevés:</strong><br>
-                    Minimum: <strong>${minValue.toFixed(3)} m</strong> | 
-                    Maximum: <strong>${maxValue.toFixed(3)} m</strong> | 
-                    Moyenne: <strong>${avgValue.toFixed(3)} m</strong><br>
-                    <em>Source: ${isVigicrues ? 'API Vigicrues Officielle' : 'API Hub\'Eau'} - Station ${stationCode}</em>
-                `;
-                
-                document.getElementById('loadingChart').style.display = 'none';
-                document.getElementById('waterChart').style.display = 'block';
-                
-            } catch (error) {
-                console.error('Erreur dans createWaterChart:', error);
-                document.getElementById('loadingChart').textContent = 'Erreur lors de l\'affichage des données';
+            } else {
+                debugLog('❌ Bouton d\'urgence NON TROUVÉ!');
             }
-        }
-
-        async function loadWaterData() {
-            const exactApiUrl = 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=10';
             
-            try {
-                console.log('🔍 Chargement des données hydro...');
-                
-                // Essayer d'abord directement
-                try {
-                    const directResponse = await fetch(exactApiUrl);
-                    if (directResponse.ok) {
-                        const directResult = await directResponse.json();
-                        
-                        if (directResult.data && directResult.data.length > 0) {
-                            console.log('✅ Données hydro chargées:', directResult.data.length, 'points');
-                            createWaterChart(directResult.data, 'V300002001');
-                            return;
-                        }
-                    }
-                } catch (directError) {
-                    console.log('API directe échouée (CORS):', directError.message);
-                }
-                
-                // Essayer avec le proxy CORS
-                const proxyUrl = 'https://api.allorigins.win/get?url=';
-                const response = await fetch(proxyUrl + encodeURIComponent(exactApiUrl));
-                
-                if (!response.ok) {
-                    throw new Error(`Proxy response not ok: ${response.status}`);
-                }
-                
-                const proxyData = await response.json();
-                
-                if (proxyData.contents) {
-                    const result = JSON.parse(proxyData.contents);
-                    
-                    if (result.data && result.data.length > 0) {
-                        console.log('✅ Données hydro via proxy:', result.data.length, 'points');
-                        createWaterChart(result.data, 'V300002001');
-                    } else {
-                        console.error('❌ Aucune donnée dans la réponse');
-                        document.getElementById('loadingChart').innerHTML = '⚠️ Aucune donnée disponible';
-                    }
-                } else {
-                    console.error('❌ Pas de contenu dans la réponse proxy');
-                    document.getElementById('loadingChart').innerHTML = '⚠️ Erreur de chargement des données';
-                }
-                
-            } catch (error) {
-                console.error('💥 Erreur complète loadWaterData:', error);
-                document.getElementById('loadingChart').innerHTML = '❌ Service temporairement indisponible';
-            }
-        }
-
-        // === INITIALISATION ===
-
-        function initApp() {
-            console.log('🚀 Initialisation de l\'application');
+            updateDate();
+            debugLog('✅ Initialisation terminée');
             
-            try {
-                // Attacher l'événement au bouton d'urgence
-                const emergencyBtn = document.getElementById('emergencyButton');
-                if (emergencyBtn) {
-                    // Méthode 1: onclick
-                    emergencyBtn.onclick = handleEmergencyIncident;
-                    
-                    // Méthode 2: addEventListener (sécurité)
-                    emergencyBtn.addEventListener('click', handleEmergencyIncident);
-                    
-                    console.log('✅ Bouton d\'urgence configuré');
-                } else {
-                    console.error('❌ Bouton d\'urgence non trouvé');
-                }
-                
-                // Autres initialisations
-                updateCurrentDate();
-                loadWaterData();
-                
-                // Mise à jour périodique
-                setInterval(() => {
-                    updateCurrentDate();
-                    loadWaterData();
-                }, 30 * 60 * 1000); // 30 minutes
-                
-                console.log('✅ Application initialisée avec succès');
-                
-            } catch (error) {
-                console.error('❌ Erreur lors de l\'initialisation:', error);
-            }
-        }
+        }, 100);
 
-        // Fermer la modal si on clique à l'extérieur
+        // Fermer modal si clic extérieur
         window.onclick = function(event) {
-            const modal = document.getElementById('emergencyModal');
-            if (event.target === modal) {
-                closeEmergencyModal();
+            if (event.target.id === 'emergencyModal') {
+                closeAlert();
             }
         }
 
-        // === DÉMARRAGE DE L'APPLICATION ===
-
-        // Méthode 1: DOMContentLoaded
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
-        } else {
-            initApp();
-        }
-
-        // Méthode 2: Cordova (pour app mobile)
-        document.addEventListener('deviceready', initApp);
-
-        // Méthode 3: Immédiate (fallback)
-        setTimeout(initApp, 100);
-
-        // Service Worker pour PWA
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(() => {
-                console.log('Service Worker non disponible');
-            });
-        }
-
-        console.log('📱 Script principal chargé - En attente d\'initialisation');
+        debugLog('📝 Fin du script principal');
     </script>
 </body>
 </html>
