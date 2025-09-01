@@ -725,4 +725,207 @@
                             <tr>
                                 <th>📅 Date & Heure</th>
                                 <th>💧 Niveau (m)</th>
-                                <th>
+                                <th>📊 Évolution</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                displayData.forEach((item, index) => {
+                    const value = parseFloat(item.resultat_obs);
+                    const date = new Date(item.date_obs);
+                    const nextValue = index < displayData.length - 1 ? parseFloat(displayData[index + 1].resultat_obs) : value;
+                    
+                    // Déterminer la tendance
+                    let trend = '';
+                    if (index < displayData.length - 1) {
+                        const diff = value - nextValue;
+                        if (diff > 0.005) {
+                            trend = '📈 +' + diff.toFixed(3) + 'm';
+                        } else if (diff < -0.005) {
+                            trend = '📉 ' + diff.toFixed(3) + 'm';
+                        } else {
+                            trend = '➡️ Stable';
+                        }
+                    }
+                    
+                    // Classe de couleur selon le niveau
+                    let levelClass = 'level-normal';
+                    if (value > 1.0) levelClass = 'level-high';
+                    else if (value < 0.3) levelClass = 'level-low';
+                    
+                    tableHTML += `
+                        <tr>
+                            <td>
+                                ${date.toLocaleDateString('fr-FR', {
+                                    weekday: 'short',
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                            </td>
+                            <td class="${levelClass}">${value.toFixed(3)} m</td>
+                            <td>${trend}</td>
+                        </tr>
+                    `;
+                });
+                
+                tableHTML += `
+                        </tbody>
+                    </table>
+                `;
+                
+                chartGraph.innerHTML = tableHTML;
+                
+                // Calculer les statistiques
+                const values = displayData.map(item => parseFloat(item.resultat_obs));
+                const maxValue = Math.max(...values);
+                const minValue = Math.min(...values);
+                const avgValue = values.reduce((a, b) => a + b, 0) / values.length;
+                
+                // Pied du graphique avec statistiques
+                const chartFooter = document.getElementById('chartFooter');
+                const isVigicrues = stationCode.includes('Vigicrues');
+                
+                chartFooter.innerHTML = `
+                    📊 <strong>Statistiques sur ${displayData.length} derniers relevés:</strong><br>
+                    Minimum: <strong>${minValue.toFixed(3)} m</strong> | 
+                    Maximum: <strong>${maxValue.toFixed(3)} m</strong> | 
+                    Moyenne: <strong>${avgValue.toFixed(3)} m</strong><br>
+                    <em>Source: ${isVigicrues ? 'API Vigicrues Officielle' : 'API Hub\'Eau'} - Station ${stationCode}</em>
+                `;
+                
+                document.getElementById('loadingChart').style.display = 'none';
+                document.getElementById('waterChart').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Erreur dans createWaterChart:', error);
+                document.getElementById('loadingChart').textContent = 'Erreur lors de l\'affichage des données';
+            }
+        }
+
+        async function loadWaterData() {
+            const exactApiUrl = 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=10';
+            
+            try {
+                console.log('🔍 Chargement des données hydro...');
+                
+                // Essayer d'abord directement
+                try {
+                    const directResponse = await fetch(exactApiUrl);
+                    if (directResponse.ok) {
+                        const directResult = await directResponse.json();
+                        
+                        if (directResult.data && directResult.data.length > 0) {
+                            console.log('✅ Données hydro chargées:', directResult.data.length, 'points');
+                            createWaterChart(directResult.data, 'V300002001');
+                            return;
+                        }
+                    }
+                } catch (directError) {
+                    console.log('API directe échouée (CORS):', directError.message);
+                }
+                
+                // Essayer avec le proxy CORS
+                const proxyUrl = 'https://api.allorigins.win/get?url=';
+                const response = await fetch(proxyUrl + encodeURIComponent(exactApiUrl));
+                
+                if (!response.ok) {
+                    throw new Error(`Proxy response not ok: ${response.status}`);
+                }
+                
+                const proxyData = await response.json();
+                
+                if (proxyData.contents) {
+                    const result = JSON.parse(proxyData.contents);
+                    
+                    if (result.data && result.data.length > 0) {
+                        console.log('✅ Données hydro via proxy:', result.data.length, 'points');
+                        createWaterChart(result.data, 'V300002001');
+                    } else {
+                        console.error('❌ Aucune donnée dans la réponse');
+                        document.getElementById('loadingChart').innerHTML = '⚠️ Aucune donnée disponible';
+                    }
+                } else {
+                    console.error('❌ Pas de contenu dans la réponse proxy');
+                    document.getElementById('loadingChart').innerHTML = '⚠️ Erreur de chargement des données';
+                }
+                
+            } catch (error) {
+                console.error('💥 Erreur complète loadWaterData:', error);
+                document.getElementById('loadingChart').innerHTML = '❌ Service temporairement indisponible';
+            }
+        }
+
+        // === INITIALISATION ===
+
+        function initApp() {
+            console.log('🚀 Initialisation de l\'application');
+            
+            try {
+                // Attacher l'événement au bouton d'urgence
+                const emergencyBtn = document.getElementById('emergencyButton');
+                if (emergencyBtn) {
+                    // Méthode 1: onclick
+                    emergencyBtn.onclick = handleEmergencyIncident;
+                    
+                    // Méthode 2: addEventListener (sécurité)
+                    emergencyBtn.addEventListener('click', handleEmergencyIncident);
+                    
+                    console.log('✅ Bouton d\'urgence configuré');
+                } else {
+                    console.error('❌ Bouton d\'urgence non trouvé');
+                }
+                
+                // Autres initialisations
+                updateCurrentDate();
+                loadWaterData();
+                
+                // Mise à jour périodique
+                setInterval(() => {
+                    updateCurrentDate();
+                    loadWaterData();
+                }, 30 * 60 * 1000); // 30 minutes
+                
+                console.log('✅ Application initialisée avec succès');
+                
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'initialisation:', error);
+            }
+        }
+
+        // Fermer la modal si on clique à l'extérieur
+        window.onclick = function(event) {
+            const modal = document.getElementById('emergencyModal');
+            if (event.target === modal) {
+                closeEmergencyModal();
+            }
+        }
+
+        // === DÉMARRAGE DE L'APPLICATION ===
+
+        // Méthode 1: DOMContentLoaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+
+        // Méthode 2: Cordova (pour app mobile)
+        document.addEventListener('deviceready', initApp);
+
+        // Méthode 3: Immédiate (fallback)
+        setTimeout(initApp, 100);
+
+        // Service Worker pour PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {
+                console.log('Service Worker non disponible');
+            });
+        }
+
+        console.log('📱 Script principal chargé - En attente d\'initialisation');
+    </script>
+</body>
+</html>
