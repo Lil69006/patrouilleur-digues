@@ -150,18 +150,6 @@
             color: #555;
         }
 
-        .debug-info {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 10px 0;
-            font-family: monospace;
-            font-size: 12px;
-            color: #495057;
-        }
-
-        /* Modal simple */
         .modal {
             display: none;
             position: fixed;
@@ -199,6 +187,11 @@
             font-size: 16px;
             margin: 10px;
         }
+
+        .modal .close-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+        }
         
         @media (max-width: 480px) {
             .container {
@@ -225,31 +218,52 @@
             📅 <span id="currentDate">Chargement...</span> | 📍 Lyon - Région Auvergne-Rhône-Alpes
         </div>
         
-        <div class="debug-info" id="debugInfo">
-            🔍 Debug: Script en cours de chargement...
-        </div>
-        
-        <!-- Bouton d'urgence TEST -->
+        <!-- Bouton d'urgence avec TOUT EN INLINE -->
         <div class="section">
-            <h2>🚨 Test d'Urgence</h2>
+            <h2>🚨 Déclaration d'Urgence</h2>
             
-            <!-- Test 1: Alert simple -->
-            <button onclick="alert('TEST 1 RÉUSSI!')" class="btn" style="background: green;">
-                TEST 1: Alert Simple
-            </button>
-            
-            <!-- Test 2: Console.log -->
-            <button onclick="console.log('TEST 2 RÉUSSI'); debugLog('TEST 2: Console log fonctionne')" class="btn" style="background: blue;">
-                TEST 2: Console Log
-            </button>
-            
-            <!-- Test 3: Fonction personnalisée -->
-            <button onclick="testCustomFunction()" class="btn" style="background: orange;">
-                TEST 3: Fonction Custom
-            </button>
-            
-            <!-- BOUTON D'URGENCE PRINCIPAL -->
-            <button id="emergencyButton" class="btn emergency-button" style="width: 100%; padding: 20px; margin: 20px 0;">
+            <button class="btn emergency-button" style="width: 100%; padding: 20px; margin: 20px 0;" 
+                    onclick="
+                        // Créer les données d'incident
+                        var now = new Date();
+                        var incidentId = 'INC_' + now.getTime();
+                        var incidentDate = now.toLocaleDateString('fr-FR');
+                        var incidentTime = now.toLocaleTimeString('fr-FR');
+                        
+                        // Remplir la modal
+                        document.getElementById('incidentId').innerHTML = incidentId;
+                        document.getElementById('incidentDate').innerHTML = incidentDate;
+                        document.getElementById('incidentTime').innerHTML = incidentTime;
+                        document.getElementById('incidentGPS').innerHTML = 'Localisation en cours...';
+                        
+                        // Sauvegarder dans des champs cachés
+                        document.getElementById('hiddenId').value = incidentId;
+                        document.getElementById('hiddenDate').value = incidentDate;
+                        document.getElementById('hiddenTime').value = incidentTime;
+                        document.getElementById('hiddenGPS').value = 'Localisation en cours...';
+                        
+                        // Afficher la modal
+                        document.getElementById('emergencyModal').style.display = 'block';
+                        
+                        // Géolocalisation
+                        if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(function(position) {
+                                var lat = position.coords.latitude.toFixed(6);
+                                var lon = position.coords.longitude.toFixed(6);
+                                var gpsText = lat + ', ' + lon;
+                                document.getElementById('incidentGPS').innerHTML = gpsText;
+                                document.getElementById('hiddenGPS').value = gpsText;
+                            }, function(error) {
+                                var errorMsg = 'GPS non disponible';
+                                document.getElementById('incidentGPS').innerHTML = errorMsg;
+                                document.getElementById('hiddenGPS').value = errorMsg;
+                            });
+                        } else {
+                            var noGpsMsg = 'GPS non supporté';
+                            document.getElementById('incidentGPS').innerHTML = noGpsMsg;
+                            document.getElementById('hiddenGPS').value = noGpsMsg;
+                        }
+                    ">
                 🚨 DÉCLARATION INCIDENT 🚨
             </button>
             
@@ -270,6 +284,12 @@
             <a href="https://www.google.com/maps/d/edit?mid=1-jG504darrlvK7GmD9JHe41UyJSwP7s&usp=sharing" class="btn" target="_blank">
                 📍 Itinéraire 3: Rue Duclos → Rue du Canal
             </a>
+            <a href="https://www.google.com/maps/d/edit?mid=1TScm_4bW-ogoKfY1x2ySLCAf7y07ysM&usp=drive_link" class="btn" target="_blank">
+                📍 Itinéraire 4: Trajet Supplémentaire 1
+            </a>
+            <a href="https://www.google.com/maps/d/edit?mid=1KTcVxRP5L-GsPFniZyd6sjX-82wl51o&usp=drive_link" class="btn" target="_blank">
+                📍 Itinéraire 5: Trajet Supplémentaire 2
+            </a>
         </div>
         
         <!-- Section Formulaires -->
@@ -278,466 +298,166 @@
             <a href="https://docs.google.com/spreadsheets/d/1wV50ZsyoDJhcf5Lja5rl1S9TxsOauadMHmyo9slFQGs/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
                 💧 Formulaire "Visite des Eaux Bleues"
             </a>
+            <a href="https://docs.google.com/spreadsheets/d/1Tsigd9S-qpZfZDQUeLgkA7RIWOTEeDww-NVUIempBMU/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
+                🏗️ Formulaire "Visite Digue Duclos"
+            </a>
+            <a href="https://docs.google.com/spreadsheets/d/1kBdOQFZrZ260ah69D6JFvHmQXbumgkTNcgMYXsYQoZs/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
+                ⛪ Formulaire "Visite Digue St Jean"
+            </a>
             <a href="https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit" class="btn btn-warning" target="_blank">
                 📝 Rapport d'Incident
             </a>
         </div>
-    </div>
-
-    <!-- Modal d'urgence SIMPLE -->
-    <div id="emergencyModal" class="modal">
-        <div class="modal-content">
-            <h2>🚨 ALERTE D'URGENCE</h2>
-            <p id="incidentDetails">Incident détecté!</p>
-            <p><strong>Date:</strong> <span id="incidentDate"></span></p>
-            <p><strong>Heure:</strong> <span id="incidentTime"></span></p>
-            <p><strong>GPS:</strong> <span id="incidentGPS">Localisation en cours...</span></p>
-            <button onclick="confirmAlert()">✅ CONFIRMER</button>
-            <button onclick="closeAlert()">❌ ANNULER</button>
+        
+        <!-- Section Documents -->
+        <div class="section">
+            <h2>📚 Documents & Planning</h2>
+            <a href="https://drive.google.com/drive/folders/1deKB9iZ3gYfjndRiJY3Dyod8UQw3kzTA" class="btn btn-success" target="_blank">
+                📄 Documents d'Astreinte
+            </a>
+            <a href="https://docs.google.com/spreadsheets/d/1EcmynZSukPIcAvIW_0W6caUiHGLPUTSP/edit?gid=1203425479#gid=1203425479" class="btn btn-success" target="_blank">
+                📅 Planning d'Astreinte
+            </a>
+        </div>
+        
+        <!-- Section Monitoring -->
+        <div class="section">
+            <h2>📊 Monitoring Temps Réel</h2>
+            <a href="https://www.vigicrues.gouv.fr/territoire/18?bbox=526039.7828146118%2C5728320.102674279%2C557457.0440850101%2C5759737.363944678#dynamic-map" class="btn btn-warning" target="_blank">
+                🌊 Site Vigicrues
+            </a>
+            
+            <div style="position: relative;">
+                <a href="https://superviseur.paratronic.com/" target="_blank" class="btn btn-warning" style="display: block; text-decoration: none;">
+                    🔧 Superviseur Paratronic
+                </a>
+                <div style="background: #e8f4fd; padding: 8px; border-radius: 5px; margin-top: 5px; font-size: 12px; color: #0c5460; text-align: center;">
+                    Identifiants: <strong>gemapilyon</strong> / Mot de passe: <strong>lyon</strong>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script>
-        // Variables globales SIMPLES
-        let incidentData = null;
-        
-        // Fonction de debug
-        function debugLog(message) {
-            const now = new Date().toLocaleTimeString();
-            const debugDiv = document.getElementById('debugInfo');
-            debugDiv.innerHTML += `<br>[${now}] ${message}`;
-            console.log(`[DEBUG] ${message}`);
-        }
-
-        // Test de fonction personnalisée
-        function testCustomFunction() {
-            debugLog('TEST 3: Fonction personnalisée appelée');
-            alert('TEST 3: Fonction personnalisée RÉUSSIE!');
-        }
-
-        // Fonction d'urgence ULTRA SIMPLE
-        function handleEmergency() {
-            debugLog('🚨 BOUTON D\'URGENCE CLIQUÉ!');
+    <!-- Modal d'urgence INLINE -->
+    <div id="emergencyModal" class="modal">
+        <div class="modal-content">
+            <h2>🚨 ALERTE D'URGENCE</h2>
+            <div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 10px; margin: 20px 0; text-align: left;">
+                <p><strong>📋 ID:</strong> <span id="incidentId"></span></p>
+                <p><strong>📅 Date:</strong> <span id="incidentDate"></span></p>
+                <p><strong>⏰ Heure:</strong> <span id="incidentTime"></span></p>
+                <p><strong>📍 GPS:</strong> <span id="incidentGPS">Localisation en cours...</span></p>
+                <p><strong>👤 Agent:</strong> Patrouilleur d'astreinte</p>
+            </div>
+            <div style="margin: 20px 0;">
+                <p><strong>⚠️ INCIDENT SIGNALÉ SUR LES DIGUES</strong></p>
+                <p>Contactez immédiatement votre responsable d'astreinte!</p>
+            </div>
             
-            try {
-                // Créer incident basique
-                const now = new Date();
-                incidentData = {
-                    id: 'INC_' + now.getTime(),
-                    date: now.toLocaleDateString('fr-FR'),
-                    time: now.toLocaleTimeString('fr-FR'),
-                    gps: 'Localisation en cours...'
-                };
+            <button onclick="
+                // Récupérer les données sauvegardées
+                var id = document.getElementById('hiddenId').value;
+                var date = document.getElementById('hiddenDate').value;
+                var time = document.getElementById('hiddenTime').value;
+                var gps = document.getElementById('hiddenGPS').value;
                 
-                debugLog('📄 Incident créé: ' + incidentData.id);
+                // Générer le rapport
+                var rapport = '🚨 RAPPORT D\'INCIDENT - PATROUILLE DES DIGUES\n';
+                rapport += '═══════════════════════════════════════════════\n\n';
+                rapport += '📋 INFORMATIONS AUTOMATIQUES\n';
+                rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+                rapport += '• ID Incident: ' + id + '\n';
+                rapport += '• Date: ' + date + '\n';
+                rapport += '• Heure: ' + time + '\n';
+                rapport += '• GPS: ' + gps + '\n';
+                rapport += '• Zone: Lyon - Région Auvergne-Rhône-Alpes\n';
+                rapport += '• Agent: Patrouilleur d\'astreinte\n\n';
+                rapport += '⚠️ DESCRIPTION DE L\'INCIDENT\n';
+                rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+                rapport += '[À COMPLÉTER PAR LE PATROUILLEUR]\n\n';
+                rapport += '□ Fissure sur la digue\n';
+                rapport += '□ Infiltration d\'eau\n';
+                rapport += '□ Affaissement du terrain\n';
+                rapport += '□ Déformation visible\n';
+                rapport += '□ Érosion du talus\n';
+                rapport += '□ Obstacle sur le chemin\n';
+                rapport += '□ Autre: ________________\n\n';
+                rapport += '📊 ÉVALUATION DU RISQUE\n';
+                rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+                rapport += '□ FAIBLE  □ MOYEN  □ ÉLEVÉ  □ CRITIQUE\n\n';
+                rapport += '🔧 ACTIONS ENTREPRISES\n';
+                rapport += '━━━━━━━━━━━━━━━━━━━━━━━\n';
+                rapport += '□ Périmètre sécurisé\n';
+                rapport += '□ Signalisation mise en place\n';
+                rapport += '□ Photos prises: _____ fichiers\n';
+                rapport += '□ Responsable contacté: ________________\n\n';
+                rapport += '📞 CONTACTS EFFECTUÉS\n';
+                rapport += '━━━━━━━━━━━━━━━━━━━━━━━\n';
+                rapport += '□ Responsable d\'astreinte: _______________\n';
+                rapport += '□ Services techniques: __________________\n';
+                rapport += '□ Pompiers (si nécessaire): _____________\n\n';
+                rapport += '📝 OBSERVATIONS\n';
+                rapport += '━━━━━━━━━━━━━━━━━\n';
+                rapport += '_____________________________________________\n';
+                rapport += '_____________________________________________\n';
+                rapport += '_____________________________________________\n\n';
+                rapport += '✍️ SIGNATURE\n';
+                rapport += '━━━━━━━━━━━━━━━━\n';
+                rapport += 'Nom: ____________________________________\n';
+                rapport += 'Date: ___________________________________\n';
+                rapport += 'Signature: ______________________________\n\n';
+                rapport += '═══════════════════════════════════════════════\n';
+                rapport += 'Rapport généré automatiquement le: ' + new Date().toLocaleString('fr-FR') + '\n';
+                rapport += 'Application: Patrouilleur des Digues v1.0\n';
+                rapport += '═══════════════════════════════════════════════';
                 
-                // Remplir la modal
-                document.getElementById('incidentDate').textContent = incidentData.date;
-                document.getElementById('incidentTime').textContent = incidentData.time;
-                document.getElementById('incidentGPS').textContent = incidentData.gps;
+                // Essayer de copier dans le presse-papier
+                var textarea = document.createElement('textarea');
+                textarea.value = rapport;
+                document.body.appendChild(textarea);
+                textarea.select();
                 
-                // Afficher la modal
-                document.getElementById('emergencyModal').style.display = 'block';
-                debugLog('✅ Modal affichée');
-                
-                // Obtenir GPS
-                getLocation();
-                
-            } catch (error) {
-                debugLog('❌ ERREUR: ' + error.message);
-                alert('ERREUR: ' + error.message);
-            }
-        }
-
-        // Géolocalisation simple
-        function getLocation() {
-            debugLog('🔍 Demande géolocalisation...');
-            
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        const lat = position.coords.latitude.toFixed(6);
-                        const lon = position.coords.longitude.toFixed(6);
-                        const gpsText = `${lat}, ${lon}`;
-                        
-                        document.getElementById('incidentGPS').textContent = gpsText;
-                        if (incidentData) {
-                            incidentData.gps = gpsText;
-                        }
-                        
-                        debugLog('📍 GPS obtenu: ' + gpsText);
-                    },
-                    function(error) {
-                        const errorMsg = 'GPS non disponible';
-                        document.getElementById('incidentGPS').textContent = errorMsg;
-                        if (incidentData) {
-                            incidentData.gps = errorMsg;
-                        }
-                        debugLog('❌ Erreur GPS: ' + error.message);
-                    }
-                );
-            } else {
-                const noGpsMsg = 'GPS non supporté';
-                document.getElementById('incidentGPS').textContent = noGpsMsg;
-                if (incidentData) {
-                    incidentData.gps = noGpsMsg;
+                var copySuccess = false;
+                try {
+                    copySuccess = document.execCommand('copy');
+                } catch (e) {
+                    copySuccess = false;
                 }
-                debugLog('❌ Géolocalisation non supportée');
-            }
-        }
-
-        // Confirmer l'incident
-        function confirmAlert() {
-            debugLog('✅ Incident confirmé: ' + incidentData.id);
-            
-            // Générer le rapport complet
-            const rapport = generateIncidentReport(incidentData);
-            
-            // Essayer de copier dans le presse-papier
-            copyToClipboard(rapport).then(() => {
-                alert(`INCIDENT CONFIRMÉ ET COPIÉ!\n\nID: ${incidentData.id}\nDate: ${incidentData.date}\nHeure: ${incidentData.time}\nGPS: ${incidentData.gps}\n\n📋 Le rapport a été copié dans le presse-papier.\nLe document va s'ouvrir - collez avec Ctrl+V`);
+                document.body.removeChild(textarea);
                 
-                closeAlert();
+                if (copySuccess) {
+                    alert('INCIDENT CONFIRMÉ ET COPIÉ!\n\nID: ' + id + '\nDate: ' + date + '\nHeure: ' + time + '\nGPS: ' + gps + '\n\n📋 Le rapport a été copié dans le presse-papier.\n\nLe document Google va s\'ouvrir.\nCollez le rapport avec Ctrl+V');
+                } else {
+                    alert('INCIDENT CONFIRMÉ!\n\nID: ' + id + '\nDate: ' + date + '\nHeure: ' + time + '\nGPS: ' + gps + '\n\nLe document Google va s\'ouvrir.\nCopiez manuellement les données affichées.');
+                }
                 
-                // Ouvrir le document après un délai
-                setTimeout(() => {
+                // Fermer la modal
+                document.getElementById('emergencyModal').style.display = 'none';
+                
+                // Ouvrir Google Docs
+                setTimeout(function() {
                     window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
                 }, 1000);
-                
-            }).catch(() => {
-                // Si la copie échoue, afficher le rapport dans une nouvelle fenêtre
-                showReportWindow(rapport);
-                closeAlert();
-            });
-        }
-
-        // Générer le rapport d'incident formaté
-        function generateIncidentReport(incident) {
-            const rapport = `🚨 RAPPORT D'INCIDENT - PATROUILLE DES DIGUES
-═══════════════════════════════════════════════
-
-📋 INFORMATIONS AUTOMATIQUES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• ID Incident: ${incident.id}
-• Date de déclaration: ${incident.date}
-• Heure de déclaration: ${incident.time}
-• Position GPS: ${incident.gps}
-• Zone: Lyon - Région Auvergne-Rhône-Alpes
-• Agent: Patrouilleur d'astreinte
-• Mode de déclaration: Bouton d'urgence mobile
-
-⚠️ DESCRIPTION DE L'INCIDENT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[À COMPLÉTER PAR LE PATROUILLEUR]
-
-Type d'incident observé:
-□ Fissure sur la digue
-□ Infiltration d'eau
-□ Affaissement du terrain
-□ Déformation visible
-□ Érosion du talus
-□ Obstacle sur le chemin de ronde
-□ Problème d'accès
-□ Végétation excessive
-□ Dégradation d'ouvrage
-□ Autre: ________________________________
-
-Description détaillée:
-_________________________________________________
-_________________________________________________
-_________________________________________________
-
-📊 ÉVALUATION DU NIVEAU DE RISQUE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-□ FAIBLE - Surveillance renforcée suffisante
-□ MOYEN - Intervention nécessaire sous 24h
-□ ÉLEVÉ - Intervention urgente requise
-□ CRITIQUE - Alerte immédiate, évacuation possible
-
-🔧 ACTIONS ENTREPRISES SUR SITE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-□ Périmètre sécurisé
-□ Signalisation mise en place
-□ Photos prises (nombre: _____)
-□ Vidéos prises (nombre: _____)
-□ Zone interdite d'accès
-□ Autre: ________________________________
-
-📞 CONTACTS EFFECTUÉS
-━━━━━━━━━━━━━━━━━━━━━━━
-□ Responsable d'astreinte: ___________________
-   Heure de contact: ________________________
-□ Services techniques municipaux: _____________
-   Heure de contact: ________________________
-□ Pompiers (si nécessaire): __________________
-   Heure de contact: ________________________
-□ Police/Gendarmerie: _______________________
-   Heure de contact: ________________________
-
-📝 OBSERVATIONS COMPLÉMENTAIRES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Conditions météorologiques:
-□ Sec  □ Pluie légère  □ Pluie forte  □ Vent fort
-□ Autre: ________________________________
-
-État des eaux:
-□ Niveau normal  □ Niveau élevé  □ Niveau critique
-□ Débit normal   □ Débit élevé   □ Débit critique
-
-Remarques particulières:
-_________________________________________________
-_________________________________________________
-_________________________________________________
-
-📸 DOCUMENTATION VISUELLE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━
-□ Photos jointes: _____ fichiers
-□ Vidéos jointes: _____ fichiers
-□ Croquis/schémas: _________________________
-
-✍️ VALIDATION ET SIGNATURE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Nom du patrouilleur: ________________________
-Signature: _________________________________
-Date de validation: ________________________
-Heure de validation: ______________________
-
-SUIVI DES ACTIONS:
-□ Rapport transmis au responsable hiérarchique
-□ Intervention programmée le: ________________
-□ Travaux réalisés le: ______________________
-□ Incident clos le: _________________________
-
-═══════════════════════════════════════════════
-Rapport généré automatiquement par l'application
-Patrouilleur des Digues - Version ${new Date().getFullYear()}
-Timestamp technique: ${new Date().toISOString()}
-═══════════════════════════════════════════════`;
-
-            return rapport;
-        }
-
-        // Copier dans le presse-papier
-        async function copyToClipboard(text) {
-            try {
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    await navigator.clipboard.writeText(text);
-                    debugLog('✅ Rapport copié dans le presse-papier');
-                    return true;
-                } else {
-                    throw new Error('Clipboard API non disponible');
-                }
-            } catch (error) {
-                debugLog('❌ Erreur copie clipboard: ' + error.message);
-                throw error;
-            }
-        }
-
-        // Afficher le rapport dans une nouvelle fenêtre si copie échoue
-        function showReportWindow(rapport) {
-            const newWindow = window.open('', '_blank', 'width=800,height=600');
-            if (newWindow) {
-                newWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>Rapport d'Incident</title>
-                        <meta charset="UTF-8">
-                        <style>
-                            body { 
-                                font-family: Arial, sans-serif; 
-                                margin: 20px; 
-                                background: #f5f5f5; 
-                            }
-                            .container { 
-                                background: white; 
-                                padding: 30px; 
-                                border-radius: 10px; 
-                                box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
-                            }
-                            .header { 
-                                color: #e74c3c; 
-                                border-bottom: 2px solid #e74c3c; 
-                                padding-bottom: 10px; 
-                                margin-bottom: 20px; 
-                            }
-                            .rapport { 
-                                background: #f8f9fa; 
-                                padding: 20px; 
-                                border-radius: 5px; 
-                                white-space: pre-wrap; 
-                                font-family: monospace; 
-                                font-size: 12px;
-                                border-left: 4px solid #e74c3c;
-                                margin: 20px 0;
-                            }
-                            .buttons { 
-                                text-align: center; 
-                                margin: 20px 0; 
-                            }
-                            .btn { 
-                                padding: 15px 25px; 
-                                margin: 0 10px; 
-                                border: none; 
-                                border-radius: 5px; 
-                                cursor: pointer; 
-                                font-size: 16px; 
-                            }
-                            .copy-btn { 
-                                background: #27ae60; 
-                                color: white; 
-                            }
-                            .open-btn { 
-                                background: #3498db; 
-                                color: white; 
-                            }
-                            .instructions {
-                                background: #fff3cd;
-                                border-left: 4px solid #ffc107;
-                                padding: 15px;
-                                margin: 20px 0;
-                                color: #856404;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="container">
-                            <h1 class="header">🚨 RAPPORT D'INCIDENT AUTOMATIQUE</h1>
-                            
-                            <div class="instructions">
-                                <strong>📋 INSTRUCTIONS:</strong><br>
-                                1. Cliquez sur "Copier le Rapport" ci-dessous<br>
-                                2. Cliquez sur "Ouvrir Google Docs"<br>
-                                3. Dans le document, faites Ctrl+V pour coller<br>
-                                4. Complétez les sections à remplir
-                            </div>
-                            
-                            <div class="buttons">
-                                <button class="btn copy-btn" onclick="copyReport()">📋 Copier le Rapport</button>
-                                <button class="btn open-btn" onclick="openGoogleDoc()">📄 Ouvrir Google Docs</button>
-                            </div>
-                            
-                            <div class="rapport" id="rapportContent">${rapport.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
-                            
-                            <script>
-                                function copyReport() {
-                                    const textarea = document.createElement('textarea');
-                                    textarea.value = document.getElementById('rapportContent').textContent;
-                                    document.body.appendChild(textarea);
-                                    textarea.select();
-                                    try {
-                                        document.execCommand('copy');
-                                        alert('📋 Rapport copié! Vous pouvez maintenant le coller dans Google Docs.');
-                                    } catch (e) {
-                                        alert('Erreur de copie. Sélectionnez et copiez le texte manuellement.');
-                                    }
-                                    document.body.removeChild(textarea);
-                                }
-                                
-                                function openGoogleDoc() {
-                                    window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
-                                }
-                            </script>
-                        </div>
-                    </body>
-                    </html>
-                `);
-            } else {
-                alert('Bloqueur de pop-up détecté. Veuillez autoriser les pop-ups pour cette fonctionnalité.');
-            }
-        }
-
-        // Fermer la modal
-        function closeAlert() {
-            document.getElementById('emergencyModal').style.display = 'none';
-            incidentData = null;
-            debugLog('❌ Modal fermée');
-        }
-
-        // Mise à jour de la date
-        function updateDate() {
-            const now = new Date();
-            document.getElementById('currentDate').textContent = now.toLocaleString('fr-FR');
-        }
-
-        // INITIALISATION IMMÉDIATE
-        debugLog('🚀 Script JavaScript chargé (version simplifiée)');
-        
-        // Test immédiat avec setTimeout
-        setTimeout(function() {
-            debugLog('🔍 Test des éléments DOM...');
+            ">✅ CONFIRMER L'ALERTE</button>
             
-            var emergencyBtn = document.getElementById('emergencyButton');
-            if (emergencyBtn) {
-                debugLog('✅ Bouton d\'urgence trouvé');
-                
-                emergencyBtn.onclick = function() {
-                    debugLog('🚨 onclick déclenché');
-                    handleEmergency();
-                };
-                debugLog('✅ onclick attaché');
-                
-                emergencyBtn.addEventListener('click', function() {
-                    debugLog('🚨 addEventListener déclenché');
-                    handleEmergency();
-                });
-                debugLog('✅ addEventListener attaché');
-                
-            } else {
-                debugLog('❌ Bouton d\'urgence NON TROUVÉ!');
-            }
-            
-            updateDate();
-            debugLog('✅ Initialisation terminée');
-            
-        }, 200);
+            <button class="close-btn" onclick="document.getElementById('emergencyModal').style.display = 'none'">
+                ❌ ANNULER
+            </button>
+        </div>
+    </div>
 
-        // Fermer modal si clic extérieur
-        window.onclick = function(event) {
-            if (event.target.id === 'emergencyModal') {
-                closeAlert();
-            }
-        };
+    <!-- Champs cachés pour sauvegarder les données -->
+    <input type="hidden" id="hiddenId" value="">
+    <input type="hidden" id="hiddenDate" value="">
+    <input type="hidden" id="hiddenTime" value="">
+    <input type="hidden" id="hiddenGPS" value="">
 
-        debugLog('📝 Fin du script principal');
-    </script>é');
-        
-        // Test immédiat
-        setTimeout(() => {
-            debugLog('🔍 Test des éléments DOM...');
-            
-            const emergencyBtn = document.getElementById('emergencyButton');
-            if (emergencyBtn) {
-                debugLog('✅ Bouton d\'urgence trouvé');
-                
-                // MÉTHODE 1: onclick direct
-                emergencyBtn.onclick = handleEmergency;
-                debugLog('✅ onclick attaché');
-                
-                // MÉTHODE 2: addEventListener
-                emergencyBtn.addEventListener('click', function() {
-                    debugLog('🚨 addEventListener déclenché');
-                    handleEmergency();
-                });
-                debugLog('✅ addEventListener attaché');
-                
-            } else {
-                debugLog('❌ Bouton d\'urgence NON TROUVÉ!');
-            }
-            
-            updateDate();
-            debugLog('✅ Initialisation terminée');
-            
-        }, 100);
-
-        // Fermer modal si clic extérieur
-        window.onclick = function(event) {
-            if (event.target.id === 'emergencyModal') {
-                closeAlert();
-            }
-        }
-
-        debugLog('📝 Fin du script principal');
+    <!-- Script minimal pour la date -->
+    <script>
+        // Mise à jour de la date (seul JavaScript autorisé)
+        setInterval(function() {
+            document.getElementById('currentDate').innerHTML = new Date().toLocaleString('fr-FR');
+        }, 1000);
     </script>
 </body>
 </html>
