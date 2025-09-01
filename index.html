@@ -661,7 +661,46 @@ Timestamp technique: ${new Date().toISOString()}
         }
 
         // INITIALISATION IMMÉDIATE
-        debugLog('🚀 Script JavaScript chargé');
+        debugLog('🚀 Script JavaScript chargé (version simplifiée)');
+        
+        // Test immédiat avec setTimeout
+        setTimeout(function() {
+            debugLog('🔍 Test des éléments DOM...');
+            
+            var emergencyBtn = document.getElementById('emergencyButton');
+            if (emergencyBtn) {
+                debugLog('✅ Bouton d\'urgence trouvé');
+                
+                emergencyBtn.onclick = function() {
+                    debugLog('🚨 onclick déclenché');
+                    handleEmergency();
+                };
+                debugLog('✅ onclick attaché');
+                
+                emergencyBtn.addEventListener('click', function() {
+                    debugLog('🚨 addEventListener déclenché');
+                    handleEmergency();
+                });
+                debugLog('✅ addEventListener attaché');
+                
+            } else {
+                debugLog('❌ Bouton d\'urgence NON TROUVÉ!');
+            }
+            
+            updateDate();
+            debugLog('✅ Initialisation terminée');
+            
+        }, 200);
+
+        // Fermer modal si clic extérieur
+        window.onclick = function(event) {
+            if (event.target.id === 'emergencyModal') {
+                closeAlert();
+            }
+        };
+
+        debugLog('📝 Fin du script principal');
+    </script>é');
         
         // Test immédiat
         setTimeout(() => {
