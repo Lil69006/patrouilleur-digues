@@ -70,6 +70,8 @@
             text-align: center;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: none;
+            cursor: pointer;
         }
         
         .btn:hover {
@@ -246,7 +248,97 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
+        /* Modal pour l'alerte d'urgence */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+            animation: slideIn 0.3s;
+        }
+
+        .modal h2 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .incident-info {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .close-modal {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        .close-modal:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .confirm-emergency {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        .confirm-emergency:hover {
+            background: #219a52;
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
         
         @media (max-width: 480px) {
             .container {
@@ -272,6 +364,16 @@
             .data-table th,
             .data-table td {
                 padding: 8px 6px;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                padding: 20px;
+                width: 95%;
+            }
+
+            .modal h2 {
+                font-size: 24px;
             }
         }
     </style>
@@ -373,7 +475,219 @@
         </div>
     </div>
 
+    <!-- Modal d'alerte d'urgence -->
+    <div id="emergencyModal" class="modal">
+        <div class="modal-content">
+            <h2>🚨 ALERTE D'URGENCE 🚨</h2>
+            <div class="incident-info" id="incidentInfo">
+                <p><strong>📅 Date:</strong> <span id="incidentDate"></span></p>
+                <p><strong>⏰ Heure:</strong> <span id="incidentTime"></span></p>
+                <p><strong>📍 Position GPS:</strong> <span id="incidentGPS">Localisation en cours...</span></p>
+                <p><strong>👤 Patrouilleur:</strong> Agent d'astreinte</p>
+            </div>
+            <div style="margin: 20px 0;">
+                <p><strong>⚠️ INCIDENT SIGNALÉ SUR LES DIGUES</strong></p>
+                <p>Alerte automatiquement enregistrée avec localisation GPS et horodatage.</p>
+            </div>
+            <button class="confirm-emergency" onclick="confirmEmergency()">✅ CONFIRMER L'ALERTE</button>
+            <button class="close-modal" onclick="closeEmergencyModal()">❌ Annuler</button>
+        </div>
+    </div>
+
     <script>
+        let currentIncident = null;
+
+        // Fonction principale pour gérer l'incident d'urgence
+        function handleEmergencyIncident() {
+            console.log('🚨 BOUTON D\'URGENCE ACTIVÉ!');
+            
+            // Créer l'objet incident
+            const now = new Date();
+            currentIncident = {
+                id: 'INCIDENT_' + now.getTime(),
+                date: now.toLocaleDateString('fr-FR'),
+                time: now.toLocaleTimeString('fr-FR'),
+                timestamp: now.toISOString(),
+                gps: 'Localisation en cours...',
+                status: 'En cours'
+            };
+
+            // Afficher les informations dans la modal
+            document.getElementById('incidentDate').textContent = currentIncident.date;
+            document.getElementById('incidentTime').textContent = currentIncident.time;
+            document.getElementById('incidentGPS').textContent = 'Localisation en cours...';
+
+            // Afficher la modal
+            document.getElementById('emergencyModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+
+            // Obtenir la position GPS
+            getGPSLocation();
+
+            // Vibration si disponible
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200, 100, 200]);
+            }
+
+            // Son d'alerte si disponible
+            try {
+                if (window.AudioContext || window.webkitAudioContext) {
+                    playAlertSound();
+                }
+            } catch (e) {
+                console.log('Son d\'alerte non disponible');
+            }
+        }
+
+        // Fonction pour obtenir la position GPS
+        function getGPSLocation() {
+            if (navigator.geolocation) {
+                console.log('🔍 Demande de géolocalisation...');
+                
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude.toFixed(6);
+                        const lon = position.coords.longitude.toFixed(6);
+                        const accuracy = position.coords.accuracy;
+                        
+                        const gpsText = `${lat}, ${lon} (±${Math.round(accuracy)}m)`;
+                        console.log('📍 Position obtenue:', gpsText);
+                        
+                        // Mettre à jour l'affichage
+                        document.getElementById('incidentGPS').textContent = gpsText;
+                        
+                        // Mettre à jour l'objet incident
+                        if (currentIncident) {
+                            currentIncident.gps = gpsText;
+                            currentIncident.latitude = lat;
+                            currentIncident.longitude = lon;
+                            currentIncident.accuracy = accuracy;
+                        }
+                    },
+                    function(error) {
+                        console.error('❌ Erreur géolocalisation:', error);
+                        let errorMsg = 'GPS non disponible';
+                        
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMsg = 'Permission GPS refusée';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMsg = 'Position GPS indisponible';
+                                break;
+                            case error.TIMEOUT:
+                                errorMsg = 'Timeout GPS';
+                                break;
+                        }
+                        
+                        document.getElementById('incidentGPS').textContent = errorMsg;
+                        if (currentIncident) {
+                            currentIncident.gps = errorMsg;
+                        }
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 60000
+                    }
+                );
+            } else {
+                console.log('❌ Géolocalisation non supportée');
+                document.getElementById('incidentGPS').textContent = 'GPS non supporté par ce dispositif';
+                if (currentIncident) {
+                    currentIncident.gps = 'GPS non supporté par ce dispositif';
+                }
+            }
+        }
+
+        // Fonction pour jouer un son d'alerte
+        function playAlertSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Créer des bips d'alerte
+                for (let i = 0; i < 3; i++) {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime + i * 0.3);
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime + i * 0.3);
+                    gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + i * 0.3 + 0.01);
+                    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + i * 0.3 + 0.2);
+                    
+                    oscillator.start(audioContext.currentTime + i * 0.3);
+                    oscillator.stop(audioContext.currentTime + i * 0.3 + 0.2);
+                }
+            } catch (e) {
+                console.log('Son d\'alerte non disponible:', e);
+            }
+        }
+
+        // Fonction pour confirmer l'urgence
+        function confirmEmergency() {
+            if (!currentIncident) return;
+            
+            console.log('✅ INCIDENT CONFIRMÉ:', currentIncident);
+            
+            // Sauvegarder localement
+            saveIncidentLocally(currentIncident);
+            
+            // Afficher confirmation
+            alert(`🚨 INCIDENT ENREGISTRÉ!\n\nID: ${currentIncident.id}\nDate: ${currentIncident.date}\nHeure: ${currentIncident.time}\nGPS: ${currentIncident.gps}\n\n⚠️ Contactez immédiatement votre responsable d'astreinte!`);
+            
+            // Fermer la modal
+            closeEmergencyModal();
+            
+            // Optionnel: ouvrir le formulaire de notes
+            setTimeout(() => {
+                if (confirm('Voulez-vous ouvrir le formulaire de notes pour documenter l\'incident?')) {
+                    window.open('https://docs.google.com/document/d/1GPb6ZJlW7zHiDn3gHAY1aWq4ladftybg8D_5YIGSgyg/edit?tab=t.0', '_blank');
+                }
+            }, 1000);
+        }
+
+        // Fonction pour sauvegarder l'incident localement
+        function saveIncidentLocally(incident) {
+            try {
+                // Récupérer les incidents existants
+                let incidents = [];
+                const saved = localStorage.getItem('dike_patrol_incidents');
+                if (saved) {
+                    incidents = JSON.parse(saved);
+                }
+                
+                // Ajouter le nouvel incident
+                incidents.push(incident);
+                
+                // Sauvegarder
+                localStorage.setItem('dike_patrol_incidents', JSON.stringify(incidents));
+                
+                console.log('💾 Incident sauvegardé localement:', incident);
+            } catch (e) {
+                console.error('❌ Erreur sauvegarde locale:', e);
+            }
+        }
+
+        // Fonction pour fermer la modal d'urgence
+        function closeEmergencyModal() {
+            document.getElementById('emergencyModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            currentIncident = null;
+        }
+
+        // Fermer la modal si on clique à l'extérieur
+        window.onclick = function(event) {
+            const modal = document.getElementById('emergencyModal');
+            if (event.target === modal) {
+                closeEmergencyModal();
+            }
+        }
+
         // Affichage de la date actuelle
         function updateCurrentDate() {
             const now = new Date();
@@ -411,259 +725,3 @@
                 station: stationCode,
                 dernière_valeur: latestValue + 'm',
                 dernière_date: latestDate.toLocaleString('fr-FR'),
-                nombre_points: data.length
-            });
-            
-            // Afficher la valeur actuelle
-            const currentLevel = document.getElementById('currentLevel');
-            currentLevel.innerHTML = `
-                <div class="level-value">${latestValue.toFixed(3)} m</div>
-                <div class="level-time">
-                    📅 ${latestDate.toLocaleDateString('fr-FR', {
-                        weekday: 'long',
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })}
-                </div>
-                <div style="margin-top: 10px; font-size: 14px;">
-                    📍 Station ${stationCode}${latestReading.libelle_station ? ' - ' + latestReading.libelle_station : ''}
-                </div>
-            `;
-            
-            // Créer le tableau des données
-            const chartGraph = document.getElementById('chartGraph');
-            let tableHTML = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>📅 Date & Heure</th>
-                            <th>💧 Niveau (m)</th>
-                            <th>📊 Évolution</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-            
-            displayData.forEach((item, index) => {
-                const value = parseFloat(item.resultat_obs);
-                const date = new Date(item.date_obs);
-                const nextValue = index < displayData.length - 1 ? parseFloat(displayData[index + 1].resultat_obs) : value;
-                
-                // Déterminer la tendance
-                let trend = '';
-                if (index < displayData.length - 1) {
-                    const diff = value - nextValue;
-                    if (diff > 0.005) {
-                        trend = '📈 +' + diff.toFixed(3) + 'm';
-                    } else if (diff < -0.005) {
-                        trend = '📉 ' + diff.toFixed(3) + 'm';
-                    } else {
-                        trend = '➡️ Stable';
-                    }
-                }
-                
-                // Classe de couleur selon le niveau
-                let levelClass = 'level-normal';
-                if (value > 1.0) levelClass = 'level-high';
-                else if (value < 0.3) levelClass = 'level-low';
-                
-                tableHTML += `
-                    <tr>
-                        <td>
-                            ${date.toLocaleDateString('fr-FR', {
-                                weekday: 'short',
-                                day: '2-digit',
-                                month: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            })}
-                        </td>
-                        <td class="${levelClass}">${value.toFixed(3)} m</td>
-                        <td>${trend}</td>
-                    </tr>
-                `;
-            });
-            
-            tableHTML += `
-                    </tbody>
-                </table>
-            `;
-            
-            chartGraph.innerHTML = tableHTML;
-            
-            // Calculer les statistiques
-            const values = displayData.map(item => parseFloat(item.resultat_obs));
-            const maxValue = Math.max(...values);
-            const minValue = Math.min(...values);
-            const avgValue = values.reduce((a, b) => a + b, 0) / values.length;
-            
-            // Pied du graphique avec statistiques
-            const chartFooter = document.getElementById('chartFooter');
-            
-            // Vérifier si ce sont des données Vigicrues ou Hub'Eau
-            const isVigicrues = stationCode.includes('Vigicrues');
-            
-            chartFooter.innerHTML = `
-                📊 <strong>Statistiques sur ${displayData.length} derniers relevés:</strong><br>
-                Minimum: <strong>${minValue.toFixed(3)} m</strong> | 
-                Maximum: <strong>${maxValue.toFixed(3)} m</strong> | 
-                Moyenne: <strong>${avgValue.toFixed(3)} m</strong><br>
-                <em>Source: ${isVigicrues ? 'API Vigicrues Officielle' : 'API Hub\'Eau'} - Station ${stationCode}</em>
-            `;
-            
-            document.getElementById('loadingChart').style.display = 'none';
-            document.getElementById('waterChart').style.display = 'block';
-        }
-        
-        // Script pour gérer l'iframe Vigicrues
-        function initializeVigicrues() {
-            const iframe = document.getElementById('vigicruFrame');
-            const errorDiv = document.getElementById('iframeError');
-            
-            // Détecter si l'iframe n'arrive pas à charger
-            iframe.onload = function() {
-                try {
-                    // Test d'accès (échouera si bloqué par CORS)
-                    iframe.contentDocument;
-                    console.log('Vigicrues chargé avec succès');
-                } catch (e) {
-                    console.log('Vigicrues bloqué par les restrictions CORS');
-                    showIframeError();
-                }
-            };
-            
-            iframe.onerror = function() {
-                console.log('Erreur de chargement Vigicrues');
-                showIframeError();
-            };
-            
-            // Timeout de sécurité
-            setTimeout(() => {
-                try {
-                    if (!iframe.contentDocument || iframe.contentDocument.title === '') {
-                        showIframeError();
-                    }
-                } catch (e) {
-                    showIframeError();
-                }
-            }, 10000); // 10 secondes
-            
-            function showIframeError() {
-                iframe.style.display = 'none';
-                errorDiv.style.display = 'block';
-            }
-        }
-        async function loadWaterData() {
-            const exactApiUrl = 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=10';
-            
-            try {
-                console.log('🔍 Test direct de l\'API:', exactApiUrl);
-                
-                // Essayer d'abord directement (sans proxy)
-                try {
-                    const directResponse = await fetch(exactApiUrl);
-                    if (directResponse.ok) {
-                        const directResult = await directResponse.json();
-                        console.log('✅ API directe réussie:', directResult);
-                        
-                        if (directResult.data && directResult.data.length > 0) {
-                            console.log('📊 Données reçues:', {
-                                nombre: directResult.data.length,
-                                premiere: directResult.data[0],
-                                station: directResult.data[0].libelle_station,
-                                derniere_mesure: directResult.data[0].resultat_obs + 'm',
-                                date: directResult.data[0].date_obs
-                            });
-                            createWaterChart(directResult.data, 'V300002001');
-                            return;
-                        }
-                    }
-                } catch (directError) {
-                    console.log('❌ API directe échouée (CORS attendu):', directError.message);
-                }
-                
-                // Essayer avec le proxy CORS
-                console.log('🔄 Tentative avec proxy CORS...');
-                const proxyUrl = 'https://api.allorigins.win/get?url=';
-                const response = await fetch(proxyUrl + encodeURIComponent(exactApiUrl));
-                
-                if (!response.ok) {
-                    throw new Error(`Proxy response not ok: ${response.status}`);
-                }
-                
-                const proxyData = await response.json();
-                console.log('📡 Réponse proxy brute:', proxyData);
-                
-                if (proxyData.contents) {
-                    const result = JSON.parse(proxyData.contents);
-                    console.log('✅ Données parsées:', result);
-                    
-                    if (result.data && result.data.length > 0) {
-                        console.log('📊 Détail des données reçues:');
-                        console.table(result.data.map(item => ({
-                            Date: new Date(item.date_obs).toLocaleString('fr-FR'),
-                            Valeur: item.resultat_obs + 'm',
-                            Station: item.libelle_station || 'Non spécifiée'
-                        })));
-                        
-                        createWaterChart(result.data, 'V300002001');
-                    } else {
-                        console.error('❌ Aucune donnée dans la réponse:', result);
-                        document.getElementById('loadingChart').innerHTML = 
-                            `⚠️ API accessible mais aucune donnée retournée<br>
-                             <small>Réponse: ${JSON.stringify(result, null, 2)}</small>`;
-                    }
-                } else {
-                    console.error('❌ Pas de contenu dans la réponse proxy:', proxyData);
-                    document.getElementById('loadingChart').innerHTML = 
-                        `⚠️ Proxy accessible mais pas de contenu<br>
-                         <small>Réponse: ${JSON.stringify(proxyData, null, 2)}</small>`;
-                }
-                
-            } catch (error) {
-                console.error('💥 Erreur complète:', error);
-                document.getElementById('loadingChart').innerHTML = 
-                    `❌ Erreur lors de l'accès à l'API:<br>
-                     <code>${exactApiUrl}</code><br>
-                     <small>Erreur: ${error.message}</small><br>
-                     <em>Consultez la console (F12) pour plus de détails</em>`;
-            }
-        }
-        
-        // Initialisation
-        document.addEventListener('deviceready', function() {
-            updateCurrentDate();
-            initializeVigicrues();
-            loadWaterData();
-            
-            // Mise à jour toutes les 30 minutes
-            setInterval(() => {
-                updateCurrentDate();
-                loadWaterData();
-            }, 30 * 60 * 1000);
-        });
-        
-        // Pour les tests dans le navigateur
-        if (typeof cordova === 'undefined') {
-            updateCurrentDate();
-            initializeVigicrues();
-            loadWaterData();
-            
-            setInterval(() => {
-                updateCurrentDate();
-                loadWaterData();
-            }, 30 * 60 * 1000);
-        }
-        
-        // Service Worker pour PWA
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(() => {
-                console.log('Service Worker non disponible');
-            });
-        }
-    </script>
-</body>
-</html>
