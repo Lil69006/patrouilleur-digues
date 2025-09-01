@@ -195,6 +195,59 @@
             color: #555;
         }
         
+        .emergency-button {
+            background: linear-gradient(45deg, #e74c3c, #c0392b) !important;
+            color: white;
+            border: 3px solid #fff;
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 40px rgba(231, 76, 60, 0.3);
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulse-red 2s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .emergency-button:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4), 0 0 60px rgba(231, 76, 60, 0.5) !important;
+        }
+        
+        .emergency-button::before {
+            content: '🚨';
+            position: absolute;
+            left: 10px;
+            font-size: 20px;
+            animation: rotate 2s linear infinite;
+        }
+        
+        .emergency-button::after {
+            content: '🚨';
+            position: absolute;
+            right: 10px;
+            font-size: 20px;
+            animation: rotate 2s linear infinite reverse;
+        }
+        
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 40px rgba(231, 76, 60, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(231, 76, 60, 0.8), 0 0 60px rgba(231, 76, 60, 0.6);
+            }
+            100% {
+                box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 40px rgba(231, 76, 60, 0.3);
+            }
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        
         @media (max-width: 480px) {
             .container {
                 padding: 10px;
@@ -233,23 +286,33 @@
             📅 <span id="currentDate"></span> | 📍 Lyon - Région Auvergne-Rhône-Alpes
         </div>
         
+        <!-- Bouton d'urgence Déclaration Incident -->
+        <div class="section">
+            <button id="emergencyButton" class="btn emergency-button" style="width: 100%; padding: 20px; margin-bottom: 10px;">
+                Déclaration Incident
+            </button>
+            <div style="text-align: center; font-size: 12px; color: #666; margin-top: 5px;">
+                Enregistrement automatique : GPS + Date/Heure
+            </div>
+        </div>
+        
         <!-- Section Itinéraires -->
         <div class="section">
             <h2>🗺️ Itinéraires Préétablis</h2>
             <a href="https://www.google.com/maps/d/edit?mid=1Ss3l_BWgc8yQB2TRXtMxFobuIlsA9PU&usp=drive_link" class="btn" target="_blank">
-                📍 Itinéraire 1: Ronde 1 → les eaux bleues
+                📍 Itinéraire 1: Triangle → Parking des Saules
             </a>
             <a href="https://www.google.com/maps/d/edit?mid=1FXGfXu9ZXQ6v0BT7j1ganR-BI1smD2E&usp=sharing" class="btn" target="_blank">
-                📍 Itinéraire 2: Ronde 2 → digue Duclos
+                📍 Itinéraire 2: Parking des Saules → Rue Louis Duclos
             </a>
             <a href="https://www.google.com/maps/d/edit?mid=1-jG504darrlvK7GmD9JHe41UyJSwP7s&usp=sharing" class="btn" target="_blank">
-                📍 Itinéraire 3: Ronde 3 → digue St Jean
+                📍 Itinéraire 3: Rue Duclos → Rue du Canal
             </a>
             <a href="https://www.google.com/maps/d/edit?mid=1TScm_4bW-ogoKfY1x2ySLCAf7y07ysM&usp=drive_link" class="btn" target="_blank">
-                📍 Itinéraire 4: Circuit C A42
+                📍 Itinéraire 4: Trajet Supplémentaire 1
             </a>
             <a href="https://www.google.com/maps/d/edit?mid=1KTcVxRP5L-GsPFniZyd6sjX-82wl51o&usp=drive_link" class="btn" target="_blank">
-                📍 Itinéraire 5: Circuit D A42
+                📍 Itinéraire 5: Trajet Supplémentaire 2
             </a>
         </div>
         
