@@ -3,277 +3,726 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Bouton d'Urgence</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: gap: https://ssl.gstatic.com https://maps.googleapis.com https://hubeau.eaufrance.fr https://docs.google.com https://drive.google.com https://www.vigicrues.gouv.fr https://superviseur.paratronic.com https://api.allorigins.win; style-src 'self' 'unsafe-inline'; media-src *;">
+    <title>Patrouilleur des Digues</title>
+    <link rel="manifest" href="manifest.json">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .container {
             padding: 20px;
-            background: #f0f0f0;
+            max-width: 100%;
+        }
+        
+        .section {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            display: block;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #00b894, #00cec9);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(45deg, #fdcb6e, #e17055);
+        }
+        
+        .chart-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .simple-chart {
+            width: 100%;
+        }
+        
+        .current-level {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .level-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .level-time {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .chart-graph {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        .data-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .data-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .data-table tr:hover {
+            background: #e3f2fd;
+        }
+        
+        .level-high {
+            color: #d63031;
+            font-weight: bold;
+        }
+        
+        .level-normal {
+            color: #00b894;
+            font-weight: bold;
+        }
+        
+        .level-low {
+            color: #fdcb6e;
+            font-weight: bold;
+        }
+        
+        .chart-footer {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+        
+        .status-bar {
+            background: rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #555;
         }
         
         .emergency-button {
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            background: linear-gradient(45deg, #e74c3c, #c0392b) !important;
             color: white;
-            border: none;
-            padding: 20px 40px;
-            border-radius: 10px;
-            font-size: 18px;
+            border: 3px solid #fff;
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 40px rgba(231, 76, 60, 0.3);
             font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulse-red 2s infinite;
+            position: relative;
+            overflow: hidden;
         }
         
         .emergency-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+            transform: translateY(-3px) !important;
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4), 0 0 60px rgba(231, 76, 60, 0.5) !important;
         }
         
-        @keyframes pulse {
-            0% { box-shadow: 0 0 10px rgba(231, 76, 60, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(231, 76, 60, 0.8); }
-            100% { box-shadow: 0 0 10px rgba(231, 76, 60, 0.5); }
+        .emergency-button::before {
+            content: '🚨';
+            position: absolute;
+            left: 10px;
+            font-size: 20px;
+            animation: rotate 2s linear infinite;
         }
         
-        .debug-log {
-            background: white;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-            font-family: monospace;
-            font-size: 12px;
-            white-space: pre-wrap;
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
+        .emergency-button::after {
+            content: '🚨';
+            position: absolute;
+            right: 10px;
+            font-size: 20px;
+            animation: rotate 2s linear infinite reverse;
         }
         
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 40px rgba(231, 76, 60, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(231, 76, 60, 0.8), 0 0 60px rgba(231, 76, 60, 0.6);
+            }
+            100% {
+                box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 40px rgba(231, 76, 60, 0.3);
+            }
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal pour l'alerte d'urgence */
         .modal {
             display: none;
             position: fixed;
-            z-index: 1000;
+            z-index: 2000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
             background-color: rgba(0,0,0,0.8);
+            animation: fadeIn 0.3s;
         }
-        
+
         .modal-content {
-            background: #e74c3c;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
             color: white;
-            margin: 15% auto;
+            margin: 5% auto;
             padding: 30px;
             border-radius: 15px;
-            width: 80%;
+            width: 90%;
             max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             text-align: center;
+            animation: slideIn 0.3s;
         }
-        
-        .close-btn {
+
+        .modal h2 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .incident-info {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .close-modal {
             background: rgba(255,255,255,0.2);
             color: white;
             border: 2px solid white;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 15px 30px;
+            border-radius: 10px;
             cursor: pointer;
+            font-size: 16px;
             margin: 10px;
+            transition: all 0.3s;
+        }
+
+        .close-modal:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .confirm-emergency {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        .confirm-emergency:hover {
+            background: #219a52;
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .section {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .level-value {
+                font-size: 28px;
+            }
+            
+            .data-table {
+                font-size: 12px;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 8px 6px;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                padding: 20px;
+                width: 95%;
+            }
+
+            .modal h2 {
+                font-size: 24px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>🚨 Test Bouton d'Urgence</h1>
-    
-    <!-- Test 1: Bouton avec onclick direct -->
-    <button onclick="testFunction1()" class="emergency-button">
-        TEST 1: Bouton avec onclick="testFunction1()"
-    </button>
-    
-    <!-- Test 2: Bouton avec ID et addEventListener -->
-    <button id="testButton2" class="emergency-button">
-        TEST 2: Bouton avec addEventListener
-    </button>
-    
-    <!-- Test 3: Bouton simple avec alert -->
-    <button onclick="alert('Test 3 fonctionne!')" class="emergency-button">
-        TEST 3: Bouton avec alert simple
-    </button>
-    
-    <!-- Test 4: Le bouton d'urgence original -->
-    <button id="emergencyButton" class="emergency-button">
-        🚨 BOUTON D'URGENCE ORIGINAL 🚨
-    </button>
-    
-    <div class="debug-log" id="debugLog">
-📋 LOG DE DÉBOGAGE:
-- Page chargée
+    <div class="header">
+        <h1>🚨 Patrouilleur des Digues</h1>
     </div>
     
-    <!-- Modal d'urgence -->
+    <div class="container">
+        <div class="status-bar">
+            📅 <span id="currentDate"></span> | 📍 Lyon - Région Auvergne-Rhône-Alpes
+        </div>
+        
+        <!-- Bouton d'urgence Déclaration Incident -->
+        <div class="section">
+            <button id="emergencyButton" class="btn emergency-button" style="width: 100%; padding: 20px; margin-bottom: 10px;">
+                Déclaration Incident
+            </button>
+            <div style="text-align: center; font-size: 12px; color: #666; margin-top: 5px;">
+                Enregistrement automatique : GPS + Date/Heure
+            </div>
+        </div>
+        
+        <!-- Section Itinéraires -->
+        <div class="section">
+            <h2>🗺️ Itinéraires Préétablis</h2>
+            <a href="https://www.google.com/maps/d/edit?mid=1Ss3l_BWgc8yQB2TRXtMxFobuIlsA9PU&usp=drive_link" class="btn" target="_blank">
+                📍 Itinéraire 1: Triangle → Parking des Saules
+            </a>
+            <a href="https://www.google.com/maps/d/edit?mid=1FXGfXu9ZXQ6v0BT7j1ganR-BI1smD2E&usp=sharing" class="btn" target="_blank">
+                📍 Itinéraire 2: Parking des Saules → Rue Louis Duclos
+            </a>
+            <a href="https://www.google.com/maps/d/edit?mid=1-jG504darrlvK7GmD9JHe41UyJSwP7s&usp=sharing" class="btn" target="_blank">
+                📍 Itinéraire 3: Rue Duclos → Rue du Canal
+            </a>
+            <a href="https://www.google.com/maps/d/edit?mid=1TScm_4bW-ogoKfY1x2ySLCAf7y07ysM&usp=drive_link" class="btn" target="_blank">
+                📍 Itinéraire 4: Trajet Supplémentaire 1
+            </a>
+            <a href="https://www.google.com/maps/d/edit?mid=1KTcVxRP5L-GsPFniZyd6sjX-82wl51o&usp=drive_link" class="btn" target="_blank">
+                📍 Itinéraire 5: Trajet Supplémentaire 2
+            </a>
+        </div>
+        
+        <!-- Section Formulaires -->
+        <div class="section">
+            <h2>📋 Formulaires de Visite</h2>
+            <a href="https://docs.google.com/spreadsheets/d/1wV50ZsyoDJhcf5Lja5rl1S9TxsOauadMHmyo9slFQGs/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
+                💧 Formulaire "Visite des Eaux Bleues"
+            </a>
+            <a href="https://docs.google.com/spreadsheets/d/1Tsigd9S-qpZfZDQUeLgkA7RIWOTEeDww-NVUIempBMU/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
+                🏗️ Formulaire "Visite Digue Duclos"
+            </a>
+            <a href="https://docs.google.com/spreadsheets/d/1kBdOQFZrZ260ah69D6JFvHmQXbumgkTNcgMYXsYQoZs/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
+                ⛪ Formulaire "Visite Digue St Jean"
+            </a>
+            <a href="https://docs.google.com/document/d/1GPb6ZJlW7zHiDn3gHAY1aWq4ladftybg8D_5YIGSgyg/edit?tab=t.0" class="btn btn-warning" target="_blank">
+                📝 Vos Notes & Remarques Terrain
+            </a>
+        </div>
+        
+        <!-- Section Documents -->
+        <div class="section">
+            <h2>📚 Documents & Planning</h2>
+            <a href="https://drive.google.com/drive/folders/1deKB9iZ3gYfjndRiJY3Dyod8UQw3kzTA" class="btn btn-success" target="_blank">
+                📄 Documents d'Astreinte
+            </a>
+            <a href="https://docs.google.com/spreadsheets/d/1EcmynZSukPIcAvIW_0W6caUiHGLPUTSP/edit?gid=1203425479#gid=1203425479" class="btn btn-success" target="_blank">
+                📅 Planning d'Astreinte
+            </a>
+        </div>
+        
+        <!-- Section Monitoring -->
+        <div class="section">
+            <h2>📊 Monitoring Temps Réel</h2>
+            <a href="https://www.vigicrues.gouv.fr/territoire/18?bbox=526039.7828146118%2C5728320.102674279%2C557457.0440850101%2C5759737.363944678#dynamic-map" class="btn btn-warning" target="_blank">
+                🌊 Site Vigicrues
+            </a>
+            
+            <!-- Bouton Paratronic simple et fonctionnel -->
+            <div style="position: relative;">
+                <a href="https://superviseur.paratronic.com/" target="_blank" class="btn btn-warning" style="display: block; text-decoration: none;">
+                    🔧 Superviseur Paratronic
+                </a>
+                <div style="background: #e8f4fd; padding: 8px; border-radius: 5px; margin-top: 5px; font-size: 12px; color: #0c5460; text-align: center;">
+                    Identifiants: <strong>gemapilyon</strong> / Mot de passe: <strong>lyon</strong>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h3>📈 Station V300002001 - Données Vigicrues Temps Réel</h3>
+                <div id="loadingChart" class="loading">🔄 Chargement des données...</div>
+                <div id="waterChart" class="simple-chart" style="display:none;">
+                    <div class="current-level" id="currentLevel"></div>
+                    <div class="chart-graph" id="chartGraph"></div>
+                    <div class="chart-footer" id="chartFooter"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal d'alerte d'urgence -->
     <div id="emergencyModal" class="modal">
         <div class="modal-content">
             <h2>🚨 ALERTE D'URGENCE 🚨</h2>
-            <p>Test réussi ! Le bouton fonctionne.</p>
-            <button class="close-btn" onclick="closeModal()">Fermer</button>
+            <div class="incident-info" id="incidentInfo">
+                <p><strong>📅 Date:</strong> <span id="incidentDate"></span></p>
+                <p><strong>⏰ Heure:</strong> <span id="incidentTime"></span></p>
+                <p><strong>📍 Position GPS:</strong> <span id="incidentGPS">Localisation en cours...</span></p>
+                <p><strong>👤 Patrouilleur:</strong> Agent d'astreinte</p>
+            </div>
+            <div style="margin: 20px 0;">
+                <p><strong>⚠️ INCIDENT SIGNALÉ SUR LES DIGUES</strong></p>
+                <p>Alerte automatiquement enregistrée avec localisation GPS et horodatage.</p>
+            </div>
+            <button class="confirm-emergency" onclick="confirmEmergency()">✅ CONFIRMER L'ALERTE</button>
+            <button class="close-modal" onclick="closeEmergencyModal()">❌ Annuler</button>
         </div>
     </div>
 
     <script>
-        // Fonction de log pour déboguer
-        function debugLog(message) {
-            const now = new Date().toLocaleTimeString();
-            const logDiv = document.getElementById('debugLog');
-            logDiv.textContent += `\n[${now}] ${message}`;
-            logDiv.scrollTop = logDiv.scrollHeight;
-            console.log(`[DEBUG] ${message}`);
-        }
+        // Variables globales
+        let currentIncident = null;
         
-        // Test 1: Fonction simple
-        function testFunction1() {
-            debugLog('✅ TEST 1 RÉUSSI: onclick direct fonctionne');
-            alert('Test 1 réussi !');
-        }
+        console.log('🚀 Application Patrouilleur des Digues - Démarrage');
+
+        // === FONCTIONS D'URGENCE (définies en premier) ===
         
-        // Test 2: Fonction avec addEventListener
-        function testFunction2() {
-            debugLog('✅ TEST 2 RÉUSSI: addEventListener fonctionne');
-            alert('Test 2 réussi !');
-        }
-        
-        // Fonction d'urgence originale
         function handleEmergencyIncident() {
-            debugLog('🚨 FONCTION D\'URGENCE APPELÉE!');
+            console.log('🚨 ALERTE D\'URGENCE DÉCLENCHÉE!');
             
             try {
+                // Créer l'objet incident
+                const now = new Date();
+                currentIncident = {
+                    id: 'INCIDENT_' + now.getTime(),
+                    date: now.toLocaleDateString('fr-FR'),
+                    time: now.toLocaleTimeString('fr-FR'),
+                    timestamp: now.toISOString(),
+                    gps: 'Localisation en cours...',
+                    status: 'En cours'
+                };
+
+                // Afficher les informations dans la modal
+                document.getElementById('incidentDate').textContent = currentIncident.date;
+                document.getElementById('incidentTime').textContent = currentIncident.time;
+                document.getElementById('incidentGPS').textContent = 'Localisation en cours...';
+
                 // Afficher la modal
                 document.getElementById('emergencyModal').style.display = 'block';
-                debugLog('✅ Modal d\'urgence affichée');
-                
+                document.body.style.overflow = 'hidden';
+
+                // Obtenir la position GPS
+                getGPSLocation();
+
                 // Vibration si disponible
                 if (navigator.vibrate) {
-                    navigator.vibrate([200, 100, 200]);
-                    debugLog('📳 Vibration déclenchée');
-                } else {
-                    debugLog('❌ Vibration non supportée');
+                    navigator.vibrate([200, 100, 200, 100, 200]);
+                    console.log('📳 Vibration déclenchée');
                 }
-                
-                // Son d'alerte
+
+                // Son d'alerte si disponible
                 try {
                     playAlertSound();
-                    debugLog('🔊 Son d\'alerte joué');
+                    console.log('🔊 Son d\'alerte joué');
                 } catch (e) {
-                    debugLog('❌ Son d\'alerte échoué: ' + e.message);
+                    console.log('Son d\'alerte non disponible:', e);
                 }
                 
             } catch (error) {
-                debugLog('❌ ERREUR dans handleEmergencyIncident: ' + error.message);
-                alert('Erreur: ' + error.message);
+                console.error('❌ Erreur dans handleEmergencyIncident:', error);
+                alert('Erreur lors du déclenchement de l\'alerte: ' + error.message);
             }
         }
-        
-        // Son d'alerte simple
-        function playAlertSound() {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-            oscillator.type = 'sine';
-            
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.2);
-            
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.2);
-        }
-        
-        // Fermer modal
-        function closeModal() {
-            document.getElementById('emergencyModal').style.display = 'none';
-            debugLog('❌ Modal fermée');
-        }
-        
-        // Initialisation immédiate
-        debugLog('🚀 Script JavaScript chargé');
-        
-        // Test immédiat des éléments
-        setTimeout(() => {
-            debugLog('🔍 Test de présence des éléments:');
-            
-            const btn1 = document.querySelector('[onclick="testFunction1()"]');
-            const btn2 = document.getElementById('testButton2');
-            const btn3 = document.querySelector('[onclick="alert(\'Test 3 fonctionne!\')"]');
-            const btnEmergency = document.getElementById('emergencyButton');
-            
-            debugLog(`- Bouton Test 1: ${btn1 ? '✅ Trouvé' : '❌ Non trouvé'}`);
-            debugLog(`- Bouton Test 2: ${btn2 ? '✅ Trouvé' : '❌ Non trouvé'}`);
-            debugLog(`- Bouton Test 3: ${btn3 ? '✅ Trouvé' : '❌ Non trouvé'}`);
-            debugLog(`- Bouton Urgence: ${btnEmergency ? '✅ Trouvé' : '❌ Non trouvé'}`);
-            
-            // Attacher l'événement au bouton 2
-            if (btn2) {
-                btn2.addEventListener('click', testFunction2);
-                debugLog('✅ addEventListener attaché au bouton 2');
-            }
-            
-            // Attacher l'événement au bouton d'urgence
-            if (btnEmergency) {
-                debugLog('🔧 Tentative d\'attachement du bouton d\'urgence...');
+
+        function getGPSLocation() {
+            if (navigator.geolocation) {
+                console.log('🔍 Demande de géolocalisation...');
                 
-                btnEmergency.addEventListener('click', function() {
-                    debugLog('🚨 CLICK DÉTECTÉ sur le bouton d\'urgence!');
-                    handleEmergencyIncident();
-                });
-                
-                debugLog('✅ Bouton d\'urgence configuré avec addEventListener');
-                
-                // Test supplémentaire avec onclick
-                btnEmergency.onclick = function() {
-                    debugLog('🚨 ONCLICK DÉTECTÉ sur le bouton d\'urgence!');
-                    handleEmergencyIncident();
-                };
-                
-                debugLog('✅ Bouton d\'urgence configuré avec onclick');
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude.toFixed(6);
+                        const lon = position.coords.longitude.toFixed(6);
+                        const accuracy = position.coords.accuracy;
+                        
+                        const gpsText = `${lat}, ${lon} (±${Math.round(accuracy)}m)`;
+                        console.log('📍 Position obtenue:', gpsText);
+                        
+                        document.getElementById('incidentGPS').textContent = gpsText;
+                        
+                        if (currentIncident) {
+                            currentIncident.gps = gpsText;
+                            currentIncident.latitude = lat;
+                            currentIncident.longitude = lon;
+                            currentIncident.accuracy = accuracy;
+                        }
+                    },
+                    function(error) {
+                        console.error('❌ Erreur géolocalisation:', error);
+                        let errorMsg = 'GPS non disponible';
+                        
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMsg = 'Permission GPS refusée';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMsg = 'Position GPS indisponible';
+                                break;
+                            case error.TIMEOUT:
+                                errorMsg = 'Timeout GPS';
+                                break;
+                        }
+                        
+                        document.getElementById('incidentGPS').textContent = errorMsg;
+                        if (currentIncident) {
+                            currentIncident.gps = errorMsg;
+                        }
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 60000
+                    }
+                );
             } else {
-                debugLog('❌ ERREUR: Bouton d\'urgence non trouvé dans le DOM');
+                console.log('❌ Géolocalisation non supportée');
+                document.getElementById('incidentGPS').textContent = 'GPS non supporté par ce dispositif';
+                if (currentIncident) {
+                    currentIncident.gps = 'GPS non supporté par ce dispositif';
+                }
             }
-            
-        }, 100);
-        
-        // Test de toutes les fonctions
-        setTimeout(() => {
-            debugLog('🧪 Test des fonctions:');
-            
+        }
+
+        function playAlertSound() {
             try {
-                if (typeof testFunction1 === 'function') {
-                    debugLog('✅ testFunction1 définie');
-                } else {
-                    debugLog('❌ testFunction1 non définie');
-                }
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 
-                if (typeof testFunction2 === 'function') {
-                    debugLog('✅ testFunction2 définie');
-                } else {
-                    debugLog('❌ testFunction2 non définie');
+                for (let i = 0; i < 3; i++) {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime + i * 0.3);
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime + i * 0.3);
+                    gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + i * 0.3 + 0.01);
+                    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + i * 0.3 + 0.2);
+                    
+                    oscillator.start(audioContext.currentTime + i * 0.3);
+                    oscillator.stop(audioContext.currentTime + i * 0.3 + 0.2);
                 }
-                
-                if (typeof handleEmergencyIncident === 'function') {
-                    debugLog('✅ handleEmergencyIncident définie');
-                } else {
-                    debugLog('❌ handleEmergencyIncident non définie');
-                }
-                
             } catch (e) {
-                debugLog('❌ Erreur lors du test des fonctions: ' + e.message);
+                console.log('Son d\'alerte non disponible:', e);
             }
+        }
+
+        function confirmEmergency() {
+            if (!currentIncident) return;
             
-        }, 200);
-        
-        debugLog('🏁 Fin du script d\'initialisation');
-    </script>
-</body>
-</html>
+            console.log('✅ INCIDENT CONFIRMÉ:', currentIncident);
+            
+            saveIncidentLocally(currentIncident);
+            
+            alert(`🚨 INCIDENT ENREGISTRÉ!\n\nID: ${currentIncident.id}\nDate: ${currentIncident.date}\nHeure: ${currentIncident.time}\nGPS: ${currentIncident.gps}\n\n⚠️ Contactez immédiatement votre responsable d'astreinte!`);
+            
+            closeEmergencyModal();
+            
+            setTimeout(() => {
+                if (confirm('Voulez-vous ouvrir le formulaire de notes pour documenter l\'incident?')) {
+                    window.open('https://docs.google.com/document/d/1GPb6ZJlW7zHiDn3gHAY1aWq4ladftybg8D_5YIGSgyg/edit?tab=t.0', '_blank');
+                }
+            }, 1000);
+        }
+
+        function saveIncidentLocally(incident) {
+            try {
+                let incidents = JSON.parse(localStorage.getItem('dike_patrol_incidents') || '[]');
+                incidents.push(incident);
+                localStorage.setItem('dike_patrol_incidents', JSON.stringify(incidents));
+                console.log('💾 Incident sauvegardé localement');
+            } catch (e) {
+                console.error('❌ Erreur sauvegarde locale:', e);
+            }
+        }
+
+        function closeEmergencyModal() {
+            document.getElementById('emergencyModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            currentIncident = null;
+        }
+
+        // === FONCTIONS UTILITAIRES ===
+
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('fr-FR', options);
+        }
+
+        // === FONCTIONS MONITORING ===
+
+        function createWaterChart(data, stationCode = 'V300002001') {
+            try {
+                if (data.length === 0) {
+                    document.getElementById('loadingChart').textContent = `Aucune donnée disponible pour la station ${stationCode}`;
+                    return;
+                }
+                
+                const sortedData = data.sort((a, b) => new Date(b.date_obs) - new Date(a.date_obs));
+                const displayData = sortedData.slice(0, Math.min(10, sortedData.length));
+                const latestReading = sortedData[0];
+                const latestValue = parseFloat(latestReading.resultat_obs);
+                const latestDate = new Date(latestReading.date_obs);
+                
+                // Afficher la valeur actuelle
+                const currentLevel = document.getElementById('currentLevel');
+                currentLevel.innerHTML = `
+                    <div class="level-value">${latestValue.toFixed(3)} m</div>
+                    <div class="level-time">
+                        📅 ${latestDate.toLocaleDateString('fr-FR', {
+                            weekday: 'long',
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}
+                    </div>
+                    <div style="margin-top: 10px; font-size: 14px;">
+                        📍 Station ${stationCode}${latestReading.libelle_station ? ' - ' + latestReading.libelle_station : ''}
+                    </div>
+                `;
+                
+                // Créer le tableau des données
+                const chartGraph = document.getElementById('chartGraph');
+                let tableHTML = `
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>📅 Date & Heure</th>
+                                <th>💧 Niveau (m)</th>
+                                <th>
