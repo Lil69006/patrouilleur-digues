@@ -644,11 +644,226 @@
             
             closeEmergencyModal();
             
+            // Proposer d'ouvrir le document avec les données pré-remplies
             setTimeout(() => {
-                if (confirm('Voulez-vous ouvrir le formulaire de notes pour documenter l\'incident?')) {
-                    window.open('https://docs.google.com/document/d/1GPb6ZJlW7zHiDn3gHAY1aWq4ladftybg8D_5YIGSgyg/edit?tab=t.0', '_blank');
+                if (confirm('Voulez-vous ouvrir le rapport d\'incident avec les données automatiquement intégrées?')) {
+                    openIncidentReportWithData(currentIncident);
                 }
             }, 1000);
+        }
+
+        function openIncidentReportWithData(incident) {
+            // Créer le texte de l'incident formaté
+            const incidentReport = generateIncidentReport(incident);
+            
+            // Option 1: Copier dans le presse-papier et ouvrir le document
+            copyToClipboard(incidentReport).then(() => {
+                alert('📋 Les données de l\'incident ont été copiées dans le presse-papier.\n\nLe document va s\'ouvrir. Collez les données avec Ctrl+V');
+                window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
+            }).catch(() => {
+                // Si la copie échoue, ouvrir avec les données en paramètre URL (méthode alternative)
+                const encodedReport = encodeURIComponent(incidentReport);
+                const docUrl = `https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit`;
+                
+                // Ouvrir une nouvelle fenêtre avec les données
+                const newWindow = window.open('about:blank', '_blank');
+                newWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Rapport d'Incident - ${incident.id}</title>
+                            <style>
+                                body { 
+                                    font-family: Arial, sans-serif; 
+                                    max-width: 800px; 
+                                    margin: 20px auto; 
+                                    padding: 20px;
+                                    background: #f5f5f5;
+                                }
+                                .report-container { 
+                                    background: white; 
+                                    padding: 30px; 
+                                    border-radius: 10px; 
+                                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                                }
+                                .header { 
+                                    color: #e74c3c; 
+                                    border-bottom: 2px solid #e74c3c; 
+                                    padding-bottom: 10px; 
+                                    margin-bottom: 20px;
+                                }
+                                .copy-btn {
+                                    background: #27ae60;
+                                    color: white;
+                                    padding: 15px 25px;
+                                    border: none;
+                                    border-radius: 5px;
+                                    cursor: pointer;
+                                    font-size: 16px;
+                                    margin: 10px 5px;
+                                }
+                                .open-doc-btn {
+                                    background: #3498db;
+                                    color: white;
+                                    padding: 15px 25px;
+                                    border: none;
+                                    border-radius: 5px;
+                                    cursor: pointer;
+                                    font-size: 16px;
+                                    margin: 10px 5px;
+                                }
+                                pre { 
+                                    background: #f8f9fa; 
+                                    padding: 15px; 
+                                    border-radius: 5px; 
+                                    border-left: 4px solid #e74c3c;
+                                    white-space: pre-wrap;
+                                    font-family: monospace;
+                                }
+                                .instructions {
+                                    background: #fff3cd;
+                                    border: 1px solid #ffeaa7;
+                                    border-radius: 5px;
+                                    padding: 15px;
+                                    margin: 20px 0;
+                                    color: #856404;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="report-container">
+                                <h1 class="header">🚨 RAPPORT D'INCIDENT AUTOMATIQUE</h1>
+                                
+                                <div class="instructions">
+                                    <strong>📋 Instructions :</strong><br>
+                                    1. Copiez le texte ci-dessous<br>
+                                    2. Ouvrez le document Google Docs<br>
+                                    3. Collez les données dans le document
+                                </div>
+                                
+                                <button class="copy-btn" onclick="copyReportText()">📋 Copier le Rapport</button>
+                                <button class="open-doc-btn" onclick="window.open('${docUrl}', '_blank')">📄 Ouvrir le Document</button>
+                                
+                                <h3>Données à copier :</h3>
+                                <pre id="reportText">${incidentReport}</pre>
+                                
+                                <script>
+                                    function copyReportText() {
+                                        const textArea = document.createElement('textarea');
+                                        textArea.value = document.getElementById('reportText').textContent;
+                                        document.body.appendChild(textArea);
+                                        textArea.select();
+                                        document.execCommand('copy');
+                                        document.body.removeChild(textArea);
+                                        alert('📋 Rapport copié ! Vous pouvez maintenant le coller dans le document Google Docs.');
+                                    }
+                                </script>
+                            </div>
+                        </body>
+                    </html>
+                `);
+            });
+        }
+
+        function generateIncidentReport(incident) {
+            const reportTemplate = `
+🚨 RAPPORT D'INCIDENT - PATROUILLE DES DIGUES
+═══════════════════════════════════════════════
+
+📋 INFORMATIONS GÉNÉRALES
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+• ID Incident: ${incident.id}
+• Date: ${incident.date}
+• Heure: ${incident.time}
+• Statut: ${incident.status}
+
+📍 LOCALISATION
+━━━━━━━━━━━━━━━━━━
+• Position GPS: ${incident.gps}
+${incident.latitude ? `• Latitude: ${incident.latitude}` : ''}
+${incident.longitude ? `• Longitude: ${incident.longitude}` : ''}
+${incident.accuracy ? `• Précision: ±${Math.round(incident.accuracy)}m` : ''}
+• Zone: Lyon - Région Auvergne-Rhône-Alpes
+
+👤 PATROUILLEUR
+━━━━━━━━━━━━━━━━━
+• Agent: Agent d'astreinte
+• Équipement: Application mobile Patrouilleur des Digues
+• Mode de déclaration: Bouton d'urgence automatique
+
+⚠️ DESCRIPTION DE L'INCIDENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[À COMPLÉTER PAR LE PATROUILLEUR]
+
+□ Fissure sur la digue
+□ Infiltration d'eau
+□ Affaissement du terrain
+□ Déformation visible
+□ Érosion
+□ Obstacle sur le chemin de ronde
+□ Problème d'accès
+□ Autre: _________________________
+
+📊 ÉVALUATION DU RISQUE
+━━━━━━━━━━━━━━━━━━━━━━━━━
+□ Faible - Surveillance renforcée
+□ Moyen - Intervention nécessaire sous 24h
+□ Élevé - Intervention urgente requise
+□ Critique - Alerte immédiate
+
+🔧 ACTIONS ENTREPRISES
+━━━━━━━━━━━━━━━━━━━━━━━
+□ Périmètre sécurisé
+□ Signalisation mise en place
+□ Responsable hiérarchique contacté
+□ Services d'urgence prévenus
+□ Photos prises
+□ Autre: _________________________
+
+📞 CONTACTS EFFECTUÉS
+━━━━━━━━━━━━━━━━━━━━━━━
+□ Responsable d'astreinte: ________________
+□ Services techniques: ___________________
+□ Pompiers: ____________________________
+□ Autre: _______________________________
+
+📝 OBSERVATIONS COMPLÉMENTAIRES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[À COMPLÉTER]
+
+
+
+
+📸 PHOTOGRAPHIES
+━━━━━━━━━━━━━━━━━
+□ Photos jointes: _____ fichiers
+□ Vidéos jointes: _____ fichiers
+
+✍️ SIGNATURE NUMÉRIQUE
+━━━━━━━━━━━━━━━━━━━━━━━
+Rapport généré automatiquement par l'application 
+Patrouilleur des Digues - Version mobile
+Timestamp: ${incident.timestamp}
+
+Nom du patrouilleur: _______________________
+Signature: ________________________________
+Date de validation: ________________________
+
+═══════════════════════════════════════════════
+FIN DU RAPPORT AUTOMATIQUE
+`.trim();
+
+            return reportTemplate;
+        }
+
+        async function copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                console.log('✅ Texte copié dans le presse-papier');
+                return true;
+            } catch (err) {
+                console.error('❌ Erreur copie presse-papier:', err);
+                throw err;
+            }
         }
 
         function saveIncidentLocally(incident) {
