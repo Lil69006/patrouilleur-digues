@@ -638,135 +638,138 @@
             
             console.log('✅ INCIDENT CONFIRMÉ:', currentIncident);
             
+            // Sauvegarder localement
             saveIncidentLocally(currentIncident);
             
+            // Générer le rapport
+            const incidentReport = generateIncidentReport(currentIncident);
+            
+            // Afficher confirmation
             alert(`🚨 INCIDENT ENREGISTRÉ!\n\nID: ${currentIncident.id}\nDate: ${currentIncident.date}\nHeure: ${currentIncident.time}\nGPS: ${currentIncident.gps}\n\n⚠️ Contactez immédiatement votre responsable d'astreinte!`);
             
+            // Fermer la modal
             closeEmergencyModal();
             
-            // Proposer d'ouvrir le document avec les données pré-remplies
+            // Proposer d'ouvrir le rapport avec données
             setTimeout(() => {
                 if (confirm('Voulez-vous ouvrir le rapport d\'incident avec les données automatiquement intégrées?')) {
-                    openIncidentReportWithData(currentIncident);
+                    try {
+                        openIncidentReportWithData(currentIncident);
+                    } catch (error) {
+                        console.error('Erreur ouverture rapport:', error);
+                        // Fallback: ouvrir juste le document
+                        window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
+                    }
                 }
             }, 1000);
         }
 
         function openIncidentReportWithData(incident) {
-            // Créer le texte de l'incident formaté
-            const incidentReport = generateIncidentReport(incident);
-            
-            // Option 1: Copier dans le presse-papier et ouvrir le document
-            copyToClipboard(incidentReport).then(() => {
-                alert('📋 Les données de l\'incident ont été copiées dans le presse-papier.\n\nLe document va s\'ouvrir. Collez les données avec Ctrl+V');
-                window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
-            }).catch(() => {
-                // Si la copie échoue, ouvrir avec les données en paramètre URL (méthode alternative)
-                const encodedReport = encodeURIComponent(incidentReport);
-                const docUrl = `https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit`;
+            try {
+                console.log('📄 Ouverture du rapport avec données:', incident.id);
                 
-                // Ouvrir une nouvelle fenêtre avec les données
-                const newWindow = window.open('about:blank', '_blank');
+                // Créer le texte de l'incident formaté
+                const incidentReport = generateIncidentReport(incident);
+                
+                // Essayer de copier dans le presse-papier
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(incidentReport).then(() => {
+                        alert('📋 Les données de l\'incident ont été copiées!\n\nLe document va s\'ouvrir. Collez avec Ctrl+V');
+                        window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
+                    }).catch((error) => {
+                        console.log('Clipboard failed, using fallback:', error);
+                        showReportInNewWindow(incidentReport, incident);
+                    });
+                } else {
+                    // Méthode alternative si clipboard pas supporté
+                    showReportInNewWindow(incidentReport, incident);
+                }
+                
+            } catch (error) {
+                console.error('Erreur dans openIncidentReportWithData:', error);
+                // Fallback simple
+                alert('Erreur lors de la génération du rapport. Ouverture du document simple...');
+                window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
+            }
+        }
+
+        function showReportInNewWindow(reportText, incident) {
+            try {
+                const newWindow = window.open('', '_blank');
+                if (!newWindow) {
+                    alert('Bloqueur de pop-up détecté. Autorisez les pop-ups pour cette fonctionnalité.');
+                    return;
+                }
+
                 newWindow.document.write(`
+                    <!DOCTYPE html>
                     <html>
-                        <head>
-                            <title>Rapport d'Incident - ${incident.id}</title>
-                            <style>
-                                body { 
-                                    font-family: Arial, sans-serif; 
-                                    max-width: 800px; 
-                                    margin: 20px auto; 
-                                    padding: 20px;
-                                    background: #f5f5f5;
-                                }
-                                .report-container { 
-                                    background: white; 
-                                    padding: 30px; 
-                                    border-radius: 10px; 
-                                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                                }
-                                .header { 
-                                    color: #e74c3c; 
-                                    border-bottom: 2px solid #e74c3c; 
-                                    padding-bottom: 10px; 
-                                    margin-bottom: 20px;
-                                }
-                                .copy-btn {
-                                    background: #27ae60;
-                                    color: white;
-                                    padding: 15px 25px;
-                                    border: none;
-                                    border-radius: 5px;
-                                    cursor: pointer;
-                                    font-size: 16px;
-                                    margin: 10px 5px;
-                                }
-                                .open-doc-btn {
-                                    background: #3498db;
-                                    color: white;
-                                    padding: 15px 25px;
-                                    border: none;
-                                    border-radius: 5px;
-                                    cursor: pointer;
-                                    font-size: 16px;
-                                    margin: 10px 5px;
-                                }
-                                pre { 
-                                    background: #f8f9fa; 
-                                    padding: 15px; 
-                                    border-radius: 5px; 
-                                    border-left: 4px solid #e74c3c;
-                                    white-space: pre-wrap;
-                                    font-family: monospace;
-                                }
-                                .instructions {
-                                    background: #fff3cd;
-                                    border: 1px solid #ffeaa7;
-                                    border-radius: 5px;
-                                    padding: 15px;
-                                    margin: 20px 0;
-                                    color: #856404;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="report-container">
-                                <h1 class="header">🚨 RAPPORT D'INCIDENT AUTOMATIQUE</h1>
-                                
-                                <div class="instructions">
-                                    <strong>📋 Instructions :</strong><br>
-                                    1. Copiez le texte ci-dessous<br>
-                                    2. Ouvrez le document Google Docs<br>
-                                    3. Collez les données dans le document
-                                </div>
-                                
-                                <button class="copy-btn" onclick="copyReportText()">📋 Copier le Rapport</button>
-                                <button class="open-doc-btn" onclick="window.open('${docUrl}', '_blank')">📄 Ouvrir le Document</button>
-                                
-                                <h3>Données à copier :</h3>
-                                <pre id="reportText">${incidentReport}</pre>
-                                
-                                <script>
-                                    function copyReportText() {
-                                        const textArea = document.createElement('textarea');
-                                        textArea.value = document.getElementById('reportText').textContent;
-                                        document.body.appendChild(textArea);
-                                        textArea.select();
-                                        document.execCommand('copy');
-                                        document.body.removeChild(textArea);
-                                        alert('📋 Rapport copié ! Vous pouvez maintenant le coller dans le document Google Docs.');
-                                    }
-                                </script>
+                    <head>
+                        <title>Rapport d'Incident - ${incident.id}</title>
+                        <meta charset="UTF-8">
+                        <style>
+                            body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; }
+                            .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                            .header { color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 10px; margin-bottom: 20px; }
+                            .btn { padding: 15px 25px; margin: 10px 5px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+                            .copy-btn { background: #27ae60; color: white; }
+                            .doc-btn { background: #3498db; color: white; }
+                            .report { background: #f8f9fa; padding: 15px; border-radius: 5px; white-space: pre-wrap; font-family: monospace; margin: 20px 0; }
+                            .instructions { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <h1 class="header">🚨 RAPPORT D'INCIDENT</h1>
+                            
+                            <div class="instructions">
+                                <strong>📋 Instructions :</strong><br>
+                                1. Cliquez sur "Copier le Rapport"<br>
+                                2. Cliquez sur "Ouvrir le Document"<br>
+                                3. Dans Google Docs, collez avec Ctrl+V
                             </div>
-                        </body>
+                            
+                            <button class="btn copy-btn" onclick="copyReport()">📋 Copier le Rapport</button>
+                            <button class="btn doc-btn" onclick="openDoc()">📄 Ouvrir le Document</button>
+                            
+                            <div class="report" id="reportContent">${reportText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+                            
+                            <script>
+                                function copyReport() {
+                                    const textArea = document.createElement('textarea');
+                                    textArea.value = document.getElementById('reportContent').textContent;
+                                    document.body.appendChild(textArea);
+                                    textArea.select();
+                                    try {
+                                        document.execCommand('copy');
+                                        alert('📋 Rapport copié dans le presse-papier!');
+                                    } catch (e) {
+                                        alert('Erreur lors de la copie. Sélectionnez le texte manuellement.');
+                                    }
+                                    document.body.removeChild(textArea);
+                                }
+                                
+                                function openDoc() {
+                                    window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
+                                }
+                            </script>
+                        </div>
+                    </body>
                     </html>
                 `);
-            });
+                
+                console.log('✅ Rapport affiché dans nouvelle fenêtre');
+                
+            } catch (error) {
+                console.error('Erreur showReportInNewWindow:', error);
+                alert('Erreur lors de l\'affichage. Ouverture du document simple...');
+                window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
+            }
         }
 
         function generateIncidentReport(incident) {
-            const reportTemplate = `
-🚨 RAPPORT D'INCIDENT - PATROUILLE DES DIGUES
+            try {
+                const reportTemplate = `🚨 RAPPORT D'INCIDENT - PATROUILLE DES DIGUES
 ═══════════════════════════════════════════════
 
 📋 INFORMATIONS GÉNÉRALES
@@ -849,20 +852,13 @@ Signature: ________________________________
 Date de validation: ________________________
 
 ═══════════════════════════════════════════════
-FIN DU RAPPORT AUTOMATIQUE
-`.trim();
+FIN DU RAPPORT AUTOMATIQUE`;
 
-            return reportTemplate;
-        }
-
-        async function copyToClipboard(text) {
-            try {
-                await navigator.clipboard.writeText(text);
-                console.log('✅ Texte copié dans le presse-papier');
-                return true;
-            } catch (err) {
-                console.error('❌ Erreur copie presse-papier:', err);
-                throw err;
+                return reportTemplate;
+                
+            } catch (error) {
+                console.error('Erreur generateIncidentReport:', error);
+                return `ERREUR lors de la génération du rapport pour l'incident ${incident.id}`;
             }
         }
 
