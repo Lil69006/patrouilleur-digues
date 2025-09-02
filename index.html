@@ -3,186 +3,917 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test API Hub'Eau</title>
+    <title>Patrouilleur des Digues</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
-        .test-section { background: white; padding: 20px; margin: 20px 0; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .btn { background: #3498db; color: white; padding: 15px 25px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 10px 5px; }
-        .log { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; font-family: monospace; font-size: 12px; white-space: pre-wrap; max-height: 300px; overflow-y: auto; border: 1px solid #dee2e6; }
-        .error { background: #ffebee; border-color: #f44336; color: #d32f2f; }
-        .success { background: #e8f5e8; border-color: #4caf50; color: #2e7d32; }
-    </style>
-</head>
-<body>
-    <h1>🔍 Test API Hub'Eau - Diagnostic</h1>
-    
-    <div class="test-section">
-        <h2>📡 Test des URLs d'API</h2>
-        
-        <button class="btn" onclick="testAPI1()">
-            🧪 Test API V2 (votre URL)
-        </button>
-        
-        <button class="btn" onclick="testAPI2()">
-            🧪 Test API V1 (fallback)
-        </button>
-        
-        <button class="btn" onclick="testWithProxy()">
-            🧪 Test avec Proxy CORS
-        </button>
-        
-        <button class="btn" onclick="clearLog()">
-            🗑️ Effacer le log
-        </button>
-        
-        <div id="testLog" class="log">🔄 Prêt pour les tests...</div>
-    </div>
-    
-    <div class="test-section">
-        <h2>📊 Données récupérées</h2>
-        <div id="dataDisplay" class="log">Aucune donnée chargée</div>
-    </div>
-
-    <script>
-        function addLog(message, type) {
-            var now = new Date().toLocaleTimeString();
-            var logDiv = document.getElementById('testLog');
-            var className = type === 'error' ? 'error' : (type === 'success' ? 'success' : '');
-            logDiv.innerHTML += '\n[' + now + '] ' + message;
-            logDiv.scrollTop = logDiv.scrollHeight;
-            console.log('[' + type + '] ' + message);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        function clearLog() {
-            document.getElementById('testLog').innerHTML = '🔄 Log effacé...';
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
         }
         
-        function displayData(data, source) {
-            var dataDiv = document.getElementById('dataDisplay');
-            if (data && data.length > 0) {
-                var display = '✅ Source: ' + source + '\n';
-                display += '📊 Nombre de points: ' + data.length + '\n\n';
-                display += '📋 Premiers éléments:\n';
-                
-                for (var i = 0; i < Math.min(5, data.length); i++) {
-                    var item = data[i];
-                    display += '• ' + (item.date_obs || item.date_observation || 'pas de date');
-                    display += ' | Valeur: ' + (item.resultat_obs || item.resultat_observation || 'pas de valeur');
-                    display += ' | Station: ' + (item.code_entite || item.code_station || 'pas de code') + '\n';
-                }
-                
-                display += '\n📝 Structure complète du premier élément:\n';
-                display += JSON.stringify(data[0], null, 2);
-                
-                dataDiv.innerHTML = display;
-                dataDiv.className = 'log success';
-            } else {
-                dataDiv.innerHTML = '❌ Aucune donnée valide trouvée\n\nRéponse brute:\n' + JSON.stringify(data, null, 2);
-                dataDiv.className = 'log error';
+        .header {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .container {
+            padding: 20px;
+            max-width: 100%;
+        }
+        
+        .section {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            display: block;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #00b894, #00cec9);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(45deg, #fdcb6e, #e17055);
+        }
+        
+        .emergency-button {
+            background: linear-gradient(45deg, #e74c3c, #c0392b) !important;
+            color: white;
+            border: 3px solid #fff;
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 40px rgba(231, 76, 60, 0.3);
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulse-red 2s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .emergency-button:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4), 0 0 60px rgba(231, 76, 60, 0.5) !important;
+        }
+        
+        .emergency-button::before {
+            content: '🚨';
+            position: absolute;
+            left: 10px;
+            font-size: 20px;
+            animation: rotate 2s linear infinite;
+        }
+        
+        .emergency-button::after {
+            content: '🚨';
+            position: absolute;
+            right: 10px;
+            font-size: 20px;
+            animation: rotate 2s linear infinite reverse;
+        }
+        
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 40px rgba(231, 76, 60, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(231, 76, 60, 0.8), 0 0 60px rgba(231, 76, 60, 0.6);
+            }
+            100% {
+                box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 40px rgba(231, 76, 60, 0.3);
             }
         }
         
-        // Test 1: API V2 originale
-        function testAPI1() {
-            addLog('🚀 Test API V2: https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=5');
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-bar {
+            background: rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
             
-            var apiUrl = 'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=5';
+            .section {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚨 Patrouilleur des Digues</h1>
+    </div>
+    
+    <div class="container">
+        <div class="status-bar">
+            📅 <span id="currentDate">Chargement...</span> | 📍 Lyon - Région Auvergne-Rhône-Alpes
+        </div>
+        
+        <!-- Test ULTRA Simple pour vérifier -->
+        <div class="section">
+            <h2>🧪 Test de Fonctionnement</h2>
+            <button onclick="alert('✅ JavaScript fonctionne parfaitement!')" class="btn" style="background: green;">
+                ✅ TEST: JavaScript Fonctionne
+            </button>
+        </div>
+        
+        <!-- Bouton d'urgence avec code INLINE SEULEMENT -->
+        <div class="section">
+            <h2>🚨 Déclaration d'Incident</h2>
+            
+            <button class="btn emergency-button" style="width: 100%; padding: 20px; margin-bottom: 10px;" 
+                    onclick="
+                        var now = new Date();
+                        var incidentId = 'INC_' + now.getTime();
+                        var incidentDate = now.toLocaleDateString('fr-FR');
+                        var incidentTime = now.toLocaleTimeString('fr-FR');
+                        var gpsText = 'GPS en cours...';
+                        
+                        if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(function(position) {
+                                gpsText = position.coords.latitude.toFixed(6) + ', ' + position.coords.longitude.toFixed(6);
+                                
+                                var rapport = '🚨 RAPPORT D\\'INCIDENT - PATROUILLE DES DIGUES\\n';
+                                rapport += '═══════════════════════════════════════════════\\n\\n';
+                                rapport += '📋 INFORMATIONS AUTOMATIQUES\\n';
+                                rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n';
+                                rapport += '• ID Incident: ' + incidentId + '\\n';
+                                rapport += '• Date: ' + incidentDate + '\\n';
+                                rapport += '• Heure: ' + incidentTime + '\\n';
+                                rapport += '• GPS: ' + gpsText + '\\n';
+                                rapport += '• Zone: Lyon - Région Auvergne-Rhône-Alpes\\n';
+                                rapport += '• Agent: Patrouilleur d\\'astreinte\\n\\n';
+                                rapport += '⚠️ DESCRIPTION DE L\\'INCIDENT\\n';
+                                rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n';
+                                rapport += '[À COMPLÉTER PAR LE PATROUILLEUR]\\n\\n';
+                                rapport += 'Type d\\'incident observé:\\n';
+                                rapport += '□ Fissure sur la digue\\n';
+                                rapport += '□ Infiltration d\\'eau\\n';
+                                rapport += '□ Affaissement du terrain\\n';
+                                rapport += '□ Déformation visible\\n';
+                                rapport += '□ Érosion du talus\\n';
+                                rapport += '□ Obstacle sur le chemin de ronde\\n';
+                                rapport += '□ Problème d\\'accès\\n';
+                                rapport += '□ Autre: ________________________________\\n\\n';
+                                rapport += '📊 ÉVALUATION DU RISQUE\\n';
+                                rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━\\n';
+                                rapport += '□ FAIBLE - Surveillance renforcée\\n';
+                                rapport += '□ MOYEN - Intervention sous 24h\\n';
+                                rapport += '□ ÉLEVÉ - Intervention urgente\\n';
+                                rapport += '□ CRITIQUE - Alerte immédiate\\n\\n';
+                                rapport += '🔧 ACTIONS ENTREPRISES\\n';
+                                rapport += '━━━━━━━━━━━━━━━━━━━━━━━\\n';
+                                rapport += '□ Périmètre sécurisé\\n';
+                                rapport += '□ Signalisation mise en place\\n';
+                                rapport += '□ Photos prises (nombre: _____)\\n';
+                                rapport += '□ Responsable contacté\\n';
+                                rapport += '□ Autre: ________________\\n\\n';
+                                rapport += '📞 CONTACTS EFFECTUÉS\\n';
+                                rapport += '━━━━━━━━━━━━━━━━━━━━━━━\\n';
+                                rapport += '□ Responsable astreinte: ___________________\\n';
+                                rapport += '□ Services techniques: _____________________\\n';
+                                rapport += '□ Pompiers: _______________________________\\n';
+                                rapport += '□ Autre: __________________________________\\n\\n';
+                                rapport += '📝 OBSERVATIONS\\n';
+                                rapport += '━━━━━━━━━━━━━━━━━━━━━━━\\n';
+                                rapport += 'Description détaillée:\\n';
+                                rapport += '_________________________________________________\\n';
+                                rapport += '_________________________________________________\\n';
+                                rapport += '_________________________________________________\\n\\n';
+                                rapport += 'Conditions météorologiques:\\n';
+                                rapport += '□ Sec  □ Pluie légère  □ Pluie forte  □ Vent\\n\\n';
+                                rapport += '✍️ SIGNATURE\\n';
+                                rapport += '━━━━━━━━━━━━━━━━\\n';
+                                rapport += 'Nom du patrouilleur: _______________________\\n';
+                                rapport += 'Signature: ________________________________\\n';
+                                rapport += 'Date validation: __________________________\\n\\n';
+                                rapport += '═══════════════════════════════════════════════\\n';
+                                rapport += 'Rapport généré automatiquement le: ' + now.toLocaleString('fr-FR') + '\\n';
+                                rapport += '═══════════════════════════════════════════════';
+                                
+                                if (navigator.clipboard && navigator.clipboard.writeText) {
+                                    navigator.clipboard.writeText(rapport).then(function() {
+                                        alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + incidentId + '\\nDate: ' + incidentDate + '\\nHeure: ' + incidentTime + '\\nGPS: ' + gpsText + '\\n\\n📋 Rapport copié dans le presse-papier!\\n\\nLe document va s\\'ouvrir.\\nCollez avec Ctrl+V');
+                                        window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
+                                    }).catch(function() {
+                                        alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + incidentId + '\\nDate: ' + incidentDate + '\\nHeure: ' + incidentTime + '\\nGPS: ' + gpsText + '\\n\\nCopiez le rapport manuellement et collez dans le document.');
+                                        window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
+                                    });
+                                } else {
+                                    alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + incidentId + '\\nDate: ' + incidentDate + '\\nHeure: ' + incidentTime + '\\nGPS: ' + gpsText + '\\n\\nLe document va s\\'ouvrir pour saisie manuelle.');
+                                    window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
+                                }
+                            }, function() {
+                                gpsText = 'GPS non disponible - Localisation manuelle requise';
+                                alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + incidentId + '\\nDate: ' + incidentDate + '\\nHeure: ' + incidentTime + '\\nGPS: ' + gpsText + '\\n\\nLe document va s\\'ouvrir.');
+                                window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
+                            });
+                        } else {
+                            gpsText = 'GPS non supporté - Indiquez position manuellement';
+                            alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + incidentId + '\\nDate: ' + incidentDate + '\\nHeure: ' + incidentTime + '\\nGPS: ' + gpsText + '\\n\\nLe document va s\\'ouvrir.');
+                            window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
+                        }
+                    ">
+                🚨 DÉCLARATION INCIDENT 🚨
+            </button>
+            
+            <div style="text-align: center; font-size: 12px; color: #666; margin-top: 5px;">
+                Enregistrement automatique : GPS + Date/Heure + Génération de rapport
+            </div>
+        </div>
+        
+        <!-- Section Itinéraires -->
+        <div class="section">
+            <h2>🗺️ Itinéraires Préétablis</h2>
+            <a href="https://www.google.com/maps/d/edit?mid=1Ss3l_BWgc8yQB2TRXtMxFobuIlsA9PU&usp=drive_link" class="btn" target="_blank">
+                📍 Itinéraire 1: Triangle → Parking des Saules
+            </a>
+            <a href="https://www.google.com/maps/d/edit?mid=1FXGfXu9ZXQ6v0BT7j1ganR-BI1smD2E&usp=sharing" class="btn" target="_blank">
+                📍 Itinéraire 2: Parking des Saules → Rue Louis Duclos
+            </a>
+            <a href="https://www.google.com/maps/d/edit?mid=1-jG504darrlvK7GmD9JHe41UyJSwP7s&usp=sharing" class="btn" target="_blank">
+                📍 Itinéraire 3: Rue Duclos → Rue du Canal
+            </a>
+            <a href="https://www.google.com/maps/d/edit?mid=1TScm_4bW-ogoKfY1x2ySLCAf7y07ysM&usp=drive_link" class="btn" target="_blank">
+                📍 Itinéraire 4: Trajet Supplémentaire 1
+            </a>
+            <a href="https://www.google.com/maps/d/edit?mid=1KTcVxRP5L-GsPFniZyd6sjX-82wl51o&usp=drive_link" class="btn" target="_blank">
+                📍 Itinéraire 5: Trajet Supplémentaire 2
+            </a>
+        </div>
+        
+        <!-- Section Formulaires -->
+        <div class="section">
+            <h2>📋 Formulaires de Visite</h2>
+            <a href="https://docs.google.com/spreadsheets/d/1wV50ZsyoDJhcf5Lja5rl1S9TxsOauadMHmyo9slFQGs/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
+                💧 Formulaire "Visite des Eaux Bleues"
+            </a>
+            <a href="https://docs.google.com/spreadsheets/d/1Tsigd9S-qpZfZDQUeLgkA7RIWOTEeDww-NVUIempBMU/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
+                🏗️ Formulaire "Visite Digue Duclos"
+            </a>
+            <a href="https://docs.google.com/spreadsheets/d/1kBdOQFZrZ260ah69D6JFvHmQXbumgkTNcgMYXsYQoZs/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
+                ⛪ Formulaire "Visite Digue St Jean"
+            </a>
+            <a href="https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit" class="btn btn-warning" target="_blank">
+                📝 Rapport d'Incident (Direct)
+            </a>
+        </div>
+        
+        <!-- Section Documents -->
+        <div class="section">
+            <h2>📚 Documents & Planning</h2>
+            <a href="https://drive.google.com/drive/folders/1deKB9iZ3gYfjndRiJY3Dyod8UQw3kzTA" class="btn btn-success" target="_blank">
+                📄 Documents d'Astreinte
+            </a>
+            <a href="https://docs.google.com/spreadsheets/d/1EcmynZSukPIcAvIW_0W6caUiHGLPUTSP/edit?gid=1203425479#gid=1203425479" class="btn btn-success" target="_blank">
+                📅 Planning d'Astreinte
+            </a>
+        </div>
+        
+        <!-- Section Monitoring -->
+        <div class="section">
+            <h2>📊 Monitoring Temps Réel</h2>
+            <a href="https://www.vigicrues.gouv.fr/territoire/18?bbox=526039.7828146118%2C5728320.102674279%2C557457.0440850101%2C5759737.363944678#dynamic-map" class="btn btn-warning" target="_blank">
+                🌊 Site Vigicrues
+            </a>
+            
+            <div style="position: relative;">
+                <a href="https://superviseur.paratronic.com/" target="_blank" class="btn btn-warning" style="display: block; text-decoration: none;">
+                    🔧 Superviseur Paratronic
+                </a>
+                <div style="background: #e8f4fd; padding: 8px; border-radius: 5px; margin-top: 5px; font-size: 12px; color: #0c5460; text-align: center;">
+                    Identifiants: <strong>gemapilyon</strong> / Mot de passe: <strong>lyon</strong>
+                </div>
+            </div>
+            
+            <!-- Nouveau graphique interactif -->
+            <div style="background: white; border-radius: 10px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h3 style="color: #2c3e50; margin-bottom: 15px;">📈 Station V300002001 - Hauteur d'eau (3 derniers jours)</h3>
+                
+                <div id="loadingGraph" style="text-align: center; padding: 40px; color: #666;">
+                    🔄 Chargement des données hydrométriques...
+                </div>
+                
+                <div id="alertZone" style="display: none; background: #ff6b6b; color: white; padding: 15px; border-radius: 10px; margin: 10px 0; text-align: center; font-weight: bold;">
+                    🚨 ALERTE: Seuil de 160cm dépassé!
+                </div>
+                
+                <canvas id="waterLevelChart" width="800" height="400" style="display: none; width: 100%; max-width: 800px; border: 1px solid #ddd; border-radius: 5px; cursor: crosshair;"></canvas>
+                
+                <div id="chartInfo" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 5px; border-left: 4px solid #667eea;">
+                    <div id="selectedPoint" style="font-weight: bold; color: #2c3e50;">Cliquez sur le graphique pour voir les détails</div>
+                    <div id="chartStats" style="margin-top: 10px; font-size: 14px; color: #666;"></div>
+                </div>
+                
+                <button onclick="
+                    document.getElementById('loadingGraph').style.display = 'block';
+                    document.getElementById('waterLevelChart').style.display = 'none';
+                    document.getElementById('chartInfo').style.display = 'none';
+                    loadWaterLevelData();
+                " style="background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+                    🔄 Actualiser les données
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts avec graphique interactif -->
+    <script>
+        // Variables globales pour le graphique
+        var chartData = [];
+        var canvas, ctx;
+        var alertThreshold = 1.60; // 160cm en mètres
+        
+            <!-- Graphique simplifié avec meilleur debug -->
+            <div style="background: white; border-radius: 10px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h3 style="color: #2c3e50; margin-bottom: 15px;">📈 Station V300002001 - Hauteur d'eau</h3>
+                
+                <div id="loadingGraph" style="text-align: center; padding: 40px; color: #666;">
+                    🔄 Chargement des données hydrométriques...
+                </div>
+                
+                <div id="errorGraph" style="display: none; background: #ffebee; color: #d32f2f; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                </div>
+                
+                <div id="debugLog" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6;">
+                </div>
+                
+                <div id="alertZone" style="display: none; background: #ff6b6b; color: white; padding: 15px; border-radius: 10px; margin: 10px 0; text-align: center; font-weight: bold;">
+                    🚨 ALERTE: Seuil de 160cm dépassé!
+                </div>
+                
+                <!-- Graphique simple avec tableau -->
+                <div id="simpleChart" style="display: none;">
+                    <div style="margin: 20px 0; padding: 15px; background: #e3f2fd; border-radius: 5px; text-align: center;">
+                        <div id="currentLevel" style="font-size: 24px; font-weight: bold; color: #1976d2;">--</div>
+                        <div>Dernière mesure</div>
+                    </div>
+                    
+                    <table id="dataTable" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <thead style="background: #667eea; color: white;">
+                            <tr>
+                                <th style="padding: 12px; text-align: left;">📅 Date/Heure</th>
+                                <th style="padding: 12px; text-align: left;">💧 Hauteur</th>
+                                <th style="padding: 12px; text-align: left;">📊 État</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody">
+                        </tbody>
+                    </table>
+                    
+                    <div id="chartStats" style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 5px; font-size: 14px;"></div>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <button onclick="loadWaterData()" style="background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
+                        🔄 Actualiser
+                    </button>
+                    <button onclick="toggleDebug()" style="background: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                        🔧 Debug
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts optimisés -->
+    <script>
+        // Variables globales
+        var waterData = [];
+        var alertThreshold = 1.60; // 160cm
+        var debugMode = false;
+        
+        function debugLog(message) {
+            var now = new Date().toLocaleTimeString();
+            var debugDiv = document.getElementById('debugLog');
+            if (debugDiv) {
+                debugDiv.innerHTML += '[' + now + '] ' + message + '\n';
+                debugDiv.scrollTop = debugDiv.scrollHeight;
+            }
+            console.log('[DEBUG] ' + message);
+        }
+        
+        function showError(message) {
+            var errorDiv = document.getElementById('errorGraph');
+            errorDiv.innerHTML = '❌ ' + message;
+            errorDiv.style.display = 'block';
+            debugLog('ERREUR: ' + message);
+        }
+        
+        function toggleDebug() {
+            debugMode = !debugMode;
+            var debugDiv = document.getElementById('debugLog');
+            debugDiv.style.display = debugMode ? 'block' : 'none';
+        }
+        
+        function loadWaterData() {
+            debugLog('🚀 Début du chargement des données');
+            
+            // Reset affichage
+            document.getElementById('loadingGraph').style.display = 'block';
+            document.getElementById('errorGraph').style.display = 'none';
+            document.getElementById('simpleChart').style.display = 'none';
+            document.getElementById('alertZone').style.display = 'none';
+            
+            // Utiliser l'API V2 qui fonctionne selon les tests
+            var apiUrl = 'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=50';
+            
+            debugLog('🔍 Chargement depuis: ' + apiUrl);
             
             fetch(apiUrl)
                 .then(function(response) {
-                    addLog('📡 Réponse reçue - Status: ' + response.status + ' ' + response.statusText);
-                    if (response.ok) {
+                    debugLog('📡 Réponse API: ' + response.status + ' ' + response.statusText);
+                    // Accepter 200 et 206 (Partial Content)
+                    if (response.status === 200 || response.status === 206) {
                         return response.json();
                     }
-                    throw new Error('Status: ' + response.status);
+                    throw new Error('HTTP ' + response.status + ' ' + response.statusText);
                 })
                 .then(function(data) {
-                    addLog('✅ Données JSON parsées avec succès', 'success');
-                    addLog('📊 Structure: ' + JSON.stringify(Object.keys(data)));
+                    debugLog('✅ Données JSON reçues');
+                    debugLog('📊 Structure: ' + JSON.stringify(Object.keys(data)));
+                    debugLog('📈 Nombre total: ' + (data.count || 'inconnu'));
                     
-                    if (data.data) {
-                        addLog('✅ Trouvé data.data avec ' + data.data.length + ' éléments', 'success');
-                        displayData(data.data, 'API V2 Direct');
-                    } else if (Array.isArray(data)) {
-                        addLog('✅ Données sous forme de tableau direct', 'success');
-                        displayData(data, 'API V2 Direct (array)');
+                    if (data.data && Array.isArray(data.data)) {
+                        debugLog('✅ Tableau data.data trouvé avec ' + data.data.length + ' éléments');
+                        processAPIData(data, 'API V2');
                     } else {
-                        addLog('⚠️ Structure de données inattendue', 'error');
-                        displayData(data, 'API V2 Direct (unknown structure)');
+                        throw new Error('Structure de données invalide: pas de data.data');
                     }
                 })
                 .catch(function(error) {
-                    addLog('❌ Erreur API V2: ' + error.message, 'error');
+                    debugLog('❌ Erreur finale: ' + error.message);
+                    showError('Erreur de chargement: ' + error.message);
                 });
         }
         
-        // Test 2: API V1 (fallback)
-        function testAPI2() {
-            addLog('🚀 Test API V1: https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=5');
+        function tryAPI(index, apiUrls) {
+            if (index >= apiUrls.length) {
+                showError('Toutes les API ont échoué. Vérifiez votre connexion.');
+                return;
+            }
             
-            var apiUrl = 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=5';
+            var apiUrl = apiUrls[index];
+            debugLog('🔍 Test API ' + (index + 1) + ': ' + apiUrl);
             
             fetch(apiUrl)
                 .then(function(response) {
-                    addLog('📡 Réponse API V1 - Status: ' + response.status);
-                    if (response.ok) {
+                    debugLog('📡 Réponse API ' + (index + 1) + ': ' + response.status + ' ' + response.statusText);
+                    // Accepter les status 200 ET 206 (Partial Content)
+                    if (response.status === 200 || response.status === 206) {
                         return response.json();
                     }
-                    throw new Error('Status: ' + response.status);
+                    throw new Error('HTTP ' + response.status);
                 })
                 .then(function(data) {
-                    addLog('✅ API V1 - Données parsées', 'success');
-                    
-                    if (data.data) {
-                        addLog('✅ API V1 - Trouvé ' + data.data.length + ' éléments', 'success');
-                        displayData(data.data, 'API V1');
-                    } else {
-                        displayData(data, 'API V1 (structure inconnue)');
-                    }
+                    debugLog('✅ Données parsées avec succès');
+                    debugLog('📊 Structure API: ' + JSON.stringify(Object.keys(data)));
+                    processAPIData(data, 'API ' + (index + 1));
                 })
                 .catch(function(error) {
-                    addLog('❌ Erreur API V1: ' + error.message, 'error');
+                    debugLog('❌ Erreur API ' + (index + 1) + ': ' + error.message);
+                    tryAPI(index + 1, apiUrls);
                 });
         }
         
-        // Test 3: Avec proxy CORS
-        function testWithProxy() {
-            addLog('🚀 Test avec Proxy CORS');
+        function tryWithProxy() {
+            debugLog('🔄 Tentative avec proxy CORS...');
             
-            var apiUrl = 'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=5';
+            var apiUrl = 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=20';
             var proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(apiUrl);
             
             fetch(proxyUrl)
                 .then(function(response) {
-                    addLog('📡 Proxy CORS - Status: ' + response.status);
+                    debugLog('📡 Proxy CORS: ' + response.status);
                     return response.json();
                 })
                 .then(function(proxyData) {
-                    addLog('✅ Proxy - Données reçues', 'success');
-                    
                     if (proxyData.contents) {
                         var data = JSON.parse(proxyData.contents);
-                        addLog('✅ Proxy - JSON parsé avec succès', 'success');
-                        
-                        if (data.data) {
-                            displayData(data.data, 'API V2 via Proxy CORS');
-                        } else {
-                            displayData(data, 'API V2 via Proxy (structure inconnue)');
-                        }
+                        debugLog('✅ Données via proxy parsées');
+                        processAPIData(data, 'Proxy CORS');
                     } else {
-                        addLog('❌ Proxy - Pas de contenu dans la réponse', 'error');
+                        throw new Error('Pas de contenu dans la réponse proxy');
                     }
                 })
                 .catch(function(error) {
-                    addLog('❌ Erreur Proxy: ' + error.message, 'error');
+                    debugLog('❌ Erreur proxy: ' + error.message);
+                    showFallbackData();
                 });
         }
         
-        // Test automatique au chargement
+        function processAPIData(rawData, source) {
+            debugLog('📊 Traitement des données de: ' + source);
+            
+            var dataArray = rawData.data;
+            if (!Array.isArray(dataArray)) {
+                debugLog('❌ data.data n\'est pas un tableau');
+                showError('Format de données invalide: data.data n\'est pas un tableau');
+                return;
+            }
+            
+            debugLog('📈 Nombre de points bruts: ' + dataArray.length);
+            
+            // Examiner le premier élément pour comprendre la structure
+            if (dataArray.length > 0) {
+                debugLog('📋 Structure du premier élément: ' + JSON.stringify(Object.keys(dataArray[0])));
+                debugLog('📋 Premier élément complet: ' + JSON.stringify(dataArray[0]));
+            }
+            
+            // Traiter les données - utiliser les bons noms de champs pour l'API V2
+            waterData = [];
+            
+            for (var i = 0; i < dataArray.length; i++) {
+                var item = dataArray[i];
+                
+                // Chercher les champs de date possibles
+                var dateField = item.date_obs || item.date_observation || item.date_mesure || item.timestamp;
+                
+                // Chercher les champs de valeur possibles  
+                var valueField = item.resultat_obs || item.resultat_observation || item.valeur || item.hauteur;
+                
+                if (dateField && valueField !== undefined && valueField !== null) {
+                    var dateObj = new Date(dateField);
+                    var valueNum = parseFloat(valueField);
+                    
+                    if (!isNaN(dateObj.getTime()) && !isNaN(valueNum)) {
+                        waterData.push({
+                            date: dateObj,
+                            value: valueNum,
+                            station: item.libelle_station || item.nom_station || 'V300002001',
+                            original: item
+                        });
+                    } else {
+                        debugLog('⚠️ Élément ignoré - date ou valeur invalide: date=' + dateField + ', valeur=' + valueField);
+                    }
+                } else {
+                    debugLog('⚠️ Élément ignoré - champs manquants: ' + JSON.stringify(item));
+                }
+            }
+            
+            debugLog('📊 Données valides après traitement: ' + waterData.length);
+            
+            if (waterData.length === 0) {
+                showError('Aucune donnée valide trouvée dans ' + dataArray.length + ' enregistrements. Vérifiez la structure des données.');
+                return;
+            }
+            
+            // Trier par date (plus récent en premier)
+            waterData.sort(function(a, b) { return b.date - a.date; });
+            
+            displaySimpleChart();
+        }
+        
+        function displaySimpleChart() {
+            debugLog('📊 Affichage du graphique simple');
+            
+            document.getElementById('loadingGraph').style.display = 'none';
+            document.getElementById('simpleChart').style.display = 'block';
+            
+            // Dernière valeur
+            var latest = waterData[0];
+            var currentLevelDiv = document.getElementById('currentLevel');
+            var heightCm = (latest.value * 100).toFixed(1);
+            currentLevelDiv.innerHTML = heightCm + ' cm';
+            
+            // Vérifier alerte
+            if (latest.value > alertThreshold) {
+                currentLevelDiv.style.color = '#e74c3c';
+                document.getElementById('alertZone').style.display = 'block';
+                document.getElementById('alertZone').innerHTML = '🚨 ALERTE: Seuil dépassé! Niveau: ' + heightCm + 'cm';
+            } else {
+                currentLevelDiv.style.color = '#1976d2';
+            }
+            
+            // Tableau des données
+            var tableBody = document.getElementById('dataTableBody');
+            tableBody.innerHTML = '';
+            
+            var displayCount = Math.min(10, waterData.length);
+            for (var i = 0; i < displayCount; i++) {
+                var item = waterData[i];
+                var row = tableBody.insertRow();
+                
+                // Date
+                var dateCell = row.insertCell(0);
+                dateCell.innerHTML = item.date.toLocaleString('fr-FR');
+                dateCell.style.padding = '10px';
+                
+                // Valeur
+                var valueCell = row.insertCell(1);
+                var valueCm = (item.value * 100).toFixed(1);
+                valueCell.innerHTML = valueCm + ' cm';
+                valueCell.style.padding = '10px';
+                valueCell.style.fontWeight = 'bold';
+                
+                if (item.value > alertThreshold) {
+                    valueCell.style.color = '#e74c3c';
+                } else {
+                    valueCell.style.color = '#27ae60';
+                }
+                
+                // État
+                var statusCell = row.insertCell(2);
+                if (item.value > alertThreshold) {
+                    statusCell.innerHTML = '🚨 ALERTE';
+                    statusCell.style.color = '#e74c3c';
+                    statusCell.style.fontWeight = 'bold';
+                } else {
+                    statusCell.innerHTML = '✅ Normal';
+                    statusCell.style.color = '#27ae60';
+                }
+                statusCell.style.padding = '10px';
+                
+                // Alternance des couleurs
+                if (i % 2 === 1) {
+                    row.style.backgroundColor = '#f8f9fa';
+                }
+            }
+            
+            // Statistiques
+            var values = waterData.map(function(item) { return item.value; });
+            var minValue = Math.min.apply(Math, values);
+            var maxValue = Math.max.apply(Math, values);
+            var avgValue = values.reduce(function(sum, val) { return sum + val; }, 0) / values.length;
+            
+            var stats = '📊 Statistiques sur ' + waterData.length + ' mesures:<br>';
+            stats += 'Minimum: ' + (minValue * 100).toFixed(1) + 'cm | ';
+            stats += 'Maximum: ' + (maxValue * 100).toFixed(1) + 'cm | ';
+            stats += 'Moyenne: ' + (avgValue * 100).toFixed(1) + 'cm<br>';
+            stats += 'Source: Station V300002001 - Dernière mise à jour: ' + new Date().toLocaleString('fr-FR');
+            
+            document.getElementById('chartStats').innerHTML = stats;
+            
+            debugLog('✅ Affichage terminé avec succès');
+        }
+        
+        function showFallbackData() {
+            debugLog('🔧 Affichage des données de test');
+            showError('API indisponible. Vérifiez votre connexion internet ou contactez le support technique.');
+            
+            // Données factices pour test
+            waterData = [
+                { date: new Date(), value: 1.45, station: 'V300002001' },
+                { date: new Date(Date.now() - 3600000), value: 1.42, station: 'V300002001' },
+                { date: new Date(Date.now() - 7200000), value: 1.40, station: 'V300002001' }
+            ];
+            
+            displaySimpleChart();
+        }
+        
+        // Mise à jour de la date et chargement automatique
         setTimeout(function() {
-            addLog('🔄 Lancement du test automatique...');
-            testAPI1();
-        }, 1000);
+            var now = new Date();
+            var dateElement = document.getElementById('currentDate');
+            if (dateElement) {
+                dateElement.innerHTML = now.toLocaleString('fr-FR');
+            }
+            
+            // Charger les données automatiquement
+            debugLog('🚀 Chargement automatique des données au démarrage');
+            loadWaterData();
+        }, 500);
+    </script>
+            var minDate = chartData[0].date.getTime();
+            var maxDate = chartData[chartData.length - 1].date.getTime();
+            var dateRange = maxDate - minDate;
+            
+            // Effacer le canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Arrière-plan
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Grille
+            ctx.strokeStyle = '#e9ecef';
+            ctx.lineWidth = 1;
+            
+            // Lignes horizontales
+            for (var i = 0; i <= 10; i++) {
+                var y = padding + (graphHeight * i / 10);
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+                
+                // Labels des valeurs
+                var value = maxValue - (valueRange * i / 10);
+                ctx.fillStyle = '#666';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'right';
+                ctx.fillText((value * 100).toFixed(0) + 'cm', padding - 5, y + 4);
+            }
+            
+            // Lignes verticales (toutes les 6h)
+            var sixHours = 6 * 60 * 60 * 1000; // 6h en ms
+            var timeStep = Math.ceil(dateRange / sixHours / 8) * sixHours; // Environ 8 divisions
+            
+            for (var time = minDate; time <= maxDate; time += timeStep) {
+                var x = padding + (graphWidth * (time - minDate) / dateRange);
+                ctx.beginPath();
+                ctx.moveTo(x, padding);
+                ctx.lineTo(x, height - padding);
+                ctx.stroke();
+                
+                // Labels des dates
+                var date = new Date(time);
+                ctx.fillStyle = '#666';
+                ctx.font = '11px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(
+                    date.getDate().toString().padStart(2, '0') + '/' + 
+                    (date.getMonth() + 1).toString().padStart(2, '0') + ' ' +
+                    date.getHours().toString().padStart(2, '0') + 'h',
+                    x, height - padding + 15
+                );
+            }
+            
+            // Ligne de seuil d'alerte
+            var alertY = padding + graphHeight - (graphHeight * (alertThreshold - minValue) / valueRange);
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(padding, alertY);
+            ctx.lineTo(width - padding, alertY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Label seuil
+            ctx.fillStyle = '#e74c3c';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('⚠️ Seuil 160cm', padding + 5, alertY - 5);
+            
+            // Ligne des données
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            for (var i = 0; i < chartData.length; i++) {
+                var item = chartData[i];
+                var x = padding + (graphWidth * (item.date.getTime() - minDate) / dateRange);
+                var y = padding + graphHeight - (graphHeight * (item.value - minValue) / valueRange);
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // Points de données
+            ctx.fillStyle = '#667eea';
+            for (var i = 0; i < chartData.length; i++) {
+                var item = chartData[i];
+                var x = padding + (graphWidth * (item.date.getTime() - minDate) / dateRange);
+                var y = padding + graphHeight - (graphHeight * (item.value - minValue) / valueRange);
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Point rouge si au-dessus du seuil
+                if (item.value > alertThreshold) {
+                    ctx.fillStyle = '#e74c3c';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 6, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.fillStyle = '#667eea';
+                }
+            }
+            
+            // Titre
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Hauteur d\\'eau - Station V300002001', width / 2, 25);
+            
+            // Statistiques
+            var stats = 'Points: ' + chartData.length + 
+                       ' | Min: ' + (minValue * 100).toFixed(1) + 'cm' +
+                       ' | Max: ' + (maxValue * 100).toFixed(1) + 'cm' +
+                       ' | Moyenne: ' + (chartData.reduce(function(sum, item) { return sum + item.value; }, 0) / chartData.length * 100).toFixed(1) + 'cm';
+            
+            document.getElementById('chartStats').innerHTML = stats;
+            
+            // Événement click
+            canvas.onclick = function(event) {
+                var rect = canvas.getBoundingClientRect();
+                var scaleX = canvas.width / rect.width;
+                var scaleY = canvas.height / rect.height;
+                var x = (event.clientX - rect.left) * scaleX;
+                var y = (event.clientY - rect.top) * scaleY;
+                
+                // Trouver le point le plus proche
+                var closestPoint = null;
+                var minDistance = Infinity;
+                
+                for (var i = 0; i < chartData.length; i++) {
+                    var item = chartData[i];
+                    var pointX = padding + (graphWidth * (item.date.getTime() - minDate) / dateRange);
+                    var pointY = padding + graphHeight - (graphHeight * (item.value - minValue) / valueRange);
+                    
+                    var distance = Math.sqrt(Math.pow(x - pointX, 2) + Math.pow(y - pointY, 2));
+                    
+                    if (distance < minDistance && distance < 20) { // 20px de tolérance
+                        minDistance = distance;
+                        closestPoint = item;
+                    }
+                }
+                
+                if (closestPoint) {
+                    var info = '📊 ' + closestPoint.date.toLocaleString('fr-FR') + 
+                              ' | Hauteur: ' + (closestPoint.value * 100).toFixed(1) + 'cm';
+                    
+                    if (closestPoint.value > alertThreshold) {
+                        info += ' 🚨 AU-DESSUS DU SEUIL!';
+                    }
+                    
+                    document.getElementById('selectedPoint').innerHTML = info;
+                }
+            };
+        }
+        
+        // Mise à jour de la date - Code ULTRA simple
+        setTimeout(function() {
+            var now = new Date();
+            var dateElement = document.getElementById('currentDate');
+            if (dateElement) {
+                dateElement.innerHTML = now.toLocaleString('fr-FR');
+            }
+            
+            // Charger automatiquement les données du graphique
+            loadWaterLevelData();
+        }, 100);
     </script>
 </body>
 </html>
