@@ -51,9 +51,6 @@
             color: #2c3e50;
             margin-bottom: 15px;
             font-size: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         
         .btn {
@@ -93,52 +90,17 @@
             background: linear-gradient(45deg, #e74c3c, #c0392b) !important;
             color: white;
             border: 3px solid #fff;
-            box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 40px rgba(231, 76, 60, 0.3);
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.5);
             font-weight: bold;
             font-size: 16px;
             text-transform: uppercase;
-            letter-spacing: 1px;
             animation: pulse-red 2s infinite;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .emergency-button:hover {
-            transform: translateY(-3px) !important;
-            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4), 0 0 60px rgba(231, 76, 60, 0.5) !important;
-        }
-        
-        .emergency-button::before {
-            content: '🚨';
-            position: absolute;
-            left: 10px;
-            font-size: 20px;
-            animation: rotate 2s linear infinite;
-        }
-        
-        .emergency-button::after {
-            content: '🚨';
-            position: absolute;
-            right: 10px;
-            font-size: 20px;
-            animation: rotate 2s linear infinite reverse;
         }
         
         @keyframes pulse-red {
-            0% {
-                box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 40px rgba(231, 76, 60, 0.3);
-            }
-            50% {
-                box-shadow: 0 0 30px rgba(231, 76, 60, 0.8), 0 0 60px rgba(231, 76, 60, 0.6);
-            }
-            100% {
-                box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 40px rgba(231, 76, 60, 0.3);
-            }
-        }
-        
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% { box-shadow: 0 0 20px rgba(231, 76, 60, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(231, 76, 60, 0.8); }
+            100% { box-shadow: 0 0 20px rgba(231, 76, 60, 0.5); }
         }
 
         .status-bar {
@@ -150,96 +112,87 @@
             color: #555;
         }
 
-        /* Styles pour le graphique */
-        .chart-container {
+        .water-level {
             background: white;
             border-radius: 10px;
             padding: 20px;
             margin-top: 20px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
         }
 
         .current-level {
-            background: #e3f2fd;
-            padding: 20px;
-            text-align: center;
-            border-radius: 10px;
+            font-size: 48px;
+            font-weight: bold;
+            color: #1976d2;
             margin: 20px 0;
         }
 
-        .current-value {
-            font-size: 32px;
-            font-weight: bold;
-            color: #1976d2;
-            margin-bottom: 5px;
+        .alert-high {
+            color: #c62828 !important;
+            animation: blink 1s infinite;
         }
 
-        .alert-zone {
-            background: #ffebee;
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.5; }
+        }
+
+        .alert-box {
+            background: #ffcdd2;
             color: #c62828;
             padding: 15px;
             border-radius: 10px;
-            margin: 10px 0;
-            text-align: center;
+            margin: 15px 0;
             font-weight: bold;
-            border: 2px solid #ef5350;
+            text-align: center;
+            border: 2px solid #f44336;
         }
 
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
+        .info-box {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
         }
 
-        .data-table th {
-            background: #667eea;
-            color: white;
-            padding: 12px;
-            text-align: left;
-        }
-
-        .data-table td {
-            padding: 10px;
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
             border-bottom: 1px solid #eee;
         }
 
-        .data-table tr:nth-child(even) {
-            background: #f8f9fa;
+        .data-row:last-child {
+            border-bottom: none;
         }
 
-        .stats-box {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
+        .time-stamp {
+            color: #666;
             font-size: 14px;
         }
 
-        .debug-box {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 10px 0;
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #dee2e6;
-            display: none;
+        .load-btn {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+
+        .test-btn {
+            background: #4caf50;
         }
         
         @media (max-width: 480px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .section {
-                padding: 15px;
-            }
-            
-            .header h1 {
-                font-size: 20px;
-            }
+            .container { padding: 10px; }
+            .section { padding: 15px; }
+            .current-level { font-size: 36px; }
         }
     </style>
 </head>
@@ -250,14 +203,14 @@
     
     <div class="container">
         <div class="status-bar">
-            📅 <span id="currentDate">Chargement...</span> | 📍 Lyon - Région Auvergne-Rhône-Alpes
+            📅 <script>document.write(new Date().toLocaleString('fr-FR'));</script> | 📍 Lyon - Région Auvergne-Rhône-Alpes
         </div>
         
-        <!-- Test de fonctionnement -->
+        <!-- Test JavaScript -->
         <div class="section">
             <h2>🧪 Test de Fonctionnement</h2>
-            <button onclick="alert('✅ JavaScript fonctionne parfaitement!')" class="btn" style="background: green;">
-                ✅ TEST: JavaScript Fonctionne
+            <button onclick="alert('✅ JavaScript fonctionne!')" class="btn" style="background: green;">
+                ✅ TEST JavaScript
             </button>
         </div>
         
@@ -265,363 +218,214 @@
         <div class="section">
             <h2>🚨 Déclaration d'Incident</h2>
             
-            <button class="btn emergency-button" style="width: 100%; padding: 20px; margin-bottom: 10px;" 
+            <button class="btn emergency-button" style="width: 100%; padding: 20px;" 
                     onclick="
                         var now = new Date();
-                        var incidentId = 'INC_' + now.getTime();
-                        var incidentDate = now.toLocaleDateString('fr-FR');
-                        var incidentTime = now.toLocaleTimeString('fr-FR');
-                        var gpsText = 'GPS en cours...';
-                        
-                        if (navigator.geolocation) {
-                            navigator.geolocation.getCurrentPosition(function(position) {
-                                gpsText = position.coords.latitude.toFixed(6) + ', ' + position.coords.longitude.toFixed(6);
-                                
-                                var rapport = '🚨 RAPPORT D\\'INCIDENT - PATROUILLE DES DIGUES\\n';
-                                rapport += '═══════════════════════════════════════════════\\n\\n';
-                                rapport += '📋 INFORMATIONS AUTOMATIQUES\\n';
-                                rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n';
-                                rapport += '• ID Incident: ' + incidentId + '\\n';
-                                rapport += '• Date: ' + incidentDate + '\\n';
-                                rapport += '• Heure: ' + incidentTime + '\\n';
-                                rapport += '• GPS: ' + gpsText + '\\n';
-                                rapport += '• Zone: Lyon - Région Auvergne-Rhône-Alpes\\n';
-                                rapport += '• Agent: Patrouilleur d\\'astreinte\\n\\n';
-                                rapport += '⚠️ DESCRIPTION DE L\\'INCIDENT\\n';
-                                rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n';
-                                rapport += '[À COMPLÉTER PAR LE PATROUILLEUR]\\n\\n';
-                                rapport += 'Type d\\'incident observé:\\n';
-                                rapport += '□ Fissure sur la digue\\n';
-                                rapport += '□ Infiltration d\\'eau\\n';
-                                rapport += '□ Affaissement du terrain\\n';
-                                rapport += '□ Autre: ________________________________\\n\\n';
-                                rapport += '📊 ÉVALUATION DU RISQUE\\n';
-                                rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━\\n';
-                                rapport += '□ FAIBLE  □ MOYEN  □ ÉLEVÉ  □ CRITIQUE\\n\\n';
-                                rapport += '📞 CONTACTS EFFECTUÉS\\n';
-                                rapport += '━━━━━━━━━━━━━━━━━━━━━━━\\n';
-                                rapport += '□ Responsable: ________________\\n';
-                                rapport += '□ Services techniques: ________\\n\\n';
-                                rapport += '✍️ SIGNATURE\\n';
-                                rapport += '━━━━━━━━━━━━━━━━\\n';
-                                rapport += 'Nom: _________________________\\n';
-                                rapport += 'Signature: ___________________\\n\\n';
-                                rapport += '═══════════════════════════════════════════════\\n';
-                                rapport += 'Rapport généré le: ' + now.toLocaleString('fr-FR');
-                                
-                                if (navigator.clipboard && navigator.clipboard.writeText) {
-                                    navigator.clipboard.writeText(rapport).then(function() {
-                                        alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + incidentId + '\\nDate: ' + incidentDate + '\\nHeure: ' + incidentTime + '\\nGPS: ' + gpsText + '\\n\\n📋 Rapport copié!\\nLe document va s\\'ouvrir. Collez avec Ctrl+V');
-                                        window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
-                                    }).catch(function() {
-                                        alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + incidentId + '\\nDate: ' + incidentDate + '\\nHeure: ' + incidentTime + '\\nGPS: ' + gpsText);
-                                        window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
-                                    });
-                                } else {
-                                    alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + incidentId + '\\nDate: ' + incidentDate + '\\nHeure: ' + incidentTime + '\\nGPS: ' + gpsText);
-                                    window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
-                                }
-                            }, function() {
-                                alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + incidentId + '\\nDate: ' + incidentDate + '\\nHeure: ' + incidentTime + '\\nGPS: Localisation non disponible');
-                                window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
-                            });
-                        } else {
-                            alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + incidentId + '\\nDate: ' + incidentDate + '\\nHeure: ' + incidentTime + '\\nGPS: Non supporté');
-                            window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
-                        }
+                        var id = 'INC_' + now.getTime();
+                        var date = now.toLocaleDateString('fr-FR');
+                        var time = now.toLocaleTimeString('fr-FR');
+                        alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + id + '\\nDate: ' + date + '\\nHeure: ' + time + '\\n\\nLe document va s\\'ouvrir...');
+                        window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
                     ">
                 🚨 DÉCLARATION INCIDENT 🚨
             </button>
-            
-            <div style="text-align: center; font-size: 12px; color: #666; margin-top: 5px;">
-                Enregistrement automatique : GPS + Date/Heure + Génération de rapport
-            </div>
         </div>
         
-        <!-- Section Monitoring avec graphique -->
+        <!-- Monitoring Eau SIMPLIFIÉ -->
         <div class="section">
-            <h2>📊 Monitoring Temps Réel</h2>
+            <h2>📊 Monitoring Station V300002001</h2>
             
-            <a href="https://www.vigicrues.gouv.fr/territoire/18?bbox=526039.7828146118%2C5728320.102674279%2C557457.0440850101%2C5759737.363944678#dynamic-map" class="btn btn-warning" target="_blank">
-                🌊 Site Vigicrues
+            <div class="water-level">
+                <h3>💧 Hauteur d'eau actuelle</h3>
+                
+                <div id="waterDisplay">
+                    <div class="current-level" id="currentLevel">--</div>
+                    <div class="time-stamp" id="lastUpdate">Cliquez pour charger les données</div>
+                </div>
+                
+                <div id="alertZone" style="display: none;"></div>
+                <div id="infoZone" style="display: none;"></div>
+                
+                <div id="dataHistory" style="text-align: left; margin-top: 20px;"></div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="load-btn" onclick="loadWaterData()">
+                        📡 Charger Données Réelles
+                    </button>
+                    <button class="load-btn test-btn" onclick="loadTestData()">
+                        🧪 Données Test
+                    </button>
+                </div>
+                
+                <div id="debugInfo" style="background: #f5f5f5; padding: 10px; margin-top: 15px; font-family: monospace; font-size: 12px; text-align: left; border-radius: 5px; display: none;">
+                </div>
+            </div>
+            
+            <!-- Liens externes -->
+            <a href="https://www.vigicrues.gouv.fr/territoire/18" class="btn btn-warning" target="_blank">
+                🌊 Site Vigicrues Officiel
             </a>
             
-            <div style="position: relative;">
-                <a href="https://superviseur.paratronic.com/" target="_blank" class="btn btn-warning" style="display: block; text-decoration: none;">
-                    🔧 Superviseur Paratronic
-                </a>
-                <div style="background: #e8f4fd; padding: 8px; border-radius: 5px; margin-top: 5px; font-size: 12px; color: #0c5460; text-align: center;">
-                    Identifiants: <strong>gemapilyon</strong> / Mot de passe: <strong>lyon</strong>
-                </div>
-            </div>
-            
-            <!-- Graphique Station V300002001 -->
-            <div class="chart-container">
-                <h3 style="color: #2c3e50; margin-bottom: 15px;">📈 Station V300002001 - Hauteur d'eau</h3>
-                
-                <div id="loadingChart" style="text-align: center; padding: 40px; color: #666;">
-                    🔄 Chargement des données...
-                </div>
-                
-                <div id="errorChart" style="display: none; background: #ffebee; color: #d32f2f; padding: 15px; border-radius: 5px; margin: 10px 0;">
-                </div>
-                
-                <div id="alertChart" class="alert-zone" style="display: none;">
-                </div>
-                
-                <div id="chartDisplay" style="display: none;">
-                    <div id="currentLevel" class="current-level">
-                        <div id="currentValue" class="current-value">--</div>
-                        <div>Dernière mesure</div>
-                    </div>
-                    
-                    <table id="dataTable" class="data-table">
-                        <thead>
-                            <tr>
-                                <th>📅 Date/Heure</th>
-                                <th>💧 Hauteur (cm)</th>
-                                <th>📊 État</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                        </tbody>
-                    </table>
-                    
-                    <div id="statsBox" class="stats-box"></div>
-                </div>
-                
-                <div style="margin-top: 15px;">
-                    <button onclick="loadChartData()" class="btn" style="background: #3498db;">
-                        🔄 Actualiser les données
-                    </button>
-                    <button onclick="toggleChartDebug()" class="btn" style="background: #95a5a6;">
-                        🔧 Debug
-                    </button>
-                    <button onclick="loadTestChart()" class="btn" style="background: #27ae60;">
-                        🧪 Données test
-                    </button>
-                </div>
-                
-                <div id="debugChart" class="debug-box"></div>
-            </div>
+            <a href="https://superviseur.paratronic.com/" target="_blank" class="btn btn-warning">
+                🔧 Superviseur Paratronic (gemapilyon/lyon)
+            </a>
         </div>
         
-        <!-- Section Itinéraires -->
+        <!-- Itinéraires -->
         <div class="section">
-            <h2>🗺️ Itinéraires Préétablis</h2>
+            <h2>🗺️ Itinéraires</h2>
             <a href="https://www.google.com/maps/d/edit?mid=1Ss3l_BWgc8yQB2TRXtMxFobuIlsA9PU&usp=drive_link" class="btn" target="_blank">
                 📍 Itinéraire 1: Triangle → Parking des Saules
             </a>
             <a href="https://www.google.com/maps/d/edit?mid=1FXGfXu9ZXQ6v0BT7j1ganR-BI1smD2E&usp=sharing" class="btn" target="_blank">
-                📍 Itinéraire 2: Parking des Saules → Rue Louis Duclos
-            </a>
-            <a href="https://www.google.com/maps/d/edit?mid=1-jG504darrlvK7GmD9JHe41UyJSwP7s&usp=sharing" class="btn" target="_blank">
-                📍 Itinéraire 3: Rue Duclos → Rue du Canal
+                📍 Itinéraire 2: Parking des Saules → Rue Duclos
             </a>
         </div>
         
-        <!-- Section Formulaires -->
+        <!-- Formulaires -->
         <div class="section">
-            <h2>📋 Formulaires de Visite</h2>
-            <a href="https://docs.google.com/spreadsheets/d/1wV50ZsyoDJhcf5Lja5rl1S9TxsOauadMHmyo9slFQGs/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
-                💧 Formulaire "Visite des Eaux Bleues"
-            </a>
-            <a href="https://docs.google.com/spreadsheets/d/1Tsigd9S-qpZfZDQUeLgkA7RIWOTEeDww-NVUIempBMU/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
-                🏗️ Formulaire "Visite Digue Duclos"
+            <h2>📋 Formulaires</h2>
+            <a href="https://docs.google.com/spreadsheets/d/1wV50ZsyoDJhcf5Lja5rl1S9TxsOauadMHmyo9slFQGs/edit" class="btn btn-secondary" target="_blank">
+                💧 Visite des Eaux Bleues
             </a>
             <a href="https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit" class="btn btn-warning" target="_blank">
                 📝 Rapport d'Incident
             </a>
         </div>
-        
-        <!-- Section Documents -->
-        <div class="section">
-            <h2>📚 Documents & Planning</h2>
-            <a href="https://drive.google.com/drive/folders/1deKB9iZ3gYfjndRiJY3Dyod8UQw3kzTA" class="btn btn-success" target="_blank">
-                📄 Documents d'Astreinte
-            </a>
-            <a href="https://docs.google.com/spreadsheets/d/1EcmynZSukPIcAvIW_0W6caUiHGLPUTSP/edit?gid=1203425479#gid=1203425479" class="btn btn-success" target="_blank">
-                📅 Planning d'Astreinte
-            </a>
-        </div>
     </div>
 
-    <!-- Script propre et complet -->
+    <!-- JavaScript ULTRA SIMPLE -->
     <script>
-        // Variables globales pour le graphique
-        var chartData = [];
-        var alertThreshold = 1.60; // 160cm
-        var debugMode = false;
-        
-        // Fonctions utilitaires
-        function updateCurrentDate() {
-            var now = new Date();
-            var dateElement = document.getElementById('currentDate');
-            if (dateElement) {
-                dateElement.innerHTML = now.toLocaleString('fr-FR');
+        function debug(msg) {
+            var d = document.getElementById('debugInfo');
+            if (d) {
+                d.style.display = 'block';
+                d.innerHTML += new Date().toLocaleTimeString() + ': ' + msg + '\n';
             }
+            console.log(msg);
         }
         
-        function chartLog(message) {
-            var now = new Date().toLocaleTimeString();
-            var debugDiv = document.getElementById('debugChart');
-            if (debugDiv) {
-                debugDiv.innerHTML += '[' + now + '] ' + message + '\n';
-                debugDiv.scrollTop = debugDiv.scrollHeight;
-            }
-            console.log('[CHART] ' + message);
-        }
-        
-        function showChartError(message) {
-            var errorDiv = document.getElementById('errorChart');
-            errorDiv.innerHTML = '❌ ' + message;
-            errorDiv.style.display = 'block';
-            chartLog('ERREUR: ' + message);
-        }
-        
-        function toggleChartDebug() {
-            debugMode = !debugMode;
-            var debugDiv = document.getElementById('debugChart');
-            debugDiv.style.display = debugMode ? 'block' : 'none';
-        }
-        
-        // Chargement des données test
-        function loadTestChart() {
-            chartLog('🧪 Chargement des données de test');
+        function showLevel(value, date, isAlert) {
+            var levelDiv = document.getElementById('currentLevel');
+            var updateDiv = document.getElementById('lastUpdate');
+            var alertDiv = document.getElementById('alertZone');
+            var infoDiv = document.getElementById('infoZone');
             
-            chartData = [
-                { date: new Date(), value: 1.65, station: 'V300002001' }, // Alerte
-                { date: new Date(Date.now() - 1800000), value: 1.58, station: 'V300002001' },
-                { date: new Date(Date.now() - 3600000), value: 1.52, station: 'V300002001' },
-                { date: new Date(Date.now() - 5400000), value: 1.48, station: 'V300002001' },
-                { date: new Date(Date.now() - 7200000), value: 1.45, station: 'V300002001' },
-                { date: new Date(Date.now() - 9000000), value: 1.42, station: 'V300002001' },
-                { date: new Date(Date.now() - 10800000), value: 1.40, station: 'V300002001' }
+            levelDiv.innerHTML = value + ' cm';
+            updateDiv.innerHTML = 'Dernière mesure: ' + date;
+            
+            if (isAlert) {
+                levelDiv.className = 'current-level alert-high';
+                alertDiv.innerHTML = '🚨 ALERTE: Seuil de 160cm dépassé!';
+                alertDiv.className = 'alert-box';
+                alertDiv.style.display = 'block';
+                infoDiv.style.display = 'none';
+            } else {
+                levelDiv.className = 'current-level';
+                alertDiv.style.display = 'none';
+                infoDiv.innerHTML = '✅ Niveau normal - Surveillance continue';
+                infoDiv.className = 'info-box';
+                infoDiv.style.display = 'block';
+            }
+        }
+        
+        function showHistory(data) {
+            var historyDiv = document.getElementById('dataHistory');
+            var html = '<h4>📈 Historique récent:</h4>';
+            
+            for (var i = 0; i < Math.min(5, data.length); i++) {
+                var item = data[i];
+                var status = item.value > 160 ? '🚨' : '✅';
+                html += '<div class="data-row">';
+                html += '<span>' + status + ' ' + item.value + ' cm</span>';
+                html += '<span class="time-stamp">' + item.time + '</span>';
+                html += '</div>';
+            }
+            
+            historyDiv.innerHTML = html;
+        }
+        
+        function loadTestData() {
+            debug('Chargement données test');
+            
+            var testData = [
+                {value: 165.2, time: new Date().toLocaleString('fr-FR')},
+                {value: 158.1, time: new Date(Date.now() - 3600000).toLocaleString('fr-FR')},
+                {value: 152.8, time: new Date(Date.now() - 7200000).toLocaleString('fr-FR')},
+                {value: 148.5, time: new Date(Date.now() - 10800000).toLocaleString('fr-FR')},
+                {value: 145.2, time: new Date(Date.now() - 14400000).toLocaleString('fr-FR')}
             ];
             
-            chartLog('✅ ' + chartData.length + ' points de test générés');
-            displayChart();
+            var latest = testData[0];
+            showLevel(latest.value, latest.time, latest.value > 160);
+            showHistory(testData);
+            
+            debug('Données test affichées: ' + testData.length + ' points');
         }
         
-        // Chargement des données réelles
-        function loadChartData() {
-            chartLog('📡 Début du chargement des données API');
+        function loadWaterData() {
+            debug('Début chargement API Hub\'Eau');
             
-            // Reset de l'affichage
-            document.getElementById('loadingChart').style.display = 'block';
-            document.getElementById('errorChart').style.display = 'none';
-            document.getElementById('alertChart').style.display = 'none';
-            document.getElementById('chartDisplay').style.display = 'none';
+            var levelDiv = document.getElementById('currentLevel');
+            var updateDiv = document.getElementById('lastUpdate');
             
-            var apiUrl = 'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=50';
-            chartLog('🔗 URL API: ' + apiUrl);
+            levelDiv.innerHTML = '🔄';
+            updateDiv.innerHTML = 'Chargement en cours...';
+            
+            var apiUrl = 'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=10';
             
             fetch(apiUrl)
                 .then(function(response) {
-                    chartLog('📡 Réponse: ' + response.status + ' ' + response.statusText);
+                    debug('Réponse API: ' + response.status);
                     if (response.status === 200 || response.status === 206) {
                         return response.json();
                     }
-                    throw new Error('HTTP ' + response.status);
+                    throw new Error('Erreur HTTP ' + response.status);
                 })
                 .then(function(data) {
-                    chartLog('✅ JSON parsé avec succès');
-                    chartLog('📊 Structure: count=' + data.count + ', data.length=' + (data.data ? data.data.length : 0));
+                    debug('Données reçues: ' + (data.data ? data.data.length : 0) + ' points');
                     
-                    if (!data.data || !Array.isArray(data.data)) {
-                        throw new Error('Pas de tableau data.data dans la réponse');
+                    if (!data.data || data.data.length === 0) {
+                        throw new Error('Pas de données');
                     }
                     
-                    if (data.data.length === 0) {
-                        throw new Error('Tableau data.data vide');
-                    }
-                    
-                    // Traitement des données
-                    chartData = [];
+                    var processedData = [];
                     for (var i = 0; i < data.data.length; i++) {
                         var item = data.data[i];
+                        var value = parseFloat(item.resultat_obs || item.resultat_observation);
+                        var date = item.date_obs || item.date_observation;
                         
-                        var dateField = item.date_obs || item.date_observation;
-                        var valueField = item.resultat_obs || item.resultat_observation;
-                        
-                        if (dateField && valueField !== undefined && valueField !== null) {
-                            var dateObj = new Date(dateField);
-                            var valueNum = parseFloat(valueField);
-                            
-                            if (!isNaN(dateObj.getTime()) && !isNaN(valueNum) && valueNum > 0) {
-                                chartData.push({
-                                    date: dateObj,
-                                    value: valueNum,
-                                    station: 'V300002001'
-                                });
-                            }
+                        if (!isNaN(value) && date) {
+                            processedData.push({
+                                value: (value * 100).toFixed(1),
+                                time: new Date(date).toLocaleString('fr-FR')
+                            });
                         }
                     }
                     
-                    chartLog('📈 Données traitées: ' + chartData.length + ' points valides');
-                    
-                    if (chartData.length === 0) {
-                        throw new Error('Aucune donnée valide après traitement');
+                    if (processedData.length > 0) {
+                        var latest = processedData[0];
+                        showLevel(latest.value, latest.time, parseFloat(latest.value) > 160);
+                        showHistory(processedData);
+                        debug('Affichage terminé: ' + processedData.length + ' points');
+                    } else {
+                        throw new Error('Aucune donnée valide');
                     }
-                    
-                    // Trier par date (plus récent en premier)
-                    chartData.sort(function(a, b) { return b.date - a.date; });
-                    
-                    displayChart();
                 })
                 .catch(function(error) {
-                    chartLog('❌ Erreur: ' + error.message);
-                    showChartError('Erreur de chargement: ' + error.message + '. Cliquez sur "Données test" pour voir un exemple.');
+                    debug('Erreur: ' + error.message);
+                    levelDiv.innerHTML = '❌';
+                    updateDiv.innerHTML = 'Erreur: ' + error.message;
+                    
+                    setTimeout(function() {
+                        if (confirm('Erreur de chargement. Charger des données de test?')) {
+                            loadTestData();
+                        }
+                    }, 2000);
                 });
         }
         
-        // Affichage du graphique
-        function displayChart() {
-            chartLog('📊 Affichage du graphique avec ' + chartData.length + ' points');
-            
-            document.getElementById('loadingChart').style.display = 'none';
-            document.getElementById('chartDisplay').style.display = 'block';
-            
-            // Valeur actuelle (plus récente)
-            var latest = chartData[0];
-            var heightCm = (latest.value * 100).toFixed(1);
-            var currentValueDiv = document.getElementById('currentValue');
-            currentValueDiv.innerHTML = heightCm + ' cm';
-            
-            // Vérification du seuil d'alerte
-            if (latest.value > alertThreshold) {
-                currentValueDiv.style.color = '#c62828';
-                document.getElementById('alertChart').innerHTML = '🚨 ALERTE: Seuil de 160cm dépassé! Niveau actuel: ' + heightCm + 'cm';
-                document.getElementById('alertChart').style.display = 'block';
-                chartLog('🚨 ALERTE: Seuil dépassé (' + heightCm + 'cm)');
-            } else {
-                currentValueDiv.style.color = '#1976d2';
-                document.getElementById('alertChart').style.display = 'none';
-            }
-            
-            // Tableau des données
-            var tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
-            
-            var displayCount = Math.min(10, chartData.length);
-            for (var i = 0; i < displayCount; i++) {
-                var item = chartData[i];
-                var row = tableBody.insertRow();
-                
-                // Date
-                var dateCell = row.insertCell(0);
-                dateCell.innerHTML = item.date.toLocaleString('fr-FR');
-                
-                // Valeur
-                var valueCell = row.insertCell(1);
-                var valueCm = (item.value * 100).toFixed(1);
-                valueCell.innerHTML = valueCm;
-                valueCell.style.fontWeight = 'bold';
-                
-                // État
-                var statusCell = row.insertCell(2);
-                if (item.value > alertThreshold) {
-                    valueCell.style.color = '#c62828';
-                    statusCell.innerHTML = '🚨 ALERTE';
-                    statusCell.style.color = '#c62828';
-                    statusCell.style.fontWeight =
+        debug('Application initialisée');
+    </script>
+</body>
+</html>
