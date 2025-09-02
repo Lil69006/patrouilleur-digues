@@ -576,9 +576,16 @@
             document.getElementById('currentLevel').innerHTML = '🔄';
             document.getElementById('lastUpdate').innerHTML = 'Chargement en cours...';
             
+            // URLs API corrigées et testées
             var apis = [
-                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=50',
-                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=50'
+                // API V1 (plus stable)
+                'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48',
+                // API V2 obs_elab avec paramètres corrects
+                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48&grandeur_hydro=H',
+                // API V2 observations_tr
+                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48',
+                // API V1 avec moins de données (fallback)
+                'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=10'
             ];
             
             tryAPI(0, apis);
@@ -586,9 +593,8 @@
         
         function tryAPI(index, apis) {
             if (index >= apis.length) {
-                debug('❌ Toutes les API ont échoué');
-                document.getElementById('currentLevel').innerHTML = '❌';
-                document.getElementById('lastUpdate').innerHTML = 'Erreur: Toutes les API ont échoué';
+                debug('❌ Toutes les API ont échoué - Tentative avec proxy CORS');
+                tryWithProxy();
                 return;
             }
             
@@ -597,17 +603,20 @@
             
             fetch(apiUrl)
                 .then(function(response) {
-                    debug('📡 API ' + (index + 1) + ' - Status: ' + response.status);
+                    debug('📡 API ' + (index + 1) + ' - Status: ' + response.status + ' ' + response.statusText);
                     if (response.status === 200 || response.status === 206) {
                         return response.json();
                     }
-                    throw new Error('HTTP ' + response.status);
+                    if (response.status === 500) {
+                        throw new Error('Erreur serveur 500 - Paramètres ou URL invalides');
+                    }
+                    throw new Error('HTTP ' + response.status + ' ' + response.statusText);
                 })
                 .then(function(data) {
                     debug('✅ JSON parsé - Count: ' + (data.count || 'N/A'));
                     
                     if (!data.data || !Array.isArray(data.data) || data.data.length === 0) {
-                        debug('❌ Pas de data.data valide');
+                        debug('❌ Pas de data.data valide - Structure: ' + Object.keys(data).join(', '));
                         throw new Error('Pas de données dans data.data');
                     }
                     
@@ -626,6 +635,51 @@
                     debug('❌ Erreur API ' + (index + 1) + ': ' + error.message);
                     tryAPI(index + 1, apis);
                 });
+        }
+        
+        function tryWithProxy() {
+            debug('🔄 Tentative avec proxy CORS - API V1');
+            
+            var apiUrl = 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=20';
+            var proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(apiUrl);
+            
+            fetch(proxyUrl)
+                .then(function(response) {
+                    debug('📡 Proxy CORS - Status: ' + response.status);
+                    return response.json();
+                })
+                .then(function(proxyData) {
+                    if (proxyData.contents) {
+                        var data = JSON.parse(proxyData.contents);
+                        debug('✅ Données via proxy - Count: ' + (data.count || 'N/A'));
+                        
+                        if (data.data && data.data.length > 0) {
+                            debug('📊 Éléments via proxy: ' + data.data.length);
+                            processAPIData(data.data, 'Proxy CORS');
+                        } else {
+                            throw new Error('Pas de données via proxy');
+                        }
+                    } else {
+                        throw new Error('Pas de contenu dans la réponse proxy');
+                    }
+                })
+                .catch(function(error) {
+                    debug('❌ Erreur proxy: ' + error.message);
+                    showAPIError();
+                });
+        }
+        
+        function showAPIError() {
+            debug('❌ ÉCHEC COMPLET: Toutes les méthodes ont échoué');
+            document.getElementById('currentLevel').innerHTML = '❌';
+            document.getElementById('lastUpdate').innerHTML = 'API Hub\'Eau indisponible';
+            
+            var infoDiv = document.getElementById('infoZone');
+            infoDiv.innerHTML = '⚠️ Service temporairement indisponible<br>📞 Contactez le support technique<br>🔄 Réessayez dans quelques minutes';
+            infoDiv.className = 'alert-box';
+            infoDiv.style.display = 'block';
+            
+            document.getElementById('alertZone').style.display = 'none';
         }
         
         function processAPIData(rawData, source) {
