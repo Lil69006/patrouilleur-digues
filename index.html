@@ -3,115 +3,609 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Graphique Simple</title>
+    <title>Patrouilleur des Digues</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
-        .container { background: white; padding: 20px; border-radius: 10px; margin: 20px 0; }
-        .btn { background: #3498db; color: white; padding: 15px 25px; border: none; border-radius: 5px; cursor: pointer; margin: 10px 5px; }
-        .current-level { background: #e3f2fd; padding: 20px; text-align: center; border-radius: 10px; margin: 20px 0; }
-        .current-value { font-size: 28px; font-weight: bold; color: #1976d2; }
-        .alert { background: #ffebee; color: #c62828; padding: 15px; border-radius: 5px; margin: 10px 0; text-align: center; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th { background: #667eea; color: white; padding: 12px; text-align: left; }
-        td { padding: 10px; border-bottom: 1px solid #eee; }
-        tr:nth-child(even) { background: #f8f9fa; }
-        .debug { background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 12px; margin: 10px 0; max-height: 300px; overflow-y: auto; border: 1px solid #ddd; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .container {
+            padding: 20px;
+            max-width: 100%;
+        }
+        
+        .section {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            display: block;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #00b894, #00cec9);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(45deg, #fdcb6e, #e17055);
+        }
+        
+        .emergency-button {
+            background: linear-gradient(45deg, #e74c3c, #c0392b) !important;
+            color: white;
+            border: 3px solid #fff;
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 40px rgba(231, 76, 60, 0.3);
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulse-red 2s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .emergency-button:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4), 0 0 60px rgba(231, 76, 60, 0.5) !important;
+        }
+        
+        .emergency-button::before {
+            content: '🚨';
+            position: absolute;
+            left: 10px;
+            font-size: 20px;
+            animation: rotate 2s linear infinite;
+        }
+        
+        .emergency-button::after {
+            content: '🚨';
+            position: absolute;
+            right: 10px;
+            font-size: 20px;
+            animation: rotate 2s linear infinite reverse;
+        }
+        
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 40px rgba(231, 76, 60, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(231, 76, 60, 0.8), 0 0 60px rgba(231, 76, 60, 0.6);
+            }
+            100% {
+                box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 40px rgba(231, 76, 60, 0.3);
+            }
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-bar {
+            background: rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* Styles pour le graphique */
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .current-level {
+            background: #e3f2fd;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .current-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 5px;
+        }
+
+        .alert-zone {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+            border: 2px solid #ef5350;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .data-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .data-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .stats-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        .debug-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            display: none;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .section {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>🧪 Test Simple - Graphique Hauteur d'Eau</h1>
+    <div class="header">
+        <h1>🚨 Patrouilleur des Digues</h1>
+    </div>
     
     <div class="container">
-        <h2>📊 Station V300002001</h2>
-        
-        <button onclick="loadRealData()" class="btn">📡 Charger Données Réelles</button>
-        <button onclick="loadTestData()" class="btn">🧪 Charger Données Test</button>
-        <button onclick="toggleDebug()" class="btn">🔧 Debug</button>
-        
-        <div id="debug" class="debug" style="display: none;"></div>
-        
-        <div id="loading" style="text-align: center; padding: 20px; color: #666;">
-            Cliquez sur un bouton pour charger des données
+        <div class="status-bar">
+            📅 <span id="currentDate">Chargement...</span> | 📍 Lyon - Région Auvergne-Rhône-Alpes
         </div>
         
-        <div id="alert" class="alert" style="display: none;"></div>
-        
-        <div id="currentLevel" class="current-level" style="display: none;">
-            <div class="current-value" id="currentValue">--</div>
-            <div>Dernière mesure</div>
+        <!-- Test de fonctionnement -->
+        <div class="section">
+            <h2>🧪 Test de Fonctionnement</h2>
+            <button onclick="alert('✅ JavaScript fonctionne parfaitement!')" class="btn" style="background: green;">
+                ✅ TEST: JavaScript Fonctionne
+            </button>
         </div>
         
-        <div id="dataTable" style="display: none;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>📅 Date/Heure</th>
-                        <th>💧 Hauteur (cm)</th>
-                        <th>📊 État</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                </tbody>
-            </table>
+        <!-- Bouton d'urgence -->
+        <div class="section">
+            <h2>🚨 Déclaration d'Incident</h2>
+            
+            <button class="btn emergency-button" style="width: 100%; padding: 20px; margin-bottom: 10px;" 
+                    onclick="
+                        var now = new Date();
+                        var incidentId = 'INC_' + now.getTime();
+                        var incidentDate = now.toLocaleDateString('fr-FR');
+                        var incidentTime = now.toLocaleTimeString('fr-FR');
+                        var gpsText = 'GPS en cours...';
+                        
+                        if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(function(position) {
+                                gpsText = position.coords.latitude.toFixed(6) + ', ' + position.coords.longitude.toFixed(6);
+                                
+                                var rapport = '🚨 RAPPORT D\\'INCIDENT - PATROUILLE DES DIGUES\\n';
+                                rapport += '═══════════════════════════════════════════════\\n\\n';
+                                rapport += '📋 INFORMATIONS AUTOMATIQUES\\n';
+                                rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n';
+                                rapport += '• ID Incident: ' + incidentId + '\\n';
+                                rapport += '• Date: ' + incidentDate + '\\n';
+                                rapport += '• Heure: ' + incidentTime + '\\n';
+                                rapport += '• GPS: ' + gpsText + '\\n';
+                                rapport += '• Zone: Lyon - Région Auvergne-Rhône-Alpes\\n';
+                                rapport += '• Agent: Patrouilleur d\\'astreinte\\n\\n';
+                                rapport += '⚠️ DESCRIPTION DE L\\'INCIDENT\\n';
+                                rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n';
+                                rapport += '[À COMPLÉTER PAR LE PATROUILLEUR]\\n\\n';
+                                rapport += 'Type d\\'incident observé:\\n';
+                                rapport += '□ Fissure sur la digue\\n';
+                                rapport += '□ Infiltration d\\'eau\\n';
+                                rapport += '□ Affaissement du terrain\\n';
+                                rapport += '□ Autre: ________________________________\\n\\n';
+                                rapport += '📊 ÉVALUATION DU RISQUE\\n';
+                                rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━\\n';
+                                rapport += '□ FAIBLE  □ MOYEN  □ ÉLEVÉ  □ CRITIQUE\\n\\n';
+                                rapport += '📞 CONTACTS EFFECTUÉS\\n';
+                                rapport += '━━━━━━━━━━━━━━━━━━━━━━━\\n';
+                                rapport += '□ Responsable: ________________\\n';
+                                rapport += '□ Services techniques: ________\\n\\n';
+                                rapport += '✍️ SIGNATURE\\n';
+                                rapport += '━━━━━━━━━━━━━━━━\\n';
+                                rapport += 'Nom: _________________________\\n';
+                                rapport += 'Signature: ___________________\\n\\n';
+                                rapport += '═══════════════════════════════════════════════\\n';
+                                rapport += 'Rapport généré le: ' + now.toLocaleString('fr-FR');
+                                
+                                if (navigator.clipboard && navigator.clipboard.writeText) {
+                                    navigator.clipboard.writeText(rapport).then(function() {
+                                        alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + incidentId + '\\nDate: ' + incidentDate + '\\nHeure: ' + incidentTime + '\\nGPS: ' + gpsText + '\\n\\n📋 Rapport copié!\\nLe document va s\\'ouvrir. Collez avec Ctrl+V');
+                                        window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
+                                    }).catch(function() {
+                                        alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + incidentId + '\\nDate: ' + incidentDate + '\\nHeure: ' + incidentTime + '\\nGPS: ' + gpsText);
+                                        window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
+                                    });
+                                } else {
+                                    alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + incidentId + '\\nDate: ' + incidentDate + '\\nHeure: ' + incidentTime + '\\nGPS: ' + gpsText);
+                                    window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
+                                }
+                            }, function() {
+                                alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + incidentId + '\\nDate: ' + incidentDate + '\\nHeure: ' + incidentTime + '\\nGPS: Localisation non disponible');
+                                window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
+                            });
+                        } else {
+                            alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + incidentId + '\\nDate: ' + incidentDate + '\\nHeure: ' + incidentTime + '\\nGPS: Non supporté');
+                            window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
+                        }
+                    ">
+                🚨 DÉCLARATION INCIDENT 🚨
+            </button>
+            
+            <div style="text-align: center; font-size: 12px; color: #666; margin-top: 5px;">
+                Enregistrement automatique : GPS + Date/Heure + Génération de rapport
+            </div>
         </div>
         
-        <div id="stats" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;"></div>
+        <!-- Section Monitoring avec graphique -->
+        <div class="section">
+            <h2>📊 Monitoring Temps Réel</h2>
+            
+            <a href="https://www.vigicrues.gouv.fr/territoire/18?bbox=526039.7828146118%2C5728320.102674279%2C557457.0440850101%2C5759737.363944678#dynamic-map" class="btn btn-warning" target="_blank">
+                🌊 Site Vigicrues
+            </a>
+            
+            <div style="position: relative;">
+                <a href="https://superviseur.paratronic.com/" target="_blank" class="btn btn-warning" style="display: block; text-decoration: none;">
+                    🔧 Superviseur Paratronic
+                </a>
+                <div style="background: #e8f4fd; padding: 8px; border-radius: 5px; margin-top: 5px; font-size: 12px; color: #0c5460; text-align: center;">
+                    Identifiants: <strong>gemapilyon</strong> / Mot de passe: <strong>lyon</strong>
+                </div>
+            </div>
+            
+            <!-- Graphique Station V300002001 -->
+            <div class="chart-container">
+                <h3 style="color: #2c3e50; margin-bottom: 15px;">📈 Station V300002001 - Hauteur d'eau</h3>
+                
+                <div id="loadingChart" style="text-align: center; padding: 40px; color: #666;">
+                    🔄 Chargement des données...
+                </div>
+                
+                <div id="errorChart" style="display: none; background: #ffebee; color: #d32f2f; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                </div>
+                
+                <div id="alertChart" class="alert-zone" style="display: none;">
+                </div>
+                
+                <div id="chartDisplay" style="display: none;">
+                    <div id="currentLevel" class="current-level">
+                        <div id="currentValue" class="current-value">--</div>
+                        <div>Dernière mesure</div>
+                    </div>
+                    
+                    <table id="dataTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>📅 Date/Heure</th>
+                                <th>💧 Hauteur (cm)</th>
+                                <th>📊 État</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                    
+                    <div id="statsBox" class="stats-box"></div>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <button onclick="loadChartData()" class="btn" style="background: #3498db;">
+                        🔄 Actualiser les données
+                    </button>
+                    <button onclick="toggleChartDebug()" class="btn" style="background: #95a5a6;">
+                        🔧 Debug
+                    </button>
+                    <button onclick="loadTestChart()" class="btn" style="background: #27ae60;">
+                        🧪 Données test
+                    </button>
+                </div>
+                
+                <div id="debugChart" class="debug-box"></div>
+            </div>
+        </div>
+        
+        <!-- Section Itinéraires -->
+        <div class="section">
+            <h2>🗺️ Itinéraires Préétablis</h2>
+            <a href="https://www.google.com/maps/d/edit?mid=1Ss3l_BWgc8yQB2TRXtMxFobuIlsA9PU&usp=drive_link" class="btn" target="_blank">
+                📍 Itinéraire 1: Triangle → Parking des Saules
+            </a>
+            <a href="https://www.google.com/maps/d/edit?mid=1FXGfXu9ZXQ6v0BT7j1ganR-BI1smD2E&usp=sharing" class="btn" target="_blank">
+                📍 Itinéraire 2: Parking des Saules → Rue Louis Duclos
+            </a>
+            <a href="https://www.google.com/maps/d/edit?mid=1-jG504darrlvK7GmD9JHe41UyJSwP7s&usp=sharing" class="btn" target="_blank">
+                📍 Itinéraire 3: Rue Duclos → Rue du Canal
+            </a>
+        </div>
+        
+        <!-- Section Formulaires -->
+        <div class="section">
+            <h2>📋 Formulaires de Visite</h2>
+            <a href="https://docs.google.com/spreadsheets/d/1wV50ZsyoDJhcf5Lja5rl1S9TxsOauadMHmyo9slFQGs/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
+                💧 Formulaire "Visite des Eaux Bleues"
+            </a>
+            <a href="https://docs.google.com/spreadsheets/d/1Tsigd9S-qpZfZDQUeLgkA7RIWOTEeDww-NVUIempBMU/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
+                🏗️ Formulaire "Visite Digue Duclos"
+            </a>
+            <a href="https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit" class="btn btn-warning" target="_blank">
+                📝 Rapport d'Incident
+            </a>
+        </div>
+        
+        <!-- Section Documents -->
+        <div class="section">
+            <h2>📚 Documents & Planning</h2>
+            <a href="https://drive.google.com/drive/folders/1deKB9iZ3gYfjndRiJY3Dyod8UQw3kzTA" class="btn btn-success" target="_blank">
+                📄 Documents d'Astreinte
+            </a>
+            <a href="https://docs.google.com/spreadsheets/d/1EcmynZSukPIcAvIW_0W6caUiHGLPUTSP/edit?gid=1203425479#gid=1203425479" class="btn btn-success" target="_blank">
+                📅 Planning d'Astreinte
+            </a>
+        </div>
     </div>
 
+    <!-- Script propre et complet -->
     <script>
-        var debugMode = false;
+        // Variables globales pour le graphique
+        var chartData = [];
         var alertThreshold = 1.60; // 160cm
+        var debugMode = false;
         
-        function log(message) {
+        // Fonctions utilitaires
+        function updateCurrentDate() {
+            var now = new Date();
+            var dateElement = document.getElementById('currentDate');
+            if (dateElement) {
+                dateElement.innerHTML = now.toLocaleString('fr-FR');
+            }
+        }
+        
+        function chartLog(message) {
             var now = new Date().toLocaleTimeString();
-            var debugDiv = document.getElementById('debug');
-            debugDiv.innerHTML += '[' + now + '] ' + message + '\n';
-            debugDiv.scrollTop = debugDiv.scrollHeight;
-            console.log('[LOG] ' + message);
+            var debugDiv = document.getElementById('debugChart');
+            if (debugDiv) {
+                debugDiv.innerHTML += '[' + now + '] ' + message + '\n';
+                debugDiv.scrollTop = debugDiv.scrollHeight;
+            }
+            console.log('[CHART] ' + message);
         }
         
-        function toggleDebug() {
+        function showChartError(message) {
+            var errorDiv = document.getElementById('errorChart');
+            errorDiv.innerHTML = '❌ ' + message;
+            errorDiv.style.display = 'block';
+            chartLog('ERREUR: ' + message);
+        }
+        
+        function toggleChartDebug() {
             debugMode = !debugMode;
-            document.getElementById('debug').style.display = debugMode ? 'block' : 'none';
+            var debugDiv = document.getElementById('debugChart');
+            debugDiv.style.display = debugMode ? 'block' : 'none';
         }
         
-        function showData(data) {
-            log('📊 Affichage de ' + data.length + ' points');
+        // Chargement des données test
+        function loadTestChart() {
+            chartLog('🧪 Chargement des données de test');
             
-            document.getElementById('loading').style.display = 'none';
+            chartData = [
+                { date: new Date(), value: 1.65, station: 'V300002001' }, // Alerte
+                { date: new Date(Date.now() - 1800000), value: 1.58, station: 'V300002001' },
+                { date: new Date(Date.now() - 3600000), value: 1.52, station: 'V300002001' },
+                { date: new Date(Date.now() - 5400000), value: 1.48, station: 'V300002001' },
+                { date: new Date(Date.now() - 7200000), value: 1.45, station: 'V300002001' },
+                { date: new Date(Date.now() - 9000000), value: 1.42, station: 'V300002001' },
+                { date: new Date(Date.now() - 10800000), value: 1.40, station: 'V300002001' }
+            ];
             
-            if (data.length === 0) {
-                log('❌ Aucune donnée à afficher');
-                return;
-            }
+            chartLog('✅ ' + chartData.length + ' points de test générés');
+            displayChart();
+        }
+        
+        // Chargement des données réelles
+        function loadChartData() {
+            chartLog('📡 Début du chargement des données API');
             
-            // Trier par date (plus récent en premier)
-            data.sort(function(a, b) { return b.date - a.date; });
+            // Reset de l'affichage
+            document.getElementById('loadingChart').style.display = 'block';
+            document.getElementById('errorChart').style.display = 'none';
+            document.getElementById('alertChart').style.display = 'none';
+            document.getElementById('chartDisplay').style.display = 'none';
             
-            // Valeur actuelle
-            var latest = data[0];
+            var apiUrl = 'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=50';
+            chartLog('🔗 URL API: ' + apiUrl);
+            
+            fetch(apiUrl)
+                .then(function(response) {
+                    chartLog('📡 Réponse: ' + response.status + ' ' + response.statusText);
+                    if (response.status === 200 || response.status === 206) {
+                        return response.json();
+                    }
+                    throw new Error('HTTP ' + response.status);
+                })
+                .then(function(data) {
+                    chartLog('✅ JSON parsé avec succès');
+                    chartLog('📊 Structure: count=' + data.count + ', data.length=' + (data.data ? data.data.length : 0));
+                    
+                    if (!data.data || !Array.isArray(data.data)) {
+                        throw new Error('Pas de tableau data.data dans la réponse');
+                    }
+                    
+                    if (data.data.length === 0) {
+                        throw new Error('Tableau data.data vide');
+                    }
+                    
+                    // Traitement des données
+                    chartData = [];
+                    for (var i = 0; i < data.data.length; i++) {
+                        var item = data.data[i];
+                        
+                        var dateField = item.date_obs || item.date_observation;
+                        var valueField = item.resultat_obs || item.resultat_observation;
+                        
+                        if (dateField && valueField !== undefined && valueField !== null) {
+                            var dateObj = new Date(dateField);
+                            var valueNum = parseFloat(valueField);
+                            
+                            if (!isNaN(dateObj.getTime()) && !isNaN(valueNum) && valueNum > 0) {
+                                chartData.push({
+                                    date: dateObj,
+                                    value: valueNum,
+                                    station: 'V300002001'
+                                });
+                            }
+                        }
+                    }
+                    
+                    chartLog('📈 Données traitées: ' + chartData.length + ' points valides');
+                    
+                    if (chartData.length === 0) {
+                        throw new Error('Aucune donnée valide après traitement');
+                    }
+                    
+                    // Trier par date (plus récent en premier)
+                    chartData.sort(function(a, b) { return b.date - a.date; });
+                    
+                    displayChart();
+                })
+                .catch(function(error) {
+                    chartLog('❌ Erreur: ' + error.message);
+                    showChartError('Erreur de chargement: ' + error.message + '. Cliquez sur "Données test" pour voir un exemple.');
+                });
+        }
+        
+        // Affichage du graphique
+        function displayChart() {
+            chartLog('📊 Affichage du graphique avec ' + chartData.length + ' points');
+            
+            document.getElementById('loadingChart').style.display = 'none';
+            document.getElementById('chartDisplay').style.display = 'block';
+            
+            // Valeur actuelle (plus récente)
+            var latest = chartData[0];
             var heightCm = (latest.value * 100).toFixed(1);
+            var currentValueDiv = document.getElementById('currentValue');
+            currentValueDiv.innerHTML = heightCm + ' cm';
             
-            document.getElementById('currentValue').innerHTML = heightCm + ' cm';
-            document.getElementById('currentLevel').style.display = 'block';
-            
-            // Alerte si nécessaire
+            // Vérification du seuil d'alerte
             if (latest.value > alertThreshold) {
-                document.getElementById('alert').innerHTML = '🚨 ALERTE: Seuil de 160cm dépassé! Niveau: ' + heightCm + 'cm';
-                document.getElementById('alert').style.display = 'block';
-                document.getElementById('currentValue').style.color = '#c62828';
-                log('🚨 ALERTE: Seuil dépassé');
+                currentValueDiv.style.color = '#c62828';
+                document.getElementById('alertChart').innerHTML = '🚨 ALERTE: Seuil de 160cm dépassé! Niveau actuel: ' + heightCm + 'cm';
+                document.getElementById('alertChart').style.display = 'block';
+                chartLog('🚨 ALERTE: Seuil dépassé (' + heightCm + 'cm)');
             } else {
-                document.getElementById('alert').style.display = 'none';
-                document.getElementById('currentValue').style.color = '#1976d2';
+                currentValueDiv.style.color = '#1976d2';
+                document.getElementById('alertChart').style.display = 'none';
             }
             
-            // Tableau
+            // Tableau des données
             var tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = '';
             
-            for (var i = 0; i < Math.min(10, data.length); i++) {
-                var item = data[i];
+            var displayCount = Math.min(10, chartData.length);
+            for (var i = 0; i < displayCount; i++) {
+                var item = chartData[i];
                 var row = tableBody.insertRow();
                 
                 // Date
@@ -130,114 +624,4 @@
                     valueCell.style.color = '#c62828';
                     statusCell.innerHTML = '🚨 ALERTE';
                     statusCell.style.color = '#c62828';
-                    statusCell.style.fontWeight = 'bold';
-                } else {
-                    valueCell.style.color = '#2e7d32';
-                    statusCell.innerHTML = '✅ Normal';
-                    statusCell.style.color = '#2e7d32';
-                }
-            }
-            
-            document.getElementById('dataTable').style.display = 'block';
-            
-            // Statistiques
-            var values = data.map(function(item) { return item.value; });
-            var minValue = Math.min.apply(Math, values);
-            var maxValue = Math.max.apply(Math, values);
-            var avgValue = values.reduce(function(sum, val) { return sum + val; }, 0) / values.length;
-            
-            var stats = '📊 Statistiques (' + data.length + ' mesures):<br>';
-            stats += 'Min: ' + (minValue * 100).toFixed(1) + 'cm | ';
-            stats += 'Max: ' + (maxValue * 100).toFixed(1) + 'cm | ';
-            stats += 'Moyenne: ' + (avgValue * 100).toFixed(1) + 'cm<br>';
-            stats += 'Dernière mise à jour: ' + new Date().toLocaleString('fr-FR');
-            
-            document.getElementById('stats').innerHTML = stats;
-            document.getElementById('stats').style.display = 'block';
-            
-            log('✅ Affichage terminé avec succès');
-        }
-        
-        function loadTestData() {
-            log('🧪 Chargement des données de test');
-            
-            var testData = [
-                { date: new Date(), value: 1.65, station: 'V300002001' }, // Au-dessus du seuil
-                { date: new Date(Date.now() - 1800000), value: 1.58, station: 'V300002001' },
-                { date: new Date(Date.now() - 3600000), value: 1.52, station: 'V300002001' },
-                { date: new Date(Date.now() - 5400000), value: 1.48, station: 'V300002001' },
-                { date: new Date(Date.now() - 7200000), value: 1.45, station: 'V300002001' },
-                { date: new Date(Date.now() - 9000000), value: 1.42, station: 'V300002001' },
-                { date: new Date(Date.now() - 10800000), value: 1.40, station: 'V300002001' }
-            ];
-            
-            log('✅ ' + testData.length + ' points de test générés');
-            showData(testData);
-        }
-        
-        function loadRealData() {
-            log('📡 Chargement des données réelles...');
-            document.getElementById('loading').innerHTML = '🔄 Chargement API Hub\'Eau...';
-            document.getElementById('loading').style.display = 'block';
-            
-            var apiUrl = 'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=20';
-            
-            fetch(apiUrl)
-                .then(function(response) {
-                    log('📡 Réponse API: ' + response.status + ' ' + response.statusText);
-                    if (response.status === 200 || response.status === 206) {
-                        return response.json();
-                    }
-                    throw new Error('HTTP ' + response.status);
-                })
-                .then(function(data) {
-                    log('✅ Données reçues: ' + (data.count || 'inconnu') + ' total');
-                    log('📊 Éléments dans data.data: ' + (data.data ? data.data.length : 0));
-                    
-                    if (data.data && data.data.length > 0) {
-                        log('📋 Premier élément: ' + JSON.stringify(data.data[0]));
-                        
-                        var processedData = [];
-                        for (var i = 0; i < data.data.length; i++) {
-                            var item = data.data[i];
-                            
-                            var dateField = item.date_obs || item.date_observation || item.timestamp;
-                            var valueField = item.resultat_obs || item.resultat_observation || item.valeur;
-                            
-                            if (dateField && valueField !== undefined) {
-                                var dateObj = new Date(dateField);
-                                var valueNum = parseFloat(valueField);
-                                
-                                if (!isNaN(dateObj.getTime()) && !isNaN(valueNum)) {
-                                    processedData.push({
-                                        date: dateObj,
-                                        value: valueNum,
-                                        station: 'V300002001'
-                                    });
-                                }
-                            }
-                        }
-                        
-                        log('✅ Données traitées: ' + processedData.length + ' points valides');
-                        showData(processedData);
-                        
-                    } else {
-                        throw new Error('Pas de données dans data.data');
-                    }
-                })
-                .catch(function(error) {
-                    log('❌ Erreur: ' + error.message);
-                    document.getElementById('loading').innerHTML = '❌ Erreur: ' + error.message;
-                    
-                    // Fallback avec données de test
-                    setTimeout(function() {
-                        log('🔄 Chargement des données de test en fallback');
-                        loadTestData();
-                    }, 2000);
-                });
-        }
-        
-        log('🚀 Test simple initialisé');
-    </script>
-</body>
-</html>
+                    statusCell.style.fontWeight =
