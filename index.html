@@ -626,10 +626,20 @@
                     if (data.data.length > 0) {
                         var firstItem = data.data[0];
                         debug('📋 Champs disponibles: ' + Object.keys(firstItem).join(', '));
-                        debug('📋 Premier élément: ' + JSON.stringify(firstItem).substring(0, 200) + '...');
+                        
+                        // Afficher les champs de date et valeur détectés
+                        var dateField = firstItem.date_obs_elab || firstItem.date_obs || firstItem.date_observation;
+                        var valueField = firstItem.resultat_obs_elab || firstItem.resultat_obs || firstItem.resultat_observation;
+                        debug('📋 Date trouvée: ' + dateField + ', Valeur trouvée: ' + valueField);
                     }
                     
-                    processAPIData(data.data, 'API ' + (index + 1));
+                    var success = processAPIData(data.data, 'API ' + (index + 1));
+                    
+                    // Si le traitement a échoué, essayer l'API suivante
+                    if (!success) {
+                        debug('🔄 Données non exploitables, test API suivante...');
+                        tryAPI(index + 1, apis);
+                    }
                 })
                 .catch(function(error) {
                     debug('❌ Erreur API ' + (index + 1) + ': ' + error.message);
@@ -696,32 +706,52 @@
             for (var i = 0; i < rawData.length; i++) {
                 var item = rawData[i];
                 
-                // Chercher tous les champs possibles
-                var dateField = item.date_obs || item.date_observation || item.date_mesure || item.timestamp;
-                var valueField = item.resultat_obs || item.resultat_observation || item.valeur || item.hauteur || item.value;
+                // Chercher tous les champs possibles (API V1 et V2)
+                var dateField = item.date_obs_elab || item.date_obs || item.date_observation || item.date_mesure || item.timestamp;
+                var valueField = item.resultat_obs_elab || item.resultat_obs || item.resultat_observation || item.valeur || item.hauteur || item.value;
                 
                 if (dateField && valueField !== undefined && valueField !== null) {
                     var dateObj = new Date(dateField);
                     var valueNum = parseFloat(valueField);
                     
+                    // Convertir si la valeur est en mm (supérieure à 10)
+                    if (valueNum > 10) {
+                        valueNum = valueNum / 1000; // Convertir mm en m
+                    }
+                    
                     // Vérifier que c'est dans les 24h et que la valeur est valide
-                    if (!isNaN(dateObj.getTime()) && !isNaN(valueNum) && valueNum > 0 && dateObj >= twentyFourHoursAgo) {
-                        chartData.push({
-                            date: dateObj,
-                            value: valueNum,
-                            station: 'V300002001'
-                        });
-                        processedCount++;
+                    if (!isNaN(dateObj.getTime()) && !isNaN(valueNum) && valueNum > 0) {
+                        // Élargir la fenêtre temporelle si pas de données récentes
+                        var isRecent = dateObj >= twentyFourHoursAgo;
+                        if (!isRecent && chartData.length < 5) {
+                            // Si moins de 5 points récents, accepter des données plus anciennes (7 jours)
+                            var sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+                            isRecent = dateObj >= sevenDaysAgo;
+                        }
+                        
+                        if (isRecent) {
+                            chartData.push({
+                                date: dateObj,
+                                value: valueNum,
+                                station: 'V300002001'
+                            });
+                            processedCount++;
+                        } else {
+                            skippedCount++;
+                            if (skippedCount <= 3) {
+                                debug('⚠️ Élément ignoré - Trop ancien: ' + dateField + ' (' + dateObj.toLocaleDateString('fr-FR') + ')');
+                            }
+                        }
                     } else {
                         skippedCount++;
-                        if (skippedCount <= 3) { // Log seulement les 3 premiers pour éviter le spam
-                            debug('⚠️ Élément ignoré - Date: ' + dateField + ', Valeur: ' + valueField + ', Age: ' + (dateObj < twentyFourHoursAgo ? 'trop ancien' : 'OK'));
+                        if (skippedCount <= 3) {
+                            debug('⚠️ Élément ignoré - Valeur invalide: ' + valueField);
                         }
                     }
                 } else {
                     skippedCount++;
                     if (skippedCount <= 3) {
-                        debug('⚠️ Élément ignoré - Champs manquants. Disponibles: ' + Object.keys(item).join(', '));
+                        debug('⚠️ Élément ignoré - Champs: date=' + dateField + ', valeur=' + valueField);
                     }
                 }
             }
@@ -729,17 +759,19 @@
             debug('📈 Résultat traitement: ' + processedCount + ' valides, ' + skippedCount + ' ignorés');
             
             if (chartData.length === 0) {
-                debug('❌ Aucune donnée valide des dernières 24h');
-                document.getElementById('currentLevel').innerHTML = '❌';
-                document.getElementById('lastUpdate').innerHTML = 'Aucune donnée des dernières 24h';
-                return;
+                debug('❌ Aucune donnée valide trouvée - Passage aux API suivantes');
+                // Au lieu d'afficher erreur, essayer les autres API
+                return false; // Indique qu'il faut essayer l'API suivante
             }
             
             // Trier par date (plus récent en premier)
             chartData.sort(function(a, b) { return b.date - a.date; });
             
-            // Afficher le niveau actuel
+            // Vérifier l'âge des données
             var latest = chartData[0];
+            var dataAge = now - latest.date;
+            var isOldData = dataAge > (24 * 60 * 60 * 1000); // Plus de 24h
+            
             var isAlert = latest.value > alertThreshold;
             
             showCurrentLevel(latest.value, latest.date, isAlert);
@@ -747,8 +779,26 @@
             // Dessiner le graphique
             drawChart();
             
-            debug('✅ Affichage terminé: ' + chartData.length + ' points sur 24h');
-            debug('📊 Niveau actuel: ' + (latest.value * 100).toFixed(1) + 'cm à ' + latest.date.toLocaleTimeString('fr-FR'));
+            // Message d'information sur l'âge des données
+            var infoDiv = document.getElementById('infoZone');
+            if (isOldData && !isAlert) {
+                var ageInDays = Math.floor(dataAge / (24 * 60 * 60 * 1000));
+                infoDiv.innerHTML = '⚠️ Données de la station V300002001<br>📅 Dernière mesure: il y a ' + ageInDays + ' jour(s)<br>🔄 Les données récentes peuvent ne pas être encore disponibles';
+                infoDiv.className = 'alert-box';
+                infoDiv.style.background = '#fff3cd';
+                infoDiv.style.color = '#856404';
+                infoDiv.style.border = '2px solid #ffc107';
+                infoDiv.style.display = 'block';
+            } else if (!isAlert) {
+                infoDiv.innerHTML = '✅ Données station V300002001<br>📊 ' + chartData.length + ' mesures disponibles<br>🔄 Mise à jour automatique';
+                infoDiv.className = 'info-box';
+                infoDiv.style.display = 'block';
+            }
+            
+            debug('✅ Affichage terminé: ' + chartData.length + ' points');
+            debug('📊 Niveau actuel: ' + (latest.value * 100).toFixed(1) + 'cm le ' + latest.date.toLocaleString('fr-FR'));
+            
+            return true; // Succès
         }
         
         // Chargement automatique au démarrage
