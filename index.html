@@ -186,19 +186,6 @@
             font-size: 16px;
             margin: 10px 5px;
         }
-
-        .debug-box {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 10px 0;
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #dee2e6;
-            display: none;
-        }
         
         @media (max-width: 480px) {
             .container { padding: 10px; }
@@ -232,7 +219,7 @@
                         if (navigator.geolocation) {
                             navigator.geolocation.getCurrentPosition(function(position) {
                                 var gps = position.coords.latitude.toFixed(6) + ', ' + position.coords.longitude.toFixed(6);
-                                var rapport = '🚨 RAPPORT D\\'INCIDENT - PATROUILLE DES DIGUES\\n═══════════════════════════════════════════════\\n\\n📋 INFORMATIONS AUTOMATIQUES\\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n• ID: ' + id + '\\n• Date: ' + date + '\\n• Heure: ' + time + '\\n• GPS: ' + gps + '\\n• Zone: Lyon - Auvergne-Rhône-Alpes\\n\\n⚠️ DESCRIPTION DE L\\'INCIDENT\\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n[À COMPLÉTER PAR LE PATROUILLEUR]\\n\\n□ Fissure sur la digue\\n□ Infiltration d\\'eau\\n□ Affaissement du terrain\\n□ Autre: ________________\\n\\n📊 ÉVALUATION DU RISQUE\\n━━━━━━━━━━━━━━━━━━━━━━━━━\\n□ FAIBLE  □ MOYEN  □ ÉLEVÉ  □ CRITIQUE\\n\\n✍️ SIGNATURE\\n━━━━━━━━━━━━━━━━\\nNom: _________________________\\nSignature: ___________________\\n\\n═══════════════════════════════════════════════\\nRapport généré le: ' + now.toLocaleString('fr-FR');
+                                var rapport = '🚨 RAPPORT D\\'INCIDENT - PATROUILLE DES DIGUES\\n═══════════════════════════════════════════════\\n\\n📋 INFORMATIONS AUTOMATIQUES\\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n• ID: ' + id + '\\n• Date: ' + date + '\\n• Heure: ' + time + '\\n• GPS: ' + gps + '\\n• Zone: Lyon - Auvergne-Rhône-Alpes\\n\\n⚠️ DESCRIPTION DE L\\'INCIDENT\\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n[À COMPLÉTER PAR LE PATROUILLEUR]\\n\\n□ Fissure sur la digue\\n□ Infiltration d\\'eau\\n□ Affaissement du terrain\\n□ Déformation visible\\n□ Érosion du talus\\n□ Obstacle sur le chemin de ronde\\n□ Problème d\\'accès\\n□ Autre: ________________\\n\\n📊 ÉVALUATION DU RISQUE\\n━━━━━━━━━━━━━━━━━━━━━━━━━\\n□ FAIBLE - Surveillance renforcée\\n□ MOYEN - Intervention sous 24h\\n□ ÉLEVÉ - Intervention urgente\\n□ CRITIQUE - Alerte immédiate\\n\\n🔧 ACTIONS ENTREPRISES\\n━━━━━━━━━━━━━━━━━━━━━━━\\n□ Périmètre sécurisé\\n□ Signalisation mise en place\\n□ Photos prises\\n□ Responsable contacté\\n\\n📞 CONTACTS EFFECTUÉS\\n━━━━━━━━━━━━━━━━━━━━━━━\\n□ Responsable astreinte: ________________\\n□ Services techniques: __________________\\n□ Pompiers: ____________________________\\n□ Autre: _______________________________\\n\\n📝 OBSERVATIONS\\n━━━━━━━━━━━━━━━━━━━━━━━\\nDescription détaillée:\\n_________________________________________________\\n_________________________________________________\\n\\n✍️ SIGNATURE\\n━━━━━━━━━━━━━━━━\\nNom du patrouilleur: _______________________\\nSignature: ________________________________\\nDate validation: __________________________\\n\\n═══════════════════════════════════════════════\\nRapport généré le: ' + now.toLocaleString('fr-FR');
                                 
                                 if (navigator.clipboard && navigator.clipboard.writeText) {
                                     navigator.clipboard.writeText(rapport).then(function() {
@@ -282,12 +269,7 @@
                     <button class="load-btn" onclick="loadWaterData()">
                         🔄 Actualiser les données
                     </button>
-                    <button class="load-btn" onclick="toggleDebug()" style="background: #95a5a6;">
-                        🔧 Debug
-                    </button>
                 </div>
-                
-                <div id="debugLog" class="debug-box"></div>
             </div>
             
             <!-- Liens externes -->
@@ -302,50 +284,58 @@
         
         <!-- Itinéraires -->
         <div class="section">
-            <h2>🗺️ Itinéraires</h2>
+            <h2>🗺️ Itinéraires Préétablis</h2>
             <a href="https://www.google.com/maps/d/edit?mid=1Ss3l_BWgc8yQB2TRXtMxFobuIlsA9PU&usp=drive_link" class="btn" target="_blank">
                 📍 Itinéraire 1: Triangle → Parking des Saules
             </a>
             <a href="https://www.google.com/maps/d/edit?mid=1FXGfXu9ZXQ6v0BT7j1ganR-BI1smD2E&usp=sharing" class="btn" target="_blank">
                 📍 Itinéraire 2: Parking des Saules → Rue Duclos
             </a>
+            <a href="https://www.google.com/maps/d/edit?mid=1-jG504darrlvK7GmD9JHe41UyJSwP7s&usp=sharing" class="btn" target="_blank">
+                📍 Itinéraire 3: Rue Duclos → Rue du Canal
+            </a>
+            <a href="https://www.google.com/maps/d/edit?mid=1TScm_4bW-ogoKfY1x2ySLCAf7y07ysM&usp=drive_link" class="btn" target="_blank">
+                📍 Itinéraire 4: Trajet Supplémentaire 1
+            </a>
+            <a href="https://www.google.com/maps/d/edit?mid=1KTcVxRP5L-GsPFniZyd6sjX-82wl51o&usp=drive_link" class="btn" target="_blank">
+                📍 Itinéraire 5: Trajet Supplémentaire 2
+            </a>
         </div>
         
         <!-- Formulaires -->
         <div class="section">
-            <h2>📋 Formulaires</h2>
-            <a href="https://docs.google.com/spreadsheets/d/1wV50ZsyoDJhcf5Lja5rl1S9TxsOauadMHmyo9slFQGs/edit" class="btn btn-secondary" target="_blank">
-                💧 Visite des Eaux Bleues
+            <h2>📋 Formulaires de Visite</h2>
+            <a href="https://docs.google.com/spreadsheets/d/1wV50ZsyoDJhcf5Lja5rl1S9TxsOauadMHmyo9slFQGs/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
+                💧 Formulaire "Visite des Eaux Bleues"
+            </a>
+            <a href="https://docs.google.com/spreadsheets/d/1Tsigd9S-qpZfZDQUeLgkA7RIWOTEeDww-NVUIempBMU/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
+                🏗️ Formulaire "Visite Digue Duclos"
+            </a>
+            <a href="https://docs.google.com/spreadsheets/d/1kBdOQFZrZ260ah69D6JFvHmQXbumgkTNcgMYXsYQoZs/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
+                ⛪ Formulaire "Visite Digue St Jean"
             </a>
             <a href="https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit" class="btn btn-warning" target="_blank">
                 📝 Rapport d'Incident
             </a>
         </div>
+        
+        <!-- Documents -->
+        <div class="section">
+            <h2>📚 Documents & Planning</h2>
+            <a href="https://drive.google.com/drive/folders/1deKB9iZ3gYfjndRiJY3Dyod8UQw3kzTA" class="btn btn-success" target="_blank">
+                📄 Documents d'Astreinte
+            </a>
+            <a href="https://docs.google.com/spreadsheets/d/1EcmynZSukPIcAvIW_0W6caUiHGLPUTSP/edit?gid=1203425479#gid=1203425479" class="btn btn-success" target="_blank">
+                📅 Planning d'Astreinte
+            </a>
+        </div>
     </div>
 
-    <!-- JavaScript pour API Hub'Eau -->
+    <!-- Script principal -->
     <script>
         var chartData = [];
         var alertThreshold = 1.60; // 160cm
-        var debugMode = false;
         var canvas, ctx;
-        
-        function debug(msg) {
-            var now = new Date().toLocaleTimeString();
-            var d = document.getElementById('debugLog');
-            if (d) {
-                if (debugMode) d.style.display = 'block';
-                d.innerHTML += '[' + now + '] ' + msg + '\n';
-                d.scrollTop = d.scrollHeight;
-            }
-            console.log('[DEBUG] ' + msg);
-        }
-        
-        function toggleDebug() {
-            debugMode = !debugMode;
-            var d = document.getElementById('debugLog');
-            d.style.display = debugMode ? 'block' : 'none';
-        }
         
         function showCurrentLevel(value, date, isAlert) {
             var levelDiv = document.getElementById('currentLevel');
@@ -366,7 +356,7 @@
             } else {
                 levelDiv.className = 'current-level';
                 alertDiv.style.display = 'none';
-                infoDiv.innerHTML = '✅ Niveau normal - Surveillance continue<br>Station V300002001';
+                infoDiv.innerHTML = '✅ Station V300002001 - Surveillance continue<br>📊 ' + chartData.length + ' mesures disponibles';
                 infoDiv.className = 'info-box';
                 infoDiv.style.display = 'block';
             }
@@ -384,18 +374,16 @@
             var graphWidth = width - 2 * padding;
             var graphHeight = height - 2 * padding;
             
-            // Calculer les échelles
             var values = chartData.map(function(item) { return item.value; });
             var minValue = Math.min.apply(Math, values);
             var maxValue = Math.max.apply(Math, values);
             var valueRange = maxValue - minValue;
             
-            // S'assurer d'inclure le seuil d'alerte
             if (alertThreshold > maxValue) {
                 maxValue = alertThreshold + 0.1;
                 valueRange = maxValue - minValue;
             }
-            if (valueRange < 0.2) { // Minimum de variation pour la lisibilité
+            if (valueRange < 0.2) {
                 var center = (minValue + maxValue) / 2;
                 minValue = center - 0.1;
                 maxValue = center + 0.1;
@@ -407,18 +395,13 @@
             var maxDate = Math.max.apply(Math, dates);
             var dateRange = maxDate - minDate;
             
-            // Effacer le canvas
             ctx.clearRect(0, 0, width, height);
-            
-            // Arrière-plan
             ctx.fillStyle = '#f8f9fa';
             ctx.fillRect(0, 0, width, height);
             
-            // Grille
             ctx.strokeStyle = '#e9ecef';
             ctx.lineWidth = 1;
             
-            // Lignes horizontales
             for (var i = 0; i <= 8; i++) {
                 var y = padding + (graphHeight * i / 8);
                 ctx.beginPath();
@@ -426,7 +409,6 @@
                 ctx.lineTo(width - padding, y);
                 ctx.stroke();
                 
-                // Labels des valeurs
                 var value = maxValue - (valueRange * i / 8);
                 ctx.fillStyle = '#666';
                 ctx.font = '12px Arial';
@@ -434,7 +416,6 @@
                 ctx.fillText((value * 100).toFixed(0) + 'cm', padding - 5, y + 4);
             }
             
-            // Ligne de seuil d'alerte
             var alertY = padding + graphHeight - (graphHeight * (alertThreshold - minValue) / valueRange);
             ctx.strokeStyle = '#e74c3c';
             ctx.lineWidth = 2;
@@ -445,16 +426,14 @@
             ctx.stroke();
             ctx.setLineDash([]);
             
-            // Label seuil
             ctx.fillStyle = '#e74c3c';
             ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'left';
             ctx.fillText('⚠️ Seuil 160cm', padding + 5, alertY - 5);
             
-            // Lignes verticales (toutes les 4h sur 24h)
             if (dateRange > 0) {
-                var fourHours = 4 * 60 * 60 * 1000; // 4h en ms
-                var timeStep = Math.max(fourHours, dateRange / 6); // Au moins 6 divisions
+                var fourHours = 4 * 60 * 60 * 1000;
+                var timeStep = Math.max(fourHours, dateRange / 6);
                 
                 for (var time = minDate; time <= maxDate; time += timeStep) {
                     var x = padding + (graphWidth * (time - minDate) / dateRange);
@@ -465,19 +444,14 @@
                     ctx.lineTo(x, height - padding);
                     ctx.stroke();
                     
-                    // Labels des dates
                     var date = new Date(time);
                     ctx.fillStyle = '#666';
                     ctx.font = '11px Arial';
                     ctx.textAlign = 'center';
-                    ctx.fillText(
-                        date.getHours().toString().padStart(2, '0') + 'h',
-                        x, height - padding + 15
-                    );
+                    ctx.fillText(date.getHours().toString().padStart(2, '0') + 'h', x, height - padding + 15);
                 }
             }
             
-            // Ligne des données
             ctx.strokeStyle = '#667eea';
             ctx.lineWidth = 3;
             ctx.beginPath();
@@ -495,34 +469,22 @@
             }
             ctx.stroke();
             
-            // Points de données
             for (var i = 0; i < chartData.length; i++) {
                 var item = chartData[i];
                 var x = dateRange > 0 ? padding + (graphWidth * (item.date.getTime() - minDate) / dateRange) : padding + graphWidth / 2;
                 var y = padding + graphHeight - (graphHeight * (item.value - minValue) / valueRange);
                 
-                // Point normal
-                ctx.fillStyle = '#667eea';
+                ctx.fillStyle = item.value > alertThreshold ? '#e74c3c' : '#667eea';
                 ctx.beginPath();
-                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.arc(x, y, item.value > alertThreshold ? 6 : 4, 0, 2 * Math.PI);
                 ctx.fill();
-                
-                // Point rouge si au-dessus du seuil
-                if (item.value > alertThreshold) {
-                    ctx.fillStyle = '#e74c3c';
-                    ctx.beginPath();
-                    ctx.arc(x, y, 6, 0, 2 * Math.PI);
-                    ctx.fill();
-                }
             }
             
-            // Titre
             ctx.fillStyle = '#2c3e50';
             ctx.font = 'bold 16px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('Station V300002001 - Hauteur d\'eau (24h)', width / 2, 25);
+            ctx.fillText('Station V300002001 - Hauteur d\'eau', width / 2, 25);
             
-            // Statistiques
             var avgValue = values.reduce(function(sum, val) { return sum + val; }, 0) / values.length;
             var stats = 'Points: ' + chartData.length + 
                        ' | Min: ' + (minValue * 100).toFixed(1) + 'cm' +
@@ -532,7 +494,6 @@
             document.getElementById('chartStats').innerHTML = stats;
             document.getElementById('chartInfo').style.display = 'block';
             
-            // Événement click
             canvas.onclick = function(event) {
                 var rect = canvas.getBoundingClientRect();
                 var scaleX = canvas.width / rect.width;
@@ -540,7 +501,6 @@
                 var x = (event.clientX - rect.left) * scaleX;
                 var y = (event.clientY - rect.top) * scaleY;
                 
-                // Trouver le point le plus proche
                 var closestPoint = null;
                 var minDistance = Infinity;
                 
@@ -571,21 +531,13 @@
         }
         
         function loadWaterData() {
-            debug('🚀 Chargement données API Hub\'Eau');
-            
             document.getElementById('currentLevel').innerHTML = '🔄';
             document.getElementById('lastUpdate').innerHTML = 'Chargement en cours...';
             
-            // URLs API corrigées et testées
             var apis = [
-                // API V1 (plus stable)
                 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48',
-                // API V2 obs_elab avec paramètres corrects
                 'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48&grandeur_hydro=H',
-                // API V2 observations_tr
-                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48',
-                // API V1 avec moins de données (fallback)
-                'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=10'
+                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48'
             ];
             
             tryAPI(0, apis);
@@ -593,221 +545,83 @@
         
         function tryAPI(index, apis) {
             if (index >= apis.length) {
-                debug('❌ Toutes les API ont échoué - Tentative avec proxy CORS');
-                tryWithProxy();
+                document.getElementById('currentLevel').innerHTML = '❌';
+                document.getElementById('lastUpdate').innerHTML = 'Service temporairement indisponible';
                 return;
             }
             
             var apiUrl = apis[index];
-            debug('🔍 Test API ' + (index + 1) + ': ' + apiUrl);
             
             fetch(apiUrl)
                 .then(function(response) {
-                    debug('📡 API ' + (index + 1) + ' - Status: ' + response.status + ' ' + response.statusText);
                     if (response.status === 200 || response.status === 206) {
                         return response.json();
                     }
-                    if (response.status === 500) {
-                        throw new Error('Erreur serveur 500 - Paramètres ou URL invalides');
-                    }
-                    throw new Error('HTTP ' + response.status + ' ' + response.statusText);
+                    throw new Error('HTTP ' + response.status);
                 })
                 .then(function(data) {
-                    debug('✅ JSON parsé - Count: ' + (data.count || 'N/A'));
-                    
                     if (!data.data || !Array.isArray(data.data) || data.data.length === 0) {
-                        debug('❌ Pas de data.data valide - Structure: ' + Object.keys(data).join(', '));
-                        throw new Error('Pas de données dans data.data');
+                        throw new Error('Pas de données');
                     }
                     
-                    debug('📊 Éléments bruts reçus: ' + data.data.length);
-                    
-                    // Examiner la structure du premier élément
-                    if (data.data.length > 0) {
-                        var firstItem = data.data[0];
-                        debug('📋 Champs disponibles: ' + Object.keys(firstItem).join(', '));
-                        
-                        // Afficher les champs de date et valeur détectés
-                        var dateField = firstItem.date_obs_elab || firstItem.date_obs || firstItem.date_observation;
-                        var valueField = firstItem.resultat_obs_elab || firstItem.resultat_obs || firstItem.resultat_observation;
-                        debug('📋 Date trouvée: ' + dateField + ', Valeur trouvée: ' + valueField);
-                    }
-                    
-                    var success = processAPIData(data.data, 'API ' + (index + 1));
-                    
-                    // Si le traitement a échoué, essayer l'API suivante
+                    var success = processAPIData(data.data);
                     if (!success) {
-                        debug('🔄 Données non exploitables, test API suivante...');
                         tryAPI(index + 1, apis);
                     }
                 })
                 .catch(function(error) {
-                    debug('❌ Erreur API ' + (index + 1) + ': ' + error.message);
                     tryAPI(index + 1, apis);
                 });
         }
         
-        function tryWithProxy() {
-            debug('🔄 Tentative avec proxy CORS - API V1');
-            
-            var apiUrl = 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=20';
-            var proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(apiUrl);
-            
-            fetch(proxyUrl)
-                .then(function(response) {
-                    debug('📡 Proxy CORS - Status: ' + response.status);
-                    return response.json();
-                })
-                .then(function(proxyData) {
-                    if (proxyData.contents) {
-                        var data = JSON.parse(proxyData.contents);
-                        debug('✅ Données via proxy - Count: ' + (data.count || 'N/A'));
-                        
-                        if (data.data && data.data.length > 0) {
-                            debug('📊 Éléments via proxy: ' + data.data.length);
-                            processAPIData(data.data, 'Proxy CORS');
-                        } else {
-                            throw new Error('Pas de données via proxy');
-                        }
-                    } else {
-                        throw new Error('Pas de contenu dans la réponse proxy');
-                    }
-                })
-                .catch(function(error) {
-                    debug('❌ Erreur proxy: ' + error.message);
-                    showAPIError();
-                });
-        }
-        
-        function showAPIError() {
-            debug('❌ ÉCHEC COMPLET: Toutes les méthodes ont échoué');
-            document.getElementById('currentLevel').innerHTML = '❌';
-            document.getElementById('lastUpdate').innerHTML = 'API Hub\'Eau indisponible';
-            
-            var infoDiv = document.getElementById('infoZone');
-            infoDiv.innerHTML = '⚠️ Service temporairement indisponible<br>📞 Contactez le support technique<br>🔄 Réessayez dans quelques minutes';
-            infoDiv.className = 'alert-box';
-            infoDiv.style.display = 'block';
-            
-            document.getElementById('alertZone').style.display = 'none';
-        }
-        
-        function processAPIData(rawData, source) {
-            debug('📊 Traitement données de: ' + source);
-            
+        function processAPIData(rawData) {
             chartData = [];
-            var processedCount = 0;
-            var skippedCount = 0;
-            
-            // Filtrer les données des dernières 24h
             var now = new Date();
-            var twentyFourHoursAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+            var sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
             
             for (var i = 0; i < rawData.length; i++) {
                 var item = rawData[i];
                 
-                // Chercher tous les champs possibles (API V1 et V2)
-                var dateField = item.date_obs_elab || item.date_obs || item.date_observation || item.date_mesure || item.timestamp;
-                var valueField = item.resultat_obs_elab || item.resultat_obs || item.resultat_observation || item.valeur || item.hauteur || item.value;
+                var dateField = item.date_obs_elab || item.date_obs || item.date_observation;
+                var valueField = item.resultat_obs_elab || item.resultat_obs || item.resultat_observation;
                 
                 if (dateField && valueField !== undefined && valueField !== null) {
                     var dateObj = new Date(dateField);
                     var valueNum = parseFloat(valueField);
                     
-                    // Convertir si la valeur est en mm (supérieure à 10)
                     if (valueNum > 10) {
-                        valueNum = valueNum / 1000; // Convertir mm en m
+                        valueNum = valueNum / 1000;
                     }
                     
-                    // Vérifier que c'est dans les 24h et que la valeur est valide
-                    if (!isNaN(dateObj.getTime()) && !isNaN(valueNum) && valueNum > 0) {
-                        // Élargir la fenêtre temporelle si pas de données récentes
-                        var isRecent = dateObj >= twentyFourHoursAgo;
-                        if (!isRecent && chartData.length < 5) {
-                            // Si moins de 5 points récents, accepter des données plus anciennes (7 jours)
-                            var sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-                            isRecent = dateObj >= sevenDaysAgo;
-                        }
-                        
-                        if (isRecent) {
-                            chartData.push({
-                                date: dateObj,
-                                value: valueNum,
-                                station: 'V300002001'
-                            });
-                            processedCount++;
-                        } else {
-                            skippedCount++;
-                            if (skippedCount <= 3) {
-                                debug('⚠️ Élément ignoré - Trop ancien: ' + dateField + ' (' + dateObj.toLocaleDateString('fr-FR') + ')');
-                            }
-                        }
-                    } else {
-                        skippedCount++;
-                        if (skippedCount <= 3) {
-                            debug('⚠️ Élément ignoré - Valeur invalide: ' + valueField);
-                        }
-                    }
-                } else {
-                    skippedCount++;
-                    if (skippedCount <= 3) {
-                        debug('⚠️ Élément ignoré - Champs: date=' + dateField + ', valeur=' + valueField);
+                    if (!isNaN(dateObj.getTime()) && !isNaN(valueNum) && valueNum > 0 && dateObj >= sevenDaysAgo) {
+                        chartData.push({
+                            date: dateObj,
+                            value: valueNum,
+                            station: 'V300002001'
+                        });
                     }
                 }
             }
             
-            debug('📈 Résultat traitement: ' + processedCount + ' valides, ' + skippedCount + ' ignorés');
-            
             if (chartData.length === 0) {
-                debug('❌ Aucune donnée valide trouvée - Passage aux API suivantes');
-                // Au lieu d'afficher erreur, essayer les autres API
-                return false; // Indique qu'il faut essayer l'API suivante
+                return false;
             }
             
-            // Trier par date (plus récent en premier)
             chartData.sort(function(a, b) { return b.date - a.date; });
             
-            // Vérifier l'âge des données
             var latest = chartData[0];
-            var dataAge = now - latest.date;
-            var isOldData = dataAge > (24 * 60 * 60 * 1000); // Plus de 24h
-            
             var isAlert = latest.value > alertThreshold;
             
             showCurrentLevel(latest.value, latest.date, isAlert);
-            
-            // Dessiner le graphique
             drawChart();
             
-            // Message d'information sur l'âge des données
-            var infoDiv = document.getElementById('infoZone');
-            if (isOldData && !isAlert) {
-                var ageInDays = Math.floor(dataAge / (24 * 60 * 60 * 1000));
-                infoDiv.innerHTML = '⚠️ Données de la station V300002001<br>📅 Dernière mesure: il y a ' + ageInDays + ' jour(s)<br>🔄 Les données récentes peuvent ne pas être encore disponibles';
-                infoDiv.className = 'alert-box';
-                infoDiv.style.background = '#fff3cd';
-                infoDiv.style.color = '#856404';
-                infoDiv.style.border = '2px solid #ffc107';
-                infoDiv.style.display = 'block';
-            } else if (!isAlert) {
-                infoDiv.innerHTML = '✅ Données station V300002001<br>📊 ' + chartData.length + ' mesures disponibles<br>🔄 Mise à jour automatique';
-                infoDiv.className = 'info-box';
-                infoDiv.style.display = 'block';
-            }
-            
-            debug('✅ Affichage terminé: ' + chartData.length + ' points');
-            debug('📊 Niveau actuel: ' + (latest.value * 100).toFixed(1) + 'cm le ' + latest.date.toLocaleString('fr-FR'));
-            
-            return true; // Succès
+            return true;
         }
         
         // Chargement automatique au démarrage
         setTimeout(function() {
-            debug('🚀 Chargement automatique des données');
             loadWaterData();
         }, 1000);
-        
-        debug('Application initialisée');
     </script>
 </body>
 </html>
