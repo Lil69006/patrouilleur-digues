@@ -304,12 +304,11 @@
         </div>
     </div>
 
-    <!-- Script simplifié et fonctionnel -->
     <script>
         var chartData = [];
         var canvas, ctx;
         
-        // Seuils d'alerte
+        // Seuils d'alerte avec noms uniquement
         var seuils = [
             { name: 'Seuil 1', value: 1.60, color: '#9c27b0' }, // violet
             { name: 'Seuil 2', value: 2.80, color: '#ffeb3b' }, // jaune
@@ -446,7 +445,7 @@
             ctx.fillStyle = '#f8f9fa';
             ctx.fillRect(0, 0, width, height);
             
-            // Grille
+            // Grille horizontale
             ctx.strokeStyle = '#e9ecef';
             ctx.lineWidth = 1;
             
@@ -464,7 +463,7 @@
                 ctx.fillText((value * 100).toFixed(0) + 'cm', padding - 5, y + 4);
             }
             
-            // Dessiner les seuils
+            // Dessiner les seuils avec leurs noms seulement
             for (var s = 0; s < seuils.length; s++) {
                 var seuil = seuils[s];
                 var seuilY = padding + graphHeight - (graphHeight * (seuil.value - minValue) / valueRange);
@@ -479,7 +478,7 @@
                     ctx.stroke();
                     ctx.setLineDash([]);
                     
-                    // Label du seuil
+                    // Label du seuil - nom uniquement
                     ctx.fillStyle = seuil.color;
                     ctx.font = 'bold 11px Arial';
                     ctx.textAlign = 'left';
@@ -527,7 +526,7 @@
             }
             ctx.stroke();
             
-            // Points de données
+            // Points de données avec couleurs selon seuils dépassés
             for (var i = 0; i < chartData.length; i++) {
                 var item = chartData[i];
                 var x = dateRange > 0 ? padding + (graphWidth * (item.date.getTime() - minDate) / dateRange) : padding + graphWidth / 2;
@@ -557,8 +556,8 @@
             // Statistiques
             var avgValue = values.reduce(function(sum, val) { return sum + val; }, 0) / values.length;
             var stats = 'Points: ' + chartData.length + 
-                       ' | Min: ' + (minValue * 100).toFixed(1) + 'cm' +
-                       ' | Max: ' + (maxValue * 100).toFixed(1) + 'cm' +
+                       ' | Min: ' + (Math.min.apply(Math, values) * 100).toFixed(1) + 'cm' +
+                       ' | Max: ' + (Math.max.apply(Math, values) * 100).toFixed(1) + 'cm' +
                        ' | Moyenne: ' + (avgValue * 100).toFixed(1) + 'cm';
             
             document.getElementById('chartStats').innerHTML = stats;
@@ -609,26 +608,135 @@
             document.getElementById('currentLevel').innerHTML = '🔄';
             document.getElementById('lastUpdate').innerHTML = 'Chargement en cours...';
             
-            var apis = [
-                'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48',
-                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48&grandeur_hydro=H'
-            ];
-            
-            tryAPI(0, apis);
-        }
-        
-        function tryAPI(index, apis) {
-            if (index >= apis.length) {
-                document.getElementById('currentLevel').innerHTML = '❌';
-                document.getElementById('lastUpdate').innerHTML = 'Service temporairement indisponible';
-                return;
-            }
-            
-            var apiUrl = apis[index];
+            var apiUrl = 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48';
             
             fetch(apiUrl)
                 .then(function(response) {
-                    if (response.status === 200 || response.status === 206) {
-                        return response.json();
+                    if (!response.ok) {
+                        throw new Error('Erreur réseau: ' + response.status);
                     }
-                    throw new Error
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.data && data.data.length > 0) {
+                        chartData = [];
+                        
+                        for (var i = 0; i < data.data.length; i++) {
+                            var observation = data.data[i];
+                            if (observation.resultat_obs && observation.date_obs) {
+                                var date = new Date(observation.date_obs);
+                                var value = parseFloat(observation.resultat_obs) / 1000; // Conversion mm vers m
+                                
+                                chartData.push({
+                                    date: date,
+                                    value: value
+                                });
+                            }
+                        }
+                        
+                        // Trier par date
+                        chartData.sort(function(a, b) {
+                            return a.date.getTime() - b.date.getTime();
+                        });
+                        
+                        if (chartData.length > 0) {
+                            var latestData = chartData[chartData.length - 1];
+                            
+                            // Déterminer le niveau d'alerte
+                            var alertLevel = 0;
+                            for (var s = seuils.length - 1; s >= 0; s--) {
+                                if (latestData.value > seuils[s].value) {
+                                    alertLevel = s + 1;
+                                    break;
+                                }
+                            }
+                            
+                            showCurrentLevel(latestData.value, latestData.date, alertLevel);
+                            drawChart();
+                        } else {
+                            document.getElementById('currentLevel').innerHTML = '❌';
+                            document.getElementById('lastUpdate').innerHTML = 'Aucune donnée disponible';
+                        }
+                    } else {
+                        throw new Error('Aucune donnée dans la réponse');
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Erreur lors du chargement des données:', error);
+                    document.getElementById('currentLevel').innerHTML = '❌';
+                    document.getElementById('lastUpdate').innerHTML = 'Erreur de chargement: ' + error.message;
+                    
+                    // Essayer une API alternative
+                    tryAlternativeAPI();
+                });
+        }
+        
+        function tryAlternativeAPI() {
+            var altApiUrl = 'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48&grandeur_hydro=H';
+            
+            fetch(altApiUrl)
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('API alternative indisponible');
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.data && data.data.length > 0) {
+                        chartData = [];
+                        
+                        for (var i = 0; i < data.data.length; i++) {
+                            var observation = data.data[i];
+                            if (observation.resultat_obs && observation.date_obs) {
+                                var date = new Date(observation.date_obs);
+                                var value = parseFloat(observation.resultat_obs);
+                                
+                                chartData.push({
+                                    date: date,
+                                    value: value
+                                });
+                            }
+                        }
+                        
+                        // Trier par date
+                        chartData.sort(function(a, b) {
+                            return a.date.getTime() - b.date.getTime();
+                        });
+                        
+                        if (chartData.length > 0) {
+                            var latestData = chartData[chartData.length - 1];
+                            
+                            // Déterminer le niveau d'alerte
+                            var alertLevel = 0;
+                            for (var s = seuils.length - 1; s >= 0; s--) {
+                                if (latestData.value > seuils[s].value) {
+                                    alertLevel = s + 1;
+                                    break;
+                                }
+                            }
+                            
+                            showCurrentLevel(latestData.value, latestData.date, alertLevel);
+                            drawChart();
+                        }
+                    } else {
+                        document.getElementById('currentLevel').innerHTML = '❌';
+                        document.getElementById('lastUpdate').innerHTML = 'Service temporairement indisponible';
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Erreur API alternative:', error);
+                    document.getElementById('currentLevel').innerHTML = '❌';
+                    document.getElementById('lastUpdate').innerHTML = 'Service temporairement indisponible';
+                });
+        }
+        
+        // Chargement automatique au démarrage
+        window.addEventListener('load', function() {
+            loadWaterData();
+        });
+        
+        // Actualisation automatique toutes les 15 minutes
+        setInterval(loadWaterData, 15 * 60 * 1000);
+    </script>
+</body>
+</html>
