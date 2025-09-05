@@ -308,7 +308,7 @@
         var chartData = [];
         var canvas, ctx;
         
-        // Seuils d'alerte avec noms uniquement
+        // Seuils d'alerte
         var seuils = [
             { name: 'Seuil 1', value: 1.60, color: '#9c27b0' }, // violet
             { name: 'Seuil 2', value: 2.80, color: '#ffeb3b' }, // jaune
@@ -410,6 +410,8 @@
             if (chartData.length === 0) return;
             
             canvas = document.getElementById('waterChart');
+            if (!canvas) return;
+            
             ctx = canvas.getContext('2d');
             
             var width = canvas.width;
@@ -422,7 +424,7 @@
             var minValue = Math.min.apply(Math, values);
             var maxValue = Math.max.apply(Math, values);
             
-            // Inclure tous les seuils dans l'échelle
+            // Inclure les seuils dans l'échelle
             var maxSeuil = Math.max.apply(Math, seuils.map(function(s) { return s.value; }));
             if (maxSeuil > maxValue) {
                 maxValue = maxSeuil + 0.2;
@@ -441,6 +443,7 @@
             var maxDate = Math.max.apply(Math, dates);
             var dateRange = maxDate - minDate;
             
+            // Fond
             ctx.clearRect(0, 0, width, height);
             ctx.fillStyle = '#f8f9fa';
             ctx.fillRect(0, 0, width, height);
@@ -463,7 +466,7 @@
                 ctx.fillText((value * 100).toFixed(0) + 'cm', padding - 5, y + 4);
             }
             
-            // Dessiner les seuils avec leurs noms seulement
+            // Dessiner les seuils
             for (var s = 0; s < seuils.length; s++) {
                 var seuil = seuils[s];
                 var seuilY = padding + graphHeight - (graphHeight * (seuil.value - minValue) / valueRange);
@@ -478,7 +481,6 @@
                     ctx.stroke();
                     ctx.setLineDash([]);
                     
-                    // Label du seuil - nom uniquement
                     ctx.fillStyle = seuil.color;
                     ctx.font = 'bold 11px Arial';
                     ctx.textAlign = 'left';
@@ -526,13 +528,12 @@
             }
             ctx.stroke();
             
-            // Points de données avec couleurs selon seuils dépassés
+            // Points colorés selon seuils
             for (var i = 0; i < chartData.length; i++) {
                 var item = chartData[i];
                 var x = dateRange > 0 ? padding + (graphWidth * (item.date.getTime() - minDate) / dateRange) : padding + graphWidth / 2;
                 var y = padding + graphHeight - (graphHeight * (item.value - minValue) / valueRange);
                 
-                // Déterminer la couleur selon le seuil dépassé
                 var seuilDepasse = 0;
                 for (var s = seuils.length - 1; s >= 0; s--) {
                     if (item.value > seuils[s].value) {
@@ -553,7 +554,7 @@
             ctx.textAlign = 'center';
             ctx.fillText('Station V300002001 - Hauteur d\'eau avec seuils d\'alerte', width / 2, 25);
             
-            // Statistiques
+            // Stats
             var avgValue = values.reduce(function(sum, val) { return sum + val; }, 0) / values.length;
             var stats = 'Points: ' + chartData.length + 
                        ' | Min: ' + (Math.min.apply(Math, values) * 100).toFixed(1) + 'cm' +
@@ -563,7 +564,7 @@
             document.getElementById('chartStats').innerHTML = stats;
             document.getElementById('chartInfo').style.display = 'block';
             
-            // Événement click
+            // Click handler
             canvas.onclick = function(event) {
                 var rect = canvas.getBoundingClientRect();
                 var scaleX = canvas.width / rect.width;
@@ -591,7 +592,6 @@
                     var info = '📊 ' + closestPoint.date.toLocaleString('fr-FR') + 
                               ' | Hauteur: ' + (closestPoint.value * 100).toFixed(1) + 'cm';
                     
-                    // Vérifier quel seuil est dépassé
                     for (var s = seuils.length - 1; s >= 0; s--) {
                         if (closestPoint.value > seuils[s].value) {
                             info += ' 🚨 ' + seuils[s].name + ' DÉPASSÉ!';
@@ -605,6 +605,7 @@
         }
         
         function loadWaterData() {
+            console.log('🔄 Chargement des données...');
             document.getElementById('currentLevel').innerHTML = '🔄';
             document.getElementById('lastUpdate').innerHTML = 'Chargement en cours...';
             
@@ -612,12 +613,15 @@
             
             fetch(apiUrl)
                 .then(function(response) {
+                    console.log('📡 Réponse API:', response.status);
                     if (!response.ok) {
                         throw new Error('Erreur réseau: ' + response.status);
                     }
                     return response.json();
                 })
                 .then(function(data) {
+                    console.log('📊 Données reçues:', data);
+                    
                     if (data.data && data.data.length > 0) {
                         chartData = [];
                         
@@ -638,6 +642,8 @@
                         chartData.sort(function(a, b) {
                             return a.date.getTime() - b.date.getTime();
                         });
+                        
+                        console.log('✅ Données traitées:', chartData.length + ' points');
                         
                         if (chartData.length > 0) {
                             var latestData = chartData[chartData.length - 1];
@@ -662,16 +668,17 @@
                     }
                 })
                 .catch(function(error) {
-                    console.error('Erreur lors du chargement des données:', error);
+                    console.error('❌ Erreur:', error);
                     document.getElementById('currentLevel').innerHTML = '❌';
-                    document.getElementById('lastUpdate').innerHTML = 'Erreur de chargement: ' + error.message;
+                    document.getElementById('lastUpdate').innerHTML = 'Service temporairement indisponible';
                     
-                    // Essayer une API alternative
+                    // Essayer l'API alternative
                     tryAlternativeAPI();
                 });
         }
         
         function tryAlternativeAPI() {
+            console.log('🔄 Tentative API alternative...');
             var altApiUrl = 'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48&grandeur_hydro=H';
             
             fetch(altApiUrl)
@@ -682,6 +689,8 @@
                     return response.json();
                 })
                 .then(function(data) {
+                    console.log('📊 Données API v2:', data);
+                    
                     if (data.data && data.data.length > 0) {
                         chartData = [];
                         
@@ -689,7 +698,7 @@
                             var observation = data.data[i];
                             if (observation.resultat_obs && observation.date_obs) {
                                 var date = new Date(observation.date_obs);
-                                var value = parseFloat(observation.resultat_obs);
+                                var value = parseFloat(observation.resultat_obs); // Déjà en mètres
                                 
                                 chartData.push({
                                     date: date,
@@ -698,7 +707,6 @@
                             }
                         }
                         
-                        // Trier par date
                         chartData.sort(function(a, b) {
                             return a.date.getTime() - b.date.getTime();
                         });
@@ -706,7 +714,6 @@
                         if (chartData.length > 0) {
                             var latestData = chartData[chartData.length - 1];
                             
-                            // Déterminer le niveau d'alerte
                             var alertLevel = 0;
                             for (var s = seuils.length - 1; s >= 0; s--) {
                                 if (latestData.value > seuils[s].value) {
@@ -720,23 +727,28 @@
                         }
                     } else {
                         document.getElementById('currentLevel').innerHTML = '❌';
-                        document.getElementById('lastUpdate').innerHTML = 'Service temporairement indisponible';
+                        document.getElementById('lastUpdate').innerHTML = 'Toutes les API sont indisponibles';
                     }
                 })
                 .catch(function(error) {
-                    console.error('Erreur API alternative:', error);
+                    console.error('❌ Erreur API alternative:', error);
                     document.getElementById('currentLevel').innerHTML = '❌';
-                    document.getElementById('lastUpdate').innerHTML = 'Service temporairement indisponible';
+                    document.getElementById('lastUpdate').innerHTML = 'Toutes les API sont indisponibles';
                 });
         }
         
         // Chargement automatique au démarrage
         window.addEventListener('load', function() {
+            console.log('🚀 Application chargée, récupération des données...');
             loadWaterData();
         });
         
         // Actualisation automatique toutes les 15 minutes
-        setInterval(loadWaterData, 15 * 60 * 1000);
+        setInterval(function() {
+            console.log('⏰ Actualisation automatique...');
+            loadWaterData();
+        }, 15 * 60 * 1000);
+        
     </script>
 </body>
 </html>
