@@ -628,22 +628,42 @@
                         throw new Error('Aucune donnée dans la réponse');
                     }
                     
-                    // Traitement des données
+                    // Traitement des données avec diagnostic complet
                     chartData = [];
+                    
+                    console.log('🔍 Diagnostic de la première mesure:', data.data[0]);
+                    console.log('🔍 Clés disponibles:', Object.keys(data.data[0]));
                     
                     for (var i = 0; i < data.data.length; i++) {
                         var obs = data.data[i];
                         
-                        if (obs.resultat_obs !== null && obs.resultat_obs !== undefined && obs.date_obs) {
-                            var date = new Date(obs.date_obs);
-                            var value = parseFloat(obs.resultat_obs) / 1000; // mm vers m
+                        // Logs de diagnostic pour chaque champ
+                        if (i < 3) { // Diagnostiquer les 3 premiers seulement
+                            console.log('🔍 Mesure #' + i + ' complète:', obs);
+                            console.log('  - resultat_obs:', obs.resultat_obs, typeof obs.resultat_obs);
+                            console.log('  - date_obs:', obs.date_obs);
+                            console.log('  - date_debut_obs:', obs.date_debut_obs);
+                            console.log('  - date_fin_obs:', obs.date_fin_obs);
+                        }
+                        
+                        // Essayer différents noms de champs possibles
+                        var resultat = obs.resultat_obs || obs.resultat || obs.valeur || obs.value;
+                        var dateObs = obs.date_obs || obs.date_debut_obs || obs.date || obs.timestamp;
+                        
+                        if (resultat !== null && resultat !== undefined && dateObs) {
+                            var date = new Date(dateObs);
+                            var value = parseFloat(resultat) / 1000; // mm vers m
                             
-                            console.log('📏 Mesure obs_elab #' + i + ':', obs.resultat_obs + 'mm → ' + value + 'm');
+                            console.log('📏 Mesure obs_elab #' + i + ':', resultat + 'mm → ' + value + 'm', 'Date:', date.toLocaleString('fr-FR'));
                             
                             chartData.push({
                                 date: date,
                                 value: value
                             });
+                        } else {
+                            if (i < 3) {
+                                console.log('❌ Mesure #' + i + ' ignorée - resultat:', resultat, 'date:', dateObs);
+                            }
                         }
                     }
                     
