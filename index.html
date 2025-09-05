@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patrouilleur des Digues</title>
+    <title>Surveillance des Digues</title>
     <style>
         * {
             margin: 0;
@@ -208,14 +208,15 @@
         <!-- Bouton d'urgence -->
         <div class="section">
             <h2>🚨 Déclaration d'Incident</h2>
+            
             <button class="btn emergency-button" style="width: 100%; padding: 20px;" onclick="declareIncident()">
-                🚨 DÉCLARATION INCIDENT 🚨
+                🚨 Déclaration Désordre 🚨
             </button>
         </div>
         
         <!-- Monitoring Station V300002001 -->
         <div class="section">
-            <h2>📊 Station V300002001 - Monitoring temps réel</h2>
+            <h2>📊 Station Pont Morand Lyon - Monitoring 24h</h2>
             
             <div class="water-level">
                 <div style="text-align: center;">
@@ -288,7 +289,7 @@
                 ⛪ Formulaire "Visite Digue St Jean"
             </a>
             <a href="https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit" class="btn btn-warning" target="_blank">
-                📝 Rapport d'Incident
+                📝 Modification de la déclaration d’incidents
             </a>
         </div>
         
@@ -298,29 +299,25 @@
             <a href="https://drive.google.com/drive/folders/1deKB9iZ3gYfjndRiJY3Dyod8UQw3kzTA" class="btn btn-success" target="_blank">
                 📄 Documents d'Astreinte
             </a>
-            <a href="https://docs.google.com/spreadsheets/d/1EcmynZSukPIcAvIW_0W6caUiHGLPUTSP/edit?gid=1203425479#gid=1203425479" class="btn btn-success" target="_blank">
+            <a href="https://docs.google.com/spreadsheets/d/1DHt0dOl-bFUE5TxNsH33UVqwarC1mSEv/edit?usp=drive_link&ouid=117931034611088760506&rtpof=true&sd=true" target="_blank">
                 📅 Planning d'Astreinte
             </a>
         </div>
     </div>
 
+    <!-- Script principal -->
     <script>
         var chartData = [];
+        var alertThreshold = 1.60; // 160cm
         var canvas, ctx;
-        
-        // Seuils d'alerte selon vos spécifications
-        var seuils = [
-            { name: 'Seuil 1', value: 1.60, color: '#9c27b0' },     // violet
-            { name: 'Seuil 1bis', value: 2.80, color: '#ffeb3b' },  // jaune
-            { name: 'Seuil 3', value: 4.60, color: '#ff9800' },     // orange
-            { name: 'Seuil 4', value: 4.80, color: '#f44336' }      // rouge
-        ];
         
         function declareIncident() {
             var now = new Date();
             var incidentId = 'INC_' + now.getTime();
             var incidentDate = now.toLocaleDateString('fr-FR');
             var incidentTime = now.toLocaleTimeString('fr-FR');
+            
+            console.log('🚨 Déclaration incident:', incidentId);
             
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -329,6 +326,7 @@
                         generateIncidentReport(incidentId, incidentDate, incidentTime, gpsCoords);
                     },
                     function(error) {
+                        console.log('Erreur GPS:', error);
                         generateIncidentReport(incidentId, incidentDate, incidentTime, 'GPS non disponible');
                     }
                 );
@@ -346,38 +344,77 @@
             rapport += '• Date: ' + date + '\n';
             rapport += '• Heure: ' + time + '\n';
             rapport += '• GPS: ' + gps + '\n';
-            rapport += '• Zone: Lyon - Région Auvergne-Rhône-Alpes\n\n';
+            rapport += '• Zone: Lyon - Région Auvergne-Rhône-Alpes\n';
+            rapport += '• Agent: Patrouilleur d\'astreinte\n\n';
             rapport += '⚠️ DESCRIPTION DE L\'INCIDENT\n';
             rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
             rapport += '[À COMPLÉTER PAR LE PATROUILLEUR]\n\n';
+            rapport += 'Type d\'incident observé:\n';
             rapport += '□ Fissure sur la digue\n';
             rapport += '□ Infiltration d\'eau\n';
             rapport += '□ Affaissement du terrain\n';
-            rapport += '□ Autre: ________________\n\n';
+            rapport += '□ Déformation visible\n';
+            rapport += '□ Érosion du talus\n';
+            rapport += '□ Obstacle sur le chemin de ronde\n';
+            rapport += '□ Problème d\'accès\n';
+            rapport += '□ Autre: ________________________________\n\n';
             rapport += '📊 ÉVALUATION DU RISQUE\n';
             rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-            rapport += '□ FAIBLE  □ MOYEN  □ ÉLEVÉ  □ CRITIQUE\n\n';
+            rapport += '□ FAIBLE - Surveillance renforcée\n';
+            rapport += '□ MOYEN - Intervention sous 24h\n';
+            rapport += '□ ÉLEVÉ - Intervention urgente\n';
+            rapport += '□ CRITIQUE - Alerte immédiate\n\n';
+            rapport += '🔧 ACTIONS ENTREPRISES\n';
+            rapport += '━━━━━━━━━━━━━━━━━━━━━━━\n';
+            rapport += '□ Périmètre sécurisé\n';
+            rapport += '□ Signalisation mise en place\n';
+            rapport += '□ Photos prises (nombre: _____)\n';
+            rapport += '□ Responsable hiérarchique contacté\n';
+            rapport += '□ Autre: ________________________________\n\n';
+            rapport += '📞 CONTACTS EFFECTUÉS\n';
+            rapport += '━━━━━━━━━━━━━━━━━━━━━━━\n';
+            rapport += '□ Responsable astreinte: ___________________\n';
+            rapport += '□ Services techniques: _____________________\n';
+            rapport += '□ Pompiers: _______________________________\n';
+            rapport += '□ Autre: __________________________________\n\n';
+            rapport += '📝 OBSERVATIONS COMPLÉMENTAIRES\n';
+            rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+            rapport += 'Conditions météorologiques:\n';
+            rapport += '□ Sec  □ Pluie légère  □ Pluie forte  □ Vent\n\n';
+            rapport += 'Description détaillée:\n';
+            rapport += '_________________________________________________\n';
+            rapport += '_________________________________________________\n';
+            rapport += '_________________________________________________\n\n';
             rapport += '✍️ SIGNATURE\n';
             rapport += '━━━━━━━━━━━━━━━━\n';
-            rapport += 'Nom: _________________________\n';
-            rapport += 'Signature: ___________________\n\n';
+            rapport += 'Nom du patrouilleur: _______________________\n';
+            rapport += 'Signature: ________________________________\n';
+            rapport += 'Date de validation: _______________________\n\n';
             rapport += '═══════════════════════════════════════════════\n';
-            rapport += 'Rapport généré le: ' + new Date().toLocaleString('fr-FR');
+            rapport += 'Rapport généré automatiquement le: ' + new Date().toLocaleString('fr-FR');
             
+            console.log('📋 Rapport généré pour:', id);
+            
+            // Essayer de copier dans le presse-papier
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(rapport).then(function() {
-                    alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nGPS: ' + gps + '\n\n📋 Rapport copié! Collez avec Ctrl+V');
+                    console.log('✅ Rapport copié dans le presse-papier');
+                    alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nDate: ' + date + '\nHeure: ' + time + '\nGPS: ' + gps + '\n\n📋 Rapport copié dans le presse-papier!\nLe document va s\'ouvrir - collez avec Ctrl+V');
+                }).catch(function(error) {
+                    console.log('❌ Erreur copie presse-papier:', error);
+                    alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nDate: ' + date + '\nHeure: ' + time + '\nGPS: ' + gps + '\n\n⚠️ Copie automatique échouée\nLe document va s\'ouvrir');
                 });
             } else {
-                alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nGPS: ' + gps);
+                alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nDate: ' + date + '\nHeure: ' + time + '\nGPS: ' + gps + '\n\n📄 Le document va s\'ouvrir');
             }
             
+            // Ouvrir le document Google
             setTimeout(function() {
                 window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
             }, 1000);
         }
         
-        function showCurrentLevel(value, date, alertLevel) {
+        function showCurrentLevel(value, date, isAlert) {
             var levelDiv = document.getElementById('currentLevel');
             var updateDiv = document.getElementById('lastUpdate');
             var alertDiv = document.getElementById('alertZone');
@@ -387,14 +424,10 @@
             levelDiv.innerHTML = heightCm + ' cm';
             updateDiv.innerHTML = 'Dernière mesure: ' + new Date(date).toLocaleString('fr-FR');
             
-            if (alertLevel > 0) {
+            if (isAlert) {
                 levelDiv.className = 'current-level alert-high';
-                var seuilActif = seuils[alertLevel - 1];
-                alertDiv.innerHTML = '🚨 ALERTE: ' + seuilActif.name + ' dépassé! Niveau: ' + heightCm + 'cm';
+                alertDiv.innerHTML = '🚨 ALERTE: Seuil de 160cm dépassé! Niveau: ' + heightCm + 'cm';
                 alertDiv.className = 'alert-box';
-                alertDiv.style.backgroundColor = seuilActif.color + '30';
-                alertDiv.style.borderColor = seuilActif.color;
-                alertDiv.style.color = seuilActif.color;
                 alertDiv.style.display = 'block';
                 infoDiv.style.display = 'none';
             } else {
@@ -410,8 +443,6 @@
             if (chartData.length === 0) return;
             
             canvas = document.getElementById('waterChart');
-            if (!canvas) return;
-            
             ctx = canvas.getContext('2d');
             
             var width = canvas.width;
@@ -423,19 +454,17 @@
             var values = chartData.map(function(item) { return item.value; });
             var minValue = Math.min.apply(Math, values);
             var maxValue = Math.max.apply(Math, values);
-            
-            // Inclure les seuils dans l'échelle
-            var maxSeuil = Math.max.apply(Math, seuils.map(function(s) { return s.value; }));
-            if (maxSeuil > maxValue) {
-                maxValue = maxSeuil + 0.2;
-            }
-            
             var valueRange = maxValue - minValue;
-            if (valueRange < 0.5) {
+            
+            if (alertThreshold > maxValue) {
+                maxValue = alertThreshold + 0.1;
+                valueRange = maxValue - minValue;
+            }
+            if (valueRange < 0.2) {
                 var center = (minValue + maxValue) / 2;
-                minValue = center - 0.25;
-                maxValue = center + 0.25;
-                valueRange = 0.5;
+                minValue = center - 0.1;
+                maxValue = center + 0.1;
+                valueRange = 0.2;
             }
             
             var dates = chartData.map(function(item) { return item.date.getTime(); });
@@ -443,12 +472,10 @@
             var maxDate = Math.max.apply(Math, dates);
             var dateRange = maxDate - minDate;
             
-            // Fond
             ctx.clearRect(0, 0, width, height);
             ctx.fillStyle = '#f8f9fa';
             ctx.fillRect(0, 0, width, height);
             
-            // Grille horizontale
             ctx.strokeStyle = '#e9ecef';
             ctx.lineWidth = 1;
             
@@ -466,29 +493,21 @@
                 ctx.fillText((value * 100).toFixed(0) + 'cm', padding - 5, y + 4);
             }
             
-            // Dessiner les seuils
-            for (var s = 0; s < seuils.length; s++) {
-                var seuil = seuils[s];
-                var seuilY = padding + graphHeight - (graphHeight * (seuil.value - minValue) / valueRange);
-                
-                if (seuilY >= padding && seuilY <= height - padding) {
-                    ctx.strokeStyle = seuil.color;
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([8, 4]);
-                    ctx.beginPath();
-                    ctx.moveTo(padding, seuilY);
-                    ctx.lineTo(width - padding, seuilY);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-                    
-                    ctx.fillStyle = seuil.color;
-                    ctx.font = 'bold 11px Arial';
-                    ctx.textAlign = 'left';
-                    ctx.fillText(seuil.name, padding + 5, seuilY - 5);
-                }
-            }
+            var alertY = padding + graphHeight - (graphHeight * (alertThreshold - minValue) / valueRange);
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(padding, alertY);
+            ctx.lineTo(width - padding, alertY);
+            ctx.stroke();
+            ctx.setLineDash([]);
             
-            // Grille temporelle
+            ctx.fillStyle = '#e74c3c';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('⚠️ Seuil 160cm', padding + 5, alertY - 5);
+            
             if (dateRange > 0) {
                 var fourHours = 4 * 60 * 60 * 1000;
                 var timeStep = Math.max(fourHours, dateRange / 6);
@@ -510,7 +529,6 @@
                 }
             }
             
-            // Ligne des données
             ctx.strokeStyle = '#667eea';
             ctx.lineWidth = 3;
             ctx.beginPath();
@@ -528,43 +546,31 @@
             }
             ctx.stroke();
             
-            // Points colorés selon seuils
             for (var i = 0; i < chartData.length; i++) {
                 var item = chartData[i];
                 var x = dateRange > 0 ? padding + (graphWidth * (item.date.getTime() - minDate) / dateRange) : padding + graphWidth / 2;
                 var y = padding + graphHeight - (graphHeight * (item.value - minValue) / valueRange);
                 
-                var seuilDepasse = 0;
-                for (var s = seuils.length - 1; s >= 0; s--) {
-                    if (item.value > seuils[s].value) {
-                        seuilDepasse = s + 1;
-                        break;
-                    }
-                }
-                
-                ctx.fillStyle = seuilDepasse > 0 ? seuils[seuilDepasse - 1].color : '#667eea';
+                ctx.fillStyle = item.value > alertThreshold ? '#e74c3c' : '#667eea';
                 ctx.beginPath();
-                ctx.arc(x, y, seuilDepasse > 0 ? 6 : 4, 0, 2 * Math.PI);
+                ctx.arc(x, y, item.value > alertThreshold ? 6 : 4, 0, 2 * Math.PI);
                 ctx.fill();
             }
             
-            // Titre
             ctx.fillStyle = '#2c3e50';
             ctx.font = 'bold 16px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('Station V300002001 - Hauteur d\'eau avec seuils d\'alerte', width / 2, 25);
+            ctx.fillText('Station V300002001 - Hauteur d\'eau', width / 2, 25);
             
-            // Stats
             var avgValue = values.reduce(function(sum, val) { return sum + val; }, 0) / values.length;
             var stats = 'Points: ' + chartData.length + 
-                       ' | Min: ' + (Math.min.apply(Math, values) * 100).toFixed(1) + 'cm' +
-                       ' | Max: ' + (Math.max.apply(Math, values) * 100).toFixed(1) + 'cm' +
+                       ' | Min: ' + (minValue * 100).toFixed(1) + 'cm' +
+                       ' | Max: ' + (maxValue * 100).toFixed(1) + 'cm' +
                        ' | Moyenne: ' + (avgValue * 100).toFixed(1) + 'cm';
             
             document.getElementById('chartStats').innerHTML = stats;
             document.getElementById('chartInfo').style.display = 'block';
             
-            // Click handler
             canvas.onclick = function(event) {
                 var rect = canvas.getBoundingClientRect();
                 var scaleX = canvas.width / rect.width;
@@ -592,11 +598,8 @@
                     var info = '📊 ' + closestPoint.date.toLocaleString('fr-FR') + 
                               ' | Hauteur: ' + (closestPoint.value * 100).toFixed(1) + 'cm';
                     
-                    for (var s = seuils.length - 1; s >= 0; s--) {
-                        if (closestPoint.value > seuils[s].value) {
-                            info += ' 🚨 ' + seuils[s].name + ' DÉPASSÉ!';
-                            break;
-                        }
+                    if (closestPoint.value > alertThreshold) {
+                        info += ' 🚨 AU-DESSUS DU SEUIL!';
                     }
                     
                     document.getElementById('clickInfo').innerHTML = info;
@@ -605,116 +608,97 @@
         }
         
         function loadWaterData() {
-            console.log('🔄 Chargement des données Hub\'Eau obs_elab...');
             document.getElementById('currentLevel').innerHTML = '🔄';
             document.getElementById('lastUpdate').innerHTML = 'Chargement en cours...';
             
-            // URL qui fonctionne d'après vos logs
-            var apiUrl = 'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48';
+            var apis = [
+                'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48',
+                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48&grandeur_hydro=H',
+                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48'
+            ];
+            
+            tryAPI(0, apis);
+        }
+        
+        function tryAPI(index, apis) {
+            if (index >= apis.length) {
+                document.getElementById('currentLevel').innerHTML = '❌';
+                document.getElementById('lastUpdate').innerHTML = 'Service temporairement indisponible';
+                return;
+            }
+            
+            var apiUrl = apis[index];
             
             fetch(apiUrl)
                 .then(function(response) {
-                    console.log('📡 Réponse obs_elab:', response.status);
-                    if (!response.ok) {
-                        throw new Error('Erreur: ' + response.status);
+                    if (response.status === 200 || response.status === 206) {
+                        return response.json();
                     }
-                    return response.json();
+                    throw new Error('HTTP ' + response.status);
                 })
                 .then(function(data) {
-                    console.log('✅ Données obs_elab reçues:', data);
-                    console.log('📊 Nombre de mesures:', data.data ? data.data.length : 0);
-                    
-                    if (!data.data || data.data.length === 0) {
-                        throw new Error('Aucune donnée dans la réponse');
+                    if (!data.data || !Array.isArray(data.data) || data.data.length === 0) {
+                        throw new Error('Pas de données');
                     }
                     
-                    // Traitement des données avec diagnostic complet
-                    chartData = [];
-                    
-                    console.log('🔍 Diagnostic de la première mesure:', data.data[0]);
-                    console.log('🔍 Clés disponibles:', Object.keys(data.data[0]));
-                    
-                    for (var i = 0; i < data.data.length; i++) {
-                        var obs = data.data[i];
-                        
-                        // Logs de diagnostic pour chaque champ
-                        if (i < 3) { // Diagnostiquer les 3 premiers seulement
-                            console.log('🔍 Mesure #' + i + ' complète:', obs);
-                            console.log('  - resultat_obs:', obs.resultat_obs, typeof obs.resultat_obs);
-                            console.log('  - date_obs:', obs.date_obs);
-                            console.log('  - date_debut_obs:', obs.date_debut_obs);
-                            console.log('  - date_fin_obs:', obs.date_fin_obs);
-                        }
-                        
-                        // Essayer différents noms de champs possibles
-                        var resultat = obs.resultat_obs || obs.resultat || obs.valeur || obs.value;
-                        var dateObs = obs.date_obs || obs.date_debut_obs || obs.date || obs.timestamp;
-                        
-                        if (resultat !== null && resultat !== undefined && dateObs) {
-                            var date = new Date(dateObs);
-                            var value = parseFloat(resultat) / 1000; // mm vers m
-                            
-                            console.log('📏 Mesure obs_elab #' + i + ':', resultat + 'mm → ' + value + 'm', 'Date:', date.toLocaleString('fr-FR'));
-                            
-                            chartData.push({
-                                date: date,
-                                value: value
-                            });
-                        } else {
-                            if (i < 3) {
-                                console.log('❌ Mesure #' + i + ' ignorée - resultat:', resultat, 'date:', dateObs);
-                            }
-                        }
-                    }
-                    
-                    console.log('✅ Données traitées obs_elab:', chartData.length + ' points');
-                    
-                    if (chartData.length > 0) {
-                        // Trier par date
-                        chartData.sort(function(a, b) {
-                            return a.date.getTime() - b.date.getTime();
-                        });
-                        
-                        var latestData = chartData[chartData.length - 1];
-                        console.log('📊 Dernière mesure obs_elab:', latestData.value + 'm');
-                        
-                        // Vérifier les seuils
-                        var alertLevel = 0;
-                        for (var s = seuils.length - 1; s >= 0; s--) {
-                            if (latestData.value > seuils[s].value) {
-                                alertLevel = s + 1;
-                                console.log('🚨 Seuil dépassé:', seuils[s].name);
-                                break;
-                            }
-                        }
-                        
-                        showCurrentLevel(latestData.value, latestData.date, alertLevel);
-                        drawChart();
-                        
-                        console.log('✅ Graphique obs_elab dessiné avec', chartData.length, 'points');
-                    } else {
-                        throw new Error('Aucune donnée valide');
+                    var success = processAPIData(data.data);
+                    if (!success) {
+                        tryAPI(index + 1, apis);
                     }
                 })
                 .catch(function(error) {
-                    console.error('❌ Erreur obs_elab:', error);
-                    document.getElementById('currentLevel').innerHTML = '❌';
-                    document.getElementById('lastUpdate').innerHTML = 'Erreur: ' + error.message;
+                    tryAPI(index + 1, apis);
                 });
         }
         
+        function processAPIData(rawData) {
+            chartData = [];
+            var now = new Date();
+            var sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+            
+            for (var i = 0; i < rawData.length; i++) {
+                var item = rawData[i];
+                
+                var dateField = item.date_obs_elab || item.date_obs || item.date_observation;
+                var valueField = item.resultat_obs_elab || item.resultat_obs || item.resultat_observation;
+                
+                if (dateField && valueField !== undefined && valueField !== null) {
+                    var dateObj = new Date(dateField);
+                    var valueNum = parseFloat(valueField);
+                    
+                    if (valueNum > 10) {
+                        valueNum = valueNum / 1000;
+                    }
+                    
+                    if (!isNaN(dateObj.getTime()) && !isNaN(valueNum) && valueNum > 0 && dateObj >= sevenDaysAgo) {
+                        chartData.push({
+                            date: dateObj,
+                            value: valueNum,
+                            station: 'V300002001'
+                        });
+                    }
+                }
+            }
+            
+            if (chartData.length === 0) {
+                return false;
+            }
+            
+            chartData.sort(function(a, b) { return b.date - a.date; });
+            
+            var latest = chartData[0];
+            var isAlert = latest.value > alertThreshold;
+            
+            showCurrentLevel(latest.value, latest.date, isAlert);
+            drawChart();
+            
+            return true;
+        }
+        
         // Chargement automatique au démarrage
-        window.addEventListener('load', function() {
-            console.log('🚀 Application chargée - NOUVEAU CODE PROPRE');
-            setTimeout(loadWaterData, 1000); // Délai de 1 seconde
-        });
-        
-        // Actualisation automatique toutes les 15 minutes
-        setInterval(function() {
-            console.log('⏰ Actualisation automatique...');
+        setTimeout(function() {
             loadWaterData();
-        }, 15 * 60 * 1000);
-        
+        }, 1000);
     </script>
 </body>
 </html>
