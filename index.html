@@ -208,41 +208,14 @@
         <!-- Bouton d'urgence -->
         <div class="section">
             <h2>🚨 Déclaration d'Incident</h2>
-            
-            <button class="btn emergency-button" style="width: 100%; padding: 20px;" 
-                    onclick="
-                        var now = new Date();
-                        var id = 'INC_' + now.getTime();
-                        var date = now.toLocaleDateString('fr-FR');
-                        var time = now.toLocaleTimeString('fr-FR');
-                        
-                        if (navigator.geolocation) {
-                            navigator.geolocation.getCurrentPosition(function(position) {
-                                var gps = position.coords.latitude.toFixed(6) + ', ' + position.coords.longitude.toFixed(6);
-                                var rapport = '🚨 RAPPORT D\\'INCIDENT - PATROUILLE DES DIGUES\\n═══════════════════════════════════════════════\\n\\n📋 INFORMATIONS AUTOMATIQUES\\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n• ID: ' + id + '\\n• Date: ' + date + '\\n• Heure: ' + time + '\\n• GPS: ' + gps + '\\n• Zone: Lyon - Auvergne-Rhône-Alpes\\n\\n⚠️ DESCRIPTION DE L\\'INCIDENT\\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n[À COMPLÉTER PAR LE PATROUILLEUR]\\n\\n□ Fissure sur la digue\\n□ Infiltration d\\'eau\\n□ Affaissement du terrain\\n□ Déformation visible\\n□ Érosion du talus\\n□ Obstacle sur le chemin de ronde\\n□ Problème d\\'accès\\n□ Autre: ________________\\n\\n📊 ÉVALUATION DU RISQUE\\n━━━━━━━━━━━━━━━━━━━━━━━━━\\n□ FAIBLE - Surveillance renforcée\\n□ MOYEN - Intervention sous 24h\\n□ ÉLEVÉ - Intervention urgente\\n□ CRITIQUE - Alerte immédiate\\n\\n🔧 ACTIONS ENTREPRISES\\n━━━━━━━━━━━━━━━━━━━━━━━\\n□ Périmètre sécurisé\\n□ Signalisation mise en place\\n□ Photos prises\\n□ Responsable contacté\\n\\n📞 CONTACTS EFFECTUÉS\\n━━━━━━━━━━━━━━━━━━━━━━━\\n□ Responsable astreinte: ________________\\n□ Services techniques: __________________\\n□ Pompiers: ____________________________\\n□ Autre: _______________________________\\n\\n📝 OBSERVATIONS\\n━━━━━━━━━━━━━━━━━━━━━━━\\nDescription détaillée:\\n_________________________________________________\\n_________________________________________________\\n\\n✍️ SIGNATURE\\n━━━━━━━━━━━━━━━━\\nNom du patrouilleur: _______________________\\nSignature: ________________________________\\nDate validation: __________________________\\n\\n═══════════════════════════════════════════════\\nRapport généré le: ' + now.toLocaleString('fr-FR');
-                                
-                                if (navigator.clipboard && navigator.clipboard.writeText) {
-                                    navigator.clipboard.writeText(rapport).then(function() {
-                                        alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + id + '\\nGPS: ' + gps + '\\n\\n📋 Rapport copié! Collez avec Ctrl+V');
-                                    });
-                                }
-                                window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
-                            }, function() {
-                                alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + id + '\\nGPS: Non disponible');
-                                window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
-                            });
-                        } else {
-                            alert('🚨 INCIDENT ENREGISTRÉ!\\n\\nID: ' + id + '\\nGPS: Non supporté');
-                            window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
-                        }
-                    ">
+            <button class="btn emergency-button" style="width: 100%; padding: 20px;" onclick="declareIncident()">
                 🚨 DÉCLARATION INCIDENT 🚨
             </button>
         </div>
         
         <!-- Monitoring Station V300002001 -->
         <div class="section">
-            <h2>📊 Station V300002001 - Monitoring 24h</h2>
+            <h2>📊 Station V300002001 - Monitoring temps réel</h2>
             
             <div class="water-level">
                 <div style="text-align: center;">
@@ -331,19 +304,24 @@
         </div>
     </div>
 
-    <!-- Script principal -->
+    <!-- Script simplifié et fonctionnel -->
     <script>
         var chartData = [];
-        var alertThreshold = 1.60; // 160cm
         var canvas, ctx;
+        
+        // Seuils d'alerte
+        var seuils = [
+            { name: 'Seuil 1', value: 1.60, color: '#9c27b0' }, // violet
+            { name: 'Seuil 2', value: 2.80, color: '#ffeb3b' }, // jaune
+            { name: 'Seuil 3', value: 4.60, color: '#ff9800' }, // orange
+            { name: 'Seuil 4', value: 4.80, color: '#f44336' }  // rouge
+        ];
         
         function declareIncident() {
             var now = new Date();
             var incidentId = 'INC_' + now.getTime();
             var incidentDate = now.toLocaleDateString('fr-FR');
             var incidentTime = now.toLocaleTimeString('fr-FR');
-            
-            console.log('🚨 Déclaration incident:', incidentId);
             
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -352,7 +330,6 @@
                         generateIncidentReport(incidentId, incidentDate, incidentTime, gpsCoords);
                     },
                     function(error) {
-                        console.log('Erreur GPS:', error);
                         generateIncidentReport(incidentId, incidentDate, incidentTime, 'GPS non disponible');
                     }
                 );
@@ -370,77 +347,38 @@
             rapport += '• Date: ' + date + '\n';
             rapport += '• Heure: ' + time + '\n';
             rapport += '• GPS: ' + gps + '\n';
-            rapport += '• Zone: Lyon - Région Auvergne-Rhône-Alpes\n';
-            rapport += '• Agent: Patrouilleur d\'astreinte\n\n';
+            rapport += '• Zone: Lyon - Région Auvergne-Rhône-Alpes\n\n';
             rapport += '⚠️ DESCRIPTION DE L\'INCIDENT\n';
             rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
             rapport += '[À COMPLÉTER PAR LE PATROUILLEUR]\n\n';
-            rapport += 'Type d\'incident observé:\n';
             rapport += '□ Fissure sur la digue\n';
             rapport += '□ Infiltration d\'eau\n';
             rapport += '□ Affaissement du terrain\n';
-            rapport += '□ Déformation visible\n';
-            rapport += '□ Érosion du talus\n';
-            rapport += '□ Obstacle sur le chemin de ronde\n';
-            rapport += '□ Problème d\'accès\n';
-            rapport += '□ Autre: ________________________________\n\n';
+            rapport += '□ Autre: ________________\n\n';
             rapport += '📊 ÉVALUATION DU RISQUE\n';
             rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-            rapport += '□ FAIBLE - Surveillance renforcée\n';
-            rapport += '□ MOYEN - Intervention sous 24h\n';
-            rapport += '□ ÉLEVÉ - Intervention urgente\n';
-            rapport += '□ CRITIQUE - Alerte immédiate\n\n';
-            rapport += '🔧 ACTIONS ENTREPRISES\n';
-            rapport += '━━━━━━━━━━━━━━━━━━━━━━━\n';
-            rapport += '□ Périmètre sécurisé\n';
-            rapport += '□ Signalisation mise en place\n';
-            rapport += '□ Photos prises (nombre: _____)\n';
-            rapport += '□ Responsable hiérarchique contacté\n';
-            rapport += '□ Autre: ________________________________\n\n';
-            rapport += '📞 CONTACTS EFFECTUÉS\n';
-            rapport += '━━━━━━━━━━━━━━━━━━━━━━━\n';
-            rapport += '□ Responsable astreinte: ___________________\n';
-            rapport += '□ Services techniques: _____________________\n';
-            rapport += '□ Pompiers: _______________________________\n';
-            rapport += '□ Autre: __________________________________\n\n';
-            rapport += '📝 OBSERVATIONS COMPLÉMENTAIRES\n';
-            rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-            rapport += 'Conditions météorologiques:\n';
-            rapport += '□ Sec  □ Pluie légère  □ Pluie forte  □ Vent\n\n';
-            rapport += 'Description détaillée:\n';
-            rapport += '_________________________________________________\n';
-            rapport += '_________________________________________________\n';
-            rapport += '_________________________________________________\n\n';
+            rapport += '□ FAIBLE  □ MOYEN  □ ÉLEVÉ  □ CRITIQUE\n\n';
             rapport += '✍️ SIGNATURE\n';
             rapport += '━━━━━━━━━━━━━━━━\n';
-            rapport += 'Nom du patrouilleur: _______________________\n';
-            rapport += 'Signature: ________________________________\n';
-            rapport += 'Date de validation: _______________________\n\n';
+            rapport += 'Nom: _________________________\n';
+            rapport += 'Signature: ___________________\n\n';
             rapport += '═══════════════════════════════════════════════\n';
-            rapport += 'Rapport généré automatiquement le: ' + new Date().toLocaleString('fr-FR');
+            rapport += 'Rapport généré le: ' + new Date().toLocaleString('fr-FR');
             
-            console.log('📋 Rapport généré pour:', id);
-            
-            // Essayer de copier dans le presse-papier
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(rapport).then(function() {
-                    console.log('✅ Rapport copié dans le presse-papier');
-                    alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nDate: ' + date + '\nHeure: ' + time + '\nGPS: ' + gps + '\n\n📋 Rapport copié dans le presse-papier!\nLe document va s\'ouvrir - collez avec Ctrl+V');
-                }).catch(function(error) {
-                    console.log('❌ Erreur copie presse-papier:', error);
-                    alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nDate: ' + date + '\nHeure: ' + time + '\nGPS: ' + gps + '\n\n⚠️ Copie automatique échouée\nLe document va s\'ouvrir');
+                    alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nGPS: ' + gps + '\n\n📋 Rapport copié! Collez avec Ctrl+V');
                 });
             } else {
-                alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nDate: ' + date + '\nHeure: ' + time + '\nGPS: ' + gps + '\n\n📄 Le document va s\'ouvrir');
+                alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nGPS: ' + gps);
             }
             
-            // Ouvrir le document Google
             setTimeout(function() {
                 window.open('https://docs.google.com/document/d/1HM0K14gAxf6Xn97wslsNZ8qUg1-2ci182cYFRXyR0AI/edit', '_blank');
             }, 1000);
         }
         
-        function showCurrentLevel(value, date, isAlert) {
+        function showCurrentLevel(value, date, alertLevel) {
             var levelDiv = document.getElementById('currentLevel');
             var updateDiv = document.getElementById('lastUpdate');
             var alertDiv = document.getElementById('alertZone');
@@ -450,10 +388,14 @@
             levelDiv.innerHTML = heightCm + ' cm';
             updateDiv.innerHTML = 'Dernière mesure: ' + new Date(date).toLocaleString('fr-FR');
             
-            if (isAlert) {
+            if (alertLevel > 0) {
                 levelDiv.className = 'current-level alert-high';
-                alertDiv.innerHTML = '🚨 ALERTE: Seuil de 160cm dépassé! Niveau: ' + heightCm + 'cm';
+                var seuilActif = seuils[alertLevel - 1];
+                alertDiv.innerHTML = '🚨 ALERTE: ' + seuilActif.name + ' dépassé! Niveau: ' + heightCm + 'cm';
                 alertDiv.className = 'alert-box';
+                alertDiv.style.backgroundColor = seuilActif.color + '30';
+                alertDiv.style.borderColor = seuilActif.color;
+                alertDiv.style.color = seuilActif.color;
                 alertDiv.style.display = 'block';
                 infoDiv.style.display = 'none';
             } else {
@@ -480,17 +422,19 @@
             var values = chartData.map(function(item) { return item.value; });
             var minValue = Math.min.apply(Math, values);
             var maxValue = Math.max.apply(Math, values);
-            var valueRange = maxValue - minValue;
             
-            if (alertThreshold > maxValue) {
-                maxValue = alertThreshold + 0.1;
-                valueRange = maxValue - minValue;
+            // Inclure tous les seuils dans l'échelle
+            var maxSeuil = Math.max.apply(Math, seuils.map(function(s) { return s.value; }));
+            if (maxSeuil > maxValue) {
+                maxValue = maxSeuil + 0.2;
             }
-            if (valueRange < 0.2) {
+            
+            var valueRange = maxValue - minValue;
+            if (valueRange < 0.5) {
                 var center = (minValue + maxValue) / 2;
-                minValue = center - 0.1;
-                maxValue = center + 0.1;
-                valueRange = 0.2;
+                minValue = center - 0.25;
+                maxValue = center + 0.25;
+                valueRange = 0.5;
             }
             
             var dates = chartData.map(function(item) { return item.date.getTime(); });
@@ -502,6 +446,7 @@
             ctx.fillStyle = '#f8f9fa';
             ctx.fillRect(0, 0, width, height);
             
+            // Grille
             ctx.strokeStyle = '#e9ecef';
             ctx.lineWidth = 1;
             
@@ -519,21 +464,30 @@
                 ctx.fillText((value * 100).toFixed(0) + 'cm', padding - 5, y + 4);
             }
             
-            var alertY = padding + graphHeight - (graphHeight * (alertThreshold - minValue) / valueRange);
-            ctx.strokeStyle = '#e74c3c';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(padding, alertY);
-            ctx.lineTo(width - padding, alertY);
-            ctx.stroke();
-            ctx.setLineDash([]);
+            // Dessiner les seuils
+            for (var s = 0; s < seuils.length; s++) {
+                var seuil = seuils[s];
+                var seuilY = padding + graphHeight - (graphHeight * (seuil.value - minValue) / valueRange);
+                
+                if (seuilY >= padding && seuilY <= height - padding) {
+                    ctx.strokeStyle = seuil.color;
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([8, 4]);
+                    ctx.beginPath();
+                    ctx.moveTo(padding, seuilY);
+                    ctx.lineTo(width - padding, seuilY);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    
+                    // Label du seuil
+                    ctx.fillStyle = seuil.color;
+                    ctx.font = 'bold 11px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(seuil.name, padding + 5, seuilY - 5);
+                }
+            }
             
-            ctx.fillStyle = '#e74c3c';
-            ctx.font = 'bold 12px Arial';
-            ctx.textAlign = 'left';
-            ctx.fillText('⚠️ Seuil 160cm', padding + 5, alertY - 5);
-            
+            // Grille temporelle
             if (dateRange > 0) {
                 var fourHours = 4 * 60 * 60 * 1000;
                 var timeStep = Math.max(fourHours, dateRange / 6);
@@ -555,6 +509,7 @@
                 }
             }
             
+            // Ligne des données
             ctx.strokeStyle = '#667eea';
             ctx.lineWidth = 3;
             ctx.beginPath();
@@ -572,22 +527,34 @@
             }
             ctx.stroke();
             
+            // Points de données
             for (var i = 0; i < chartData.length; i++) {
                 var item = chartData[i];
                 var x = dateRange > 0 ? padding + (graphWidth * (item.date.getTime() - minDate) / dateRange) : padding + graphWidth / 2;
                 var y = padding + graphHeight - (graphHeight * (item.value - minValue) / valueRange);
                 
-                ctx.fillStyle = item.value > alertThreshold ? '#e74c3c' : '#667eea';
+                // Déterminer la couleur selon le seuil dépassé
+                var seuilDepasse = 0;
+                for (var s = seuils.length - 1; s >= 0; s--) {
+                    if (item.value > seuils[s].value) {
+                        seuilDepasse = s + 1;
+                        break;
+                    }
+                }
+                
+                ctx.fillStyle = seuilDepasse > 0 ? seuils[seuilDepasse - 1].color : '#667eea';
                 ctx.beginPath();
-                ctx.arc(x, y, item.value > alertThreshold ? 6 : 4, 0, 2 * Math.PI);
+                ctx.arc(x, y, seuilDepasse > 0 ? 6 : 4, 0, 2 * Math.PI);
                 ctx.fill();
             }
             
+            // Titre
             ctx.fillStyle = '#2c3e50';
             ctx.font = 'bold 16px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('Station V300002001 - Hauteur d\'eau', width / 2, 25);
+            ctx.fillText('Station V300002001 - Hauteur d\'eau avec seuils d\'alerte', width / 2, 25);
             
+            // Statistiques
             var avgValue = values.reduce(function(sum, val) { return sum + val; }, 0) / values.length;
             var stats = 'Points: ' + chartData.length + 
                        ' | Min: ' + (minValue * 100).toFixed(1) + 'cm' +
@@ -597,6 +564,7 @@
             document.getElementById('chartStats').innerHTML = stats;
             document.getElementById('chartInfo').style.display = 'block';
             
+            // Événement click
             canvas.onclick = function(event) {
                 var rect = canvas.getBoundingClientRect();
                 var scaleX = canvas.width / rect.width;
@@ -624,8 +592,12 @@
                     var info = '📊 ' + closestPoint.date.toLocaleString('fr-FR') + 
                               ' | Hauteur: ' + (closestPoint.value * 100).toFixed(1) + 'cm';
                     
-                    if (closestPoint.value > alertThreshold) {
-                        info += ' 🚨 AU-DESSUS DU SEUIL!';
+                    // Vérifier quel seuil est dépassé
+                    for (var s = seuils.length - 1; s >= 0; s--) {
+                        if (closestPoint.value > seuils[s].value) {
+                            info += ' 🚨 ' + seuils[s].name + ' DÉPASSÉ!';
+                            break;
+                        }
                     }
                     
                     document.getElementById('clickInfo').innerHTML = info;
@@ -639,8 +611,7 @@
             
             var apis = [
                 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48',
-                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48&grandeur_hydro=H',
-                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48'
+                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48&grandeur_hydro=H'
             ];
             
             tryAPI(0, apis);
@@ -660,75 +631,4 @@
                     if (response.status === 200 || response.status === 206) {
                         return response.json();
                     }
-                    throw new Error('HTTP ' + response.status);
-                })
-                .then(function(data) {
-                    if (!data.data || !Array.isArray(data.data) || data.data.length === 0) {
-                        throw new Error('Pas de données');
-                    }
-                    
-                    var success = processAPIData(data.data);
-                    if (!success) {
-                        tryAPI(index + 1, apis);
-                    }
-                })
-                .catch(function(error) {
-                    tryAPI(index + 1, apis);
-                });
-        }
-        
-        function processAPIData(rawData) {
-            chartData = [];
-            var now = new Date();
-            var sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-            
-            for (var i = 0; i < rawData.length; i++) {
-                var item = rawData[i];
-                
-                var dateField = item.date_obs_elab || item.date_obs || item.date_observation;
-                var valueField = item.resultat_obs_elab || item.resultat_obs || item.resultat_observation;
-                
-                if (dateField && valueField !== undefined && valueField !== null) {
-                    var dateObj = new Date(dateField);
-                    var valueNum = parseFloat(valueField);
-                    
-                    if (valueNum > 10) {
-                        valueNum = valueNum / 1000;
-                    }
-                    
-                    if (!isNaN(dateObj.getTime()) && !isNaN(valueNum) && valueNum > 0 && dateObj >= sevenDaysAgo) {
-                        chartData.push({
-                            date: dateObj,
-                            value: valueNum,
-                            station: 'V300002001'
-                        });
-                    }
-                }
-            }
-            
-            if (chartData.length === 0) {
-                return false;
-            }
-            
-            chartData.sort(function(a, b) { return b.date - a.date; });
-            
-            var latest = chartData[0];
-            var isAlert = latest.value > alertThreshold;
-            
-            showCurrentLevel(latest.value, latest.date, isAlert);
-            drawChart();
-            
-            return true;
-        }
-        
-        // Chargement automatique au démarrage
-        setTimeout(function() {
-            loadWaterData();
-            // Charger les prévisions Vigicrues après un délai
-            setTimeout(function() {
-                loadSimpleVigicrues();
-            }, 3000);
-        }, 1000);
-    </script>
-</body>
-</html>
+                    throw new Error
