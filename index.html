@@ -207,7 +207,7 @@
         
         <!-- Bouton d'urgence -->
         <div class="section">
-            <h2>🚨 Déclaration d'Incident</h2>
+            <h2>🚨 Déclaration désordre</h2>
             
             <button class="btn emergency-button" style="width: 100%; padding: 20px;" onclick="declareIncident()">
                 🚨 Déclaration Désordre 🚨
@@ -347,52 +347,6 @@
             rapport += '• Zone: Lyon - Région Auvergne-Rhône-Alpes\n';
             rapport += '• Agent: Patrouilleur d\'astreinte\n\n';
             rapport += '⚠️ DESCRIPTION DE L\'INCIDENT\n';
-            rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-            rapport += '[À COMPLÉTER PAR LE PATROUILLEUR]\n\n';
-            rapport += 'Type d\'incident observé:\n';
-            rapport += '□ Fissure sur la digue\n';
-            rapport += '□ Infiltration d\'eau\n';
-            rapport += '□ Affaissement du terrain\n';
-            rapport += '□ Déformation visible\n';
-            rapport += '□ Érosion du talus\n';
-            rapport += '□ Obstacle sur le chemin de ronde\n';
-            rapport += '□ Problème d\'accès\n';
-            rapport += '□ Autre: ________________________________\n\n';
-            rapport += '📊 ÉVALUATION DU RISQUE\n';
-            rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-            rapport += '□ FAIBLE - Surveillance renforcée\n';
-            rapport += '□ MOYEN - Intervention sous 24h\n';
-            rapport += '□ ÉLEVÉ - Intervention urgente\n';
-            rapport += '□ CRITIQUE - Alerte immédiate\n\n';
-            rapport += '🔧 ACTIONS ENTREPRISES\n';
-            rapport += '━━━━━━━━━━━━━━━━━━━━━━━\n';
-            rapport += '□ Périmètre sécurisé\n';
-            rapport += '□ Signalisation mise en place\n';
-            rapport += '□ Photos prises (nombre: _____)\n';
-            rapport += '□ Responsable hiérarchique contacté\n';
-            rapport += '□ Autre: ________________________________\n\n';
-            rapport += '📞 CONTACTS EFFECTUÉS\n';
-            rapport += '━━━━━━━━━━━━━━━━━━━━━━━\n';
-            rapport += '□ Responsable astreinte: ___________________\n';
-            rapport += '□ Services techniques: _____________________\n';
-            rapport += '□ Pompiers: _______________________________\n';
-            rapport += '□ Autre: __________________________________\n\n';
-            rapport += '📝 OBSERVATIONS COMPLÉMENTAIRES\n';
-            rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-            rapport += 'Conditions météorologiques:\n';
-            rapport += '□ Sec  □ Pluie légère  □ Pluie forte  □ Vent\n\n';
-            rapport += 'Description détaillée:\n';
-            rapport += '_________________________________________________\n';
-            rapport += '_________________________________________________\n';
-            rapport += '_________________________________________________\n\n';
-            rapport += '✍️ SIGNATURE\n';
-            rapport += '━━━━━━━━━━━━━━━━\n';
-            rapport += 'Nom du patrouilleur: _______________________\n';
-            rapport += 'Signature: ________________________________\n';
-            rapport += 'Date de validation: _______________________\n\n';
-            rapport += '═══════════════════════════════════════════════\n';
-            rapport += 'Rapport généré automatiquement le: ' + new Date().toLocaleString('fr-FR');
-            
             console.log('📋 Rapport généré pour:', id);
             
             // Essayer de copier dans le presse-papier
