@@ -724,10 +724,10 @@
         // Chargement automatique au démarrage
         setTimeout(function() {
             loadWaterData();
-            // Charger Vigicrues avec un délai pour éviter de surcharger les APIs
+            // Charger les prévisions Vigicrues après un délai
             setTimeout(function() {
-                loadVigicruesData();
-            }, 2000);
+                loadSimpleVigicrues();
+            }, 3000);
         }, 1000);
     </script>
 </body>
