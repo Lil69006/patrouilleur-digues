@@ -308,7 +308,7 @@
         var chartData = [];
         var canvas, ctx;
         
-        // Seuils d'alerte avec les noms exacts demandés
+        // Seuils d'alerte selon vos spécifications
         var seuils = [
             { name: 'Seuil 1', value: 1.60, color: '#9c27b0' },     // violet
             { name: 'Seuil 1bis', value: 2.80, color: '#ffeb3b' },  // jaune
@@ -605,143 +605,88 @@
         }
         
         function loadWaterData() {
-            console.log('🔄 Chargement des données...');
+            console.log('🔄 Chargement des données Hub\'Eau obs_elab...');
             document.getElementById('currentLevel').innerHTML = '🔄';
             document.getElementById('lastUpdate').innerHTML = 'Chargement en cours...';
             
-            var apiUrl = 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48';
+            // URL qui fonctionne d'après vos logs
+            var apiUrl = 'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48';
             
             fetch(apiUrl)
                 .then(function(response) {
-                    console.log('📡 Réponse API:', response.status);
+                    console.log('📡 Réponse obs_elab:', response.status);
                     if (!response.ok) {
-                        throw new Error('Erreur réseau: ' + response.status);
+                        throw new Error('Erreur: ' + response.status);
                     }
                     return response.json();
                 })
                 .then(function(data) {
-                    console.log('📊 Données reçues:', data);
+                    console.log('✅ Données obs_elab reçues:', data);
+                    console.log('📊 Nombre de mesures:', data.data ? data.data.length : 0);
                     
-                    if (data.data && data.data.length > 0) {
-                        chartData = [];
+                    if (!data.data || data.data.length === 0) {
+                        throw new Error('Aucune donnée dans la réponse');
+                    }
+                    
+                    // Traitement des données
+                    chartData = [];
+                    
+                    for (var i = 0; i < data.data.length; i++) {
+                        var obs = data.data[i];
                         
-                        for (var i = 0; i < data.data.length; i++) {
-                            var observation = data.data[i];
-                            if (observation.resultat_obs && observation.date_obs) {
-                                var date = new Date(observation.date_obs);
-                                var value = parseFloat(observation.resultat_obs) / 1000; // Conversion mm vers m
-                                
-                                chartData.push({
-                                    date: date,
-                                    value: value
-                                });
-                            }
+                        if (obs.resultat_obs !== null && obs.resultat_obs !== undefined && obs.date_obs) {
+                            var date = new Date(obs.date_obs);
+                            var value = parseFloat(obs.resultat_obs) / 1000; // mm vers m
+                            
+                            console.log('📏 Mesure obs_elab #' + i + ':', obs.resultat_obs + 'mm → ' + value + 'm');
+                            
+                            chartData.push({
+                                date: date,
+                                value: value
+                            });
                         }
-                        
+                    }
+                    
+                    console.log('✅ Données traitées obs_elab:', chartData.length + ' points');
+                    
+                    if (chartData.length > 0) {
                         // Trier par date
                         chartData.sort(function(a, b) {
                             return a.date.getTime() - b.date.getTime();
                         });
                         
-                        console.log('✅ Données traitées:', chartData.length + ' points');
+                        var latestData = chartData[chartData.length - 1];
+                        console.log('📊 Dernière mesure obs_elab:', latestData.value + 'm');
                         
-                        if (chartData.length > 0) {
-                            var latestData = chartData[chartData.length - 1];
-                            
-                            // Déterminer le niveau d'alerte
-                            var alertLevel = 0;
-                            for (var s = seuils.length - 1; s >= 0; s--) {
-                                if (latestData.value > seuils[s].value) {
-                                    alertLevel = s + 1;
-                                    break;
-                                }
+                        // Vérifier les seuils
+                        var alertLevel = 0;
+                        for (var s = seuils.length - 1; s >= 0; s--) {
+                            if (latestData.value > seuils[s].value) {
+                                alertLevel = s + 1;
+                                console.log('🚨 Seuil dépassé:', seuils[s].name);
+                                break;
                             }
-                            
-                            showCurrentLevel(latestData.value, latestData.date, alertLevel);
-                            drawChart();
-                        } else {
-                            document.getElementById('currentLevel').innerHTML = '❌';
-                            document.getElementById('lastUpdate').innerHTML = 'Aucune donnée disponible';
                         }
+                        
+                        showCurrentLevel(latestData.value, latestData.date, alertLevel);
+                        drawChart();
+                        
+                        console.log('✅ Graphique obs_elab dessiné avec', chartData.length, 'points');
                     } else {
-                        throw new Error('Aucune donnée dans la réponse');
+                        throw new Error('Aucune donnée valide');
                     }
                 })
                 .catch(function(error) {
-                    console.error('❌ Erreur:', error);
+                    console.error('❌ Erreur obs_elab:', error);
                     document.getElementById('currentLevel').innerHTML = '❌';
-                    document.getElementById('lastUpdate').innerHTML = 'Service temporairement indisponible';
-                    
-                    // Essayer l'API alternative
-                    tryAlternativeAPI();
-                });
-        }
-        
-        function tryAlternativeAPI() {
-            console.log('🔄 Tentative API alternative...');
-            var altApiUrl = 'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48&grandeur_hydro=H';
-            
-            fetch(altApiUrl)
-                .then(function(response) {
-                    if (!response.ok) {
-                        throw new Error('API alternative indisponible');
-                    }
-                    return response.json();
-                })
-                .then(function(data) {
-                    console.log('📊 Données API v2:', data);
-                    
-                    if (data.data && data.data.length > 0) {
-                        chartData = [];
-                        
-                        for (var i = 0; i < data.data.length; i++) {
-                            var observation = data.data[i];
-                            if (observation.resultat_obs && observation.date_obs) {
-                                var date = new Date(observation.date_obs);
-                                // Dans l'API v2 obs_elab, les hauteurs sont aussi en mètres
-                                var value = parseFloat(observation.resultat_obs);
-                                
-                                chartData.push({
-                                    date: date,
-                                    value: value
-                                });
-                            }
-                        }
-                        
-                        chartData.sort(function(a, b) {
-                            return a.date.getTime() - b.date.getTime();
-                        });
-                        
-                        if (chartData.length > 0) {
-                            var latestData = chartData[chartData.length - 1];
-                            
-                            var alertLevel = 0;
-                            for (var s = seuils.length - 1; s >= 0; s--) {
-                                if (latestData.value > seuils[s].value) {
-                                    alertLevel = s + 1;
-                                    break;
-                                }
-                            }
-                            
-                            showCurrentLevel(latestData.value, latestData.date, alertLevel);
-                            drawChart();
-                        }
-                    } else {
-                        document.getElementById('currentLevel').innerHTML = '❌';
-                        document.getElementById('lastUpdate').innerHTML = 'Toutes les API sont indisponibles';
-                    }
-                })
-                .catch(function(error) {
-                    console.error('❌ Erreur API alternative:', error);
-                    document.getElementById('currentLevel').innerHTML = '❌';
-                    document.getElementById('lastUpdate').innerHTML = 'Toutes les API sont indisponibles';
+                    document.getElementById('lastUpdate').innerHTML = 'Erreur: ' + error.message;
                 });
         }
         
         // Chargement automatique au démarrage
         window.addEventListener('load', function() {
-            console.log('🚀 Application chargée, récupération des données...');
-            loadWaterData();
+            console.log('🚀 Application chargée - NOUVEAU CODE PROPRE');
+            setTimeout(loadWaterData, 1000); // Délai de 1 seconde
         });
         
         // Actualisation automatique toutes les 15 minutes
