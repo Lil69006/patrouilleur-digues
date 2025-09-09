@@ -228,6 +228,10 @@
             margin: 10px 5px;
         }
 
+        .load-btn:hover {
+            background: #1976d2;
+        }
+
         .thresholds-legend {
             background: #f8f9fa;
             border-radius: 8px;
@@ -248,6 +252,18 @@
             height: 3px;
             margin-right: 10px;
             border-radius: 2px;
+        }
+
+        .debug-info {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            color: #666;
+            max-height: 100px;
+            overflow-y: auto;
         }
         
         @media (max-width: 480px) {
@@ -297,28 +313,34 @@
                 <div id="alertZone" style="display: none;"></div>
                 <div id="infoZone" style="display: none;"></div>
                 
+                <!-- Debug Info -->
+                <div id="debugInfo" class="debug-info" style="display: none;">
+                    <strong>Informations de débogage :</strong><br>
+                    <div id="debugContent">Initialisation...</div>
+                </div>
+                
                 <!-- Légende des seuils -->
                 <div class="thresholds-legend">
                     <h4 style="margin-bottom: 10px;">📏 Seuils de surveillance</h4>
                     <div class="threshold-item">
                         <div class="threshold-color" style="background: #7B1FA2;"></div>
-                        <span>Seuil de vigilance 1: 160 cm (1.60m)</span>
+                        <span>Seuil 1: 160 cm (1.60m) - Surveillance renforcée</span>
                     </div>
                     <div class="threshold-item">
                         <div class="threshold-color" style="background: #F57F17;"></div>
-                        <span>Seuil de vigilance 1bis: 280 cm (2.80m)</span>
+                        <span>Seuil 1bis: 280 cm (2.80m) - Pré-alerte</span>
                     </div>
                     <div class="threshold-item">
                         <div class="threshold-color" style="background: #F57F17;"></div>
-                        <span>Seuil de vigilance 2: 280 cm (2.80m)</span>
+                        <span>Seuil 2: 280 cm (2.80m) - Vigilance</span>
                     </div>
                     <div class="threshold-item">
                         <div class="threshold-color" style="background: #FF9800;"></div>
-                        <span>Seuil de vigilance 3 (niveau de protection): 460 cm (4.60m)</span>
+                        <span>Seuil 3: 460 cm (4.60m) - Alerte</span>
                     </div>
                     <div class="threshold-item">
                         <div class="threshold-color" style="background: #D32F2F;"></div>
-                        <span>Seuil de vigilance 4 (niveau de danger): 480 cm (4.80m)</span>
+                        <span>Seuil 4: 480 cm (4.80m) - Alerte critique</span>
                     </div>
                 </div>
                 
@@ -334,6 +356,12 @@
                 <div style="text-align: center; margin-top: 20px;">
                     <button class="load-btn" onclick="loadWaterData()">
                         🔄 Actualiser les données
+                    </button>
+                    <button class="load-btn" onclick="loadBackupData()" style="background: #ff9800;">
+                        🧪 Données de test
+                    </button>
+                    <button class="load-btn" onclick="toggleDebug()" style="background: #9c27b0;">
+                        🔧 Debug
                     </button>
                 </div>
             </div>
@@ -351,7 +379,7 @@
         <!-- Itinéraires -->
         <div class="section">
             <h2>🗺️ Itinéraires Préétablis</h2>
-            <a href="https://www.google.com/maps/d/edit?mid=1Ss3l_BWgc8yQB2TRXtMxFobuIlsA9PU&usp=sharing" class="btn" target="_blank">
+            <a href="https://www.google.com/maps/d/edit?mid=1Ss3l_BWgc8yQB2TRXtMxFobuIlsA9PU&usp=drive_link" class="btn" target="_blank">
                 📍 Itinéraire 1: Triangle → Eaux bleues
             </a>
             <a href="https://www.google.com/maps/d/edit?mid=1FXGfXu9ZXQ6v0BT7j1ganR-BI1smD2E&usp=sharing" class="btn" target="_blank">
@@ -388,15 +416,16 @@
             <a href="https://drive.google.com/drive/folders/1deKB9iZ3gYfjndRiJY3Dyod8UQw3kzTA" class="btn btn-success" target="_blank">
                 📄 Documents d'Astreinte
             </a>
-            <a href="https://docs.google.com/spreadsheets/d/1DHt0dOl-bFUE5TxNsH33UVqwarC1mSEv/edit?usp=drive_link&ouid=117931034611088760506&rtpof=true&sd=true" target="_blank">
+            <a href="https://docs.google.com/spreadsheets/d/1DHt0dOl-bFUE5TxNsH33UVqwarC1mSEv/edit?usp=drive_link&ouid=117931034611088760506&rtpof=true&sd=true" class="btn btn-success" target="_blank">
                 📅 Planning d'Astreinte
             </a>
         </div>
     </div>
 
-    <!-- Script principal -->
+    <!-- Script principal avec correctif CORS -->
     <script>
         var chartData = [];
+        var debugMode = false;
         
         // Définition des 5 seuils avec leurs couleurs
         var thresholds = [
@@ -409,13 +438,33 @@
         
         var canvas, ctx;
         
+        function addDebugInfo(message) {
+            if (debugMode) {
+                var debugContent = document.getElementById('debugContent');
+                var time = new Date().toLocaleTimeString();
+                debugContent.innerHTML += '<br>[' + time + '] ' + message;
+                debugContent.scrollTop = debugContent.scrollHeight;
+            }
+            console.log(message);
+        }
+        
+        function toggleDebug() {
+            debugMode = !debugMode;
+            var debugDiv = document.getElementById('debugInfo');
+            debugDiv.style.display = debugMode ? 'block' : 'none';
+            
+            if (debugMode) {
+                addDebugInfo('Mode debug activé');
+            }
+        }
+        
         function declareIncident() {
             var now = new Date();
             var incidentId = 'INC_' + now.getTime();
             var incidentDate = now.toLocaleDateString('fr-FR');
             var incidentTime = now.toLocaleTimeString('fr-FR');
             
-            console.log('🚨 Déclaration incident:', incidentId);
+            addDebugInfo('🚨 Déclaration incident: ' + incidentId);
             
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -424,7 +473,7 @@
                         generateIncidentReport(incidentId, incidentDate, incidentTime, gpsCoords);
                     },
                     function(error) {
-                        console.log('Erreur GPS:', error);
+                        addDebugInfo('Erreur GPS: ' + error.message);
                         generateIncidentReport(incidentId, incidentDate, incidentTime, 'GPS non disponible');
                     }
                 );
@@ -445,19 +494,22 @@
             rapport += '• Zone: Lyon - Région Auvergne-Rhône-Alpes\n';
             rapport += '• Agent: Patrouilleur d\'astreinte\n\n';
             rapport += '⚠️ DESCRIPTION DE L\'INCIDENT\n';
-            console.log('📋 Rapport généré pour:', id);
+            rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+            rapport += '[À COMPLÉTER PAR L\'AGENT]\n\n';
+            
+            addDebugInfo('📋 Rapport généré pour: ' + id);
             
             // Essayer de copier dans le presse-papier
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(rapport).then(function() {
-                    console.log('✅ Rapport copié dans le presse-papier');
+                    addDebugInfo('✅ Rapport copié dans le presse-papier');
                     alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nDate: ' + date + '\nHeure: ' + time + '\nGPS: ' + gps + '\n\n📋 Rapport copié dans le presse-papier!\nLe document va s\'ouvrir - collez avec Ctrl+V');
                 }).catch(function(error) {
-                    console.log('❌ Erreur copie presse-papier:', error);
-                    alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nDate: ' + date + '\nHeure: ' + time + '\nGPS: ' + gps + '\n\n⚠️ Copie automatique échouée\nLe document va s\'ouvrir');
+                    addDebugInfo('❌ Erreur copie presse-papier: ' + error.message);
+                    alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nDate: ' + date + '\nHeure: ' + time + '\nGPS: ' + gps + '\n\n⚠️ Copie automatique échouée\nLe document va s\'ouvrir\n\nRapport:\n' + rapport);
                 });
             } else {
-                alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nDate: ' + date + '\nHeure: ' + time + '\nGPS: ' + gps + '\n\n📄 Le document va s\'ouvrir');
+                alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nDate: ' + date + '\nHeure: ' + time + '\nGPS: ' + gps + '\n\n📄 Le document va s\'ouvrir\n\nRapport à copier:\n' + rapport);
             }
             
             // Ouvrir le document Google
@@ -725,14 +777,25 @@
             };
         }
         
+        // FONCTION CORRIGÉE POUR CORS
         function loadWaterData() {
             document.getElementById('currentLevel').innerHTML = '🔄';
             document.getElementById('lastUpdate').innerHTML = 'Chargement en cours...';
+            addDebugInfo('🔄 Début chargement données HubEau');
             
+            // URLs avec proxies CORS pour contourner le blocage
             var apis = [
-                'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48',
-                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48&grandeur_hydro=H',
-                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48'
+                // Proxy AllOrigins (recommandé)
+                'https://api.allorigins.win/get?url=' + encodeURIComponent('https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48'),
+                
+                // Proxy CORS alternatif
+                'https://corsproxy.io/?' + encodeURIComponent('https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48'),
+                
+                // API V2 avec proxy
+                'https://api.allorigins.win/get?url=' + encodeURIComponent('https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48&grandeur_hydro=H'),
+                
+                // Troisième tentative avec API V2 différente
+                'https://corsproxy.io/?' + encodeURIComponent('https://hubeau.eaufrance.fr/api/v2/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48')
             ];
             
             tryAPI(0, apis);
@@ -740,39 +803,130 @@
         
         function tryAPI(index, apis) {
             if (index >= apis.length) {
+                addDebugInfo('❌ Toutes les APIs ont échoué');
                 document.getElementById('currentLevel').innerHTML = '❌';
-                document.getElementById('lastUpdate').innerHTML = 'Service temporairement indisponible';
+                document.getElementById('lastUpdate').innerHTML = 'Service temporairement indisponible - Vérifiez votre connexion';
+                
+                // Afficher message d'aide
+                var alertDiv = document.getElementById('alertZone');
+                alertDiv.innerHTML = '⚠️ Problème de connexion aux serveurs HubEau<br>Essayez le bouton "Données de test" ou consultez Vigicrues directement';
+                alertDiv.className = 'alert-box seuil2';
+                alertDiv.style.display = 'block';
+                
                 return;
             }
             
             var apiUrl = apis[index];
+            var proxyType = apiUrl.includes('allorigins') ? 'AllOrigins' : 
+                           apiUrl.includes('corsproxy') ? 'CorsProxy' : 'Direct';
+            
+            addDebugInfo('🌐 Tentative API ' + (index + 1) + ' (' + proxyType + ')');
             
             fetch(apiUrl)
                 .then(function(response) {
+                    addDebugInfo('📡 Réponse API ' + (index + 1) + ': HTTP ' + response.status);
                     if (response.status === 200 || response.status === 206) {
                         return response.json();
                     }
                     throw new Error('HTTP ' + response.status);
                 })
                 .then(function(data) {
-                    if (!data.data || !Array.isArray(data.data) || data.data.length === 0) {
+                    addDebugInfo('📦 Données reçues API ' + (index + 1));
+                    
+                    // Gestion des différents types de proxy
+                    var actualData;
+                    if (data.contents) {
+                        // AllOrigins retourne les données dans data.contents (string JSON)
+                        try {
+                            actualData = JSON.parse(data.contents);
+                            addDebugInfo('✅ Parsing AllOrigins réussi');
+                        } catch (e) {
+                            addDebugInfo('❌ Erreur parsing AllOrigins: ' + e.message);
+                            throw new Error('Erreur parsing JSON');
+                        }
+                    } else if (data.data) {
+                        // Données directes
+                        actualData = data;
+                        addDebugInfo('✅ Données directes détectées');
+                    } else {
+                        // Autres formats de proxy
+                        actualData = data;
+                        addDebugInfo('✅ Format proxy alternatif');
+                    }
+                    
+                    if (!actualData.data || !Array.isArray(actualData.data) || actualData.data.length === 0) {
+                        addDebugInfo('❌ Pas de données dans la réponse API ' + (index + 1));
                         throw new Error('Pas de données');
                     }
                     
-                    var success = processAPIData(data.data);
+                    addDebugInfo('📊 Traitement ' + actualData.data.length + ' points de données');
+                    var success = processAPIData(actualData.data);
                     if (!success) {
+                        addDebugInfo('❌ Échec traitement API ' + (index + 1) + ', essai suivant');
                         tryAPI(index + 1, apis);
+                    } else {
+                        addDebugInfo('✅ Succès API ' + (index + 1) + ' (' + proxyType + ')');
                     }
                 })
                 .catch(function(error) {
+                    addDebugInfo('❌ Erreur API ' + (index + 1) + ': ' + error.message);
                     tryAPI(index + 1, apis);
                 });
+        }
+        
+        // FONCTION DE SECOURS - Données simulées pour test
+        function loadBackupData() {
+            addDebugInfo('🧪 Chargement données de test simulées');
+            
+            document.getElementById('currentLevel').innerHTML = '🔄';
+            document.getElementById('lastUpdate').innerHTML = 'Génération données de test...';
+            
+            // Données simulées réalistes pour test
+            var now = new Date();
+            var simulatedData = [];
+            
+            // Générer 48 points de données simulées (7 jours)
+            for (var i = 47; i >= 0; i--) {
+                var pointDate = new Date(now.getTime() - (i * 15 * 60 * 1000)); // Toutes les 15 minutes
+                var baseLevel = 175; // Niveau de base en cm
+                var variation = Math.sin(i * 0.1) * 25 + Math.sin(i * 0.05) * 15 + Math.random() * 10 - 5; // Variation réaliste
+                var level = Math.max(50, baseLevel + variation); // Minimum 50cm
+                
+                // Ajouter quelques pics pour tester les seuils
+                if (i === 20) level = 290; // Test seuil 2
+                if (i === 15) level = 470; // Test seuil 3
+                
+                simulatedData.push({
+                    date_obs: pointDate.toISOString(),
+                    resultat_obs: level / 100 // Convertir en mètres
+                });
+            }
+            
+            addDebugInfo('📊 ' + simulatedData.length + ' points de test générés');
+            var success = processAPIData(simulatedData);
+            
+            if (success) {
+                // Ajouter indication que ce sont des données de test
+                var infoDiv = document.getElementById('infoZone');
+                infoDiv.innerHTML = '🧪 DONNÉES DE TEST - Pour démonstration uniquement<br>📊 ' + chartData.length + ' points simulés générés<br>⚠️ Utilisez "Actualiser les données" pour les vraies mesures';
+                infoDiv.className = 'alert-box seuil2';
+                infoDiv.style.display = 'block';
+                
+                // Masquer les autres alertes
+                document.getElementById('alertZone').style.display = 'none';
+                
+                addDebugInfo('✅ Données de test chargées avec succès');
+            }
         }
         
         function processAPIData(rawData) {
             chartData = [];
             var now = new Date();
             var sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+            var processedCount = 0;
+            var skippedCount = 0;
+            
+            addDebugInfo('🔍 Traitement de ' + rawData.length + ' points bruts');
             
             for (var i = 0; i < rawData.length; i++) {
                 var item = rawData[i];
@@ -784,8 +938,10 @@
                     var dateObj = new Date(dateField);
                     var valueNum = parseFloat(valueField);
                     
+                    // Conversion automatique mm vers m si nécessaire
                     if (valueNum > 10) {
                         valueNum = valueNum / 1000;
+                        addDebugInfo('🔄 Conversion mm vers m: ' + (valueNum * 1000) + 'mm → ' + valueNum + 'm');
                     }
                     
                     if (!isNaN(dateObj.getTime()) && !isNaN(valueNum) && valueNum > 0 && dateObj >= sevenDaysAgo) {
@@ -794,18 +950,30 @@
                             value: valueNum,
                             station: 'V300002001'
                         });
+                        processedCount++;
+                    } else {
+                        skippedCount++;
                     }
                 }
             }
             
+            addDebugInfo('📈 Points traités: ' + processedCount + ', ignorés: ' + skippedCount);
+            
             if (chartData.length === 0) {
+                addDebugInfo('❌ Aucune donnée valide trouvée');
                 return false;
             }
             
+            // Tri par date décroissante (plus récent d'abord)
             chartData.sort(function(a, b) { return b.date - a.date; });
             
             var latest = chartData[0];
             var activeThreshold = getActiveThreshold(latest.value);
+            
+            addDebugInfo('📊 Niveau actuel: ' + (latest.value * 100).toFixed(1) + 'cm');
+            if (activeThreshold) {
+                addDebugInfo('🚨 Seuil actif: ' + activeThreshold.name + ' (' + activeThreshold.description + ')');
+            }
             
             showCurrentLevel(latest.value, latest.date, activeThreshold);
             drawChart();
@@ -815,8 +983,17 @@
         
         // Chargement automatique au démarrage
         setTimeout(function() {
+            addDebugInfo('🚀 Initialisation de l\'application');
             loadWaterData();
         }, 1000);
+        
+        // Auto-refresh toutes les 15 minutes
+        setInterval(function() {
+            if (!debugMode) { // Pas d'auto-refresh en mode debug
+                addDebugInfo('🔄 Auto-refresh (15 min)');
+                loadWaterData();
+            }
+        }, 15 * 60 * 1000);
     </script>
 </body>
 </html>
