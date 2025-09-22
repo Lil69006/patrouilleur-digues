@@ -134,9 +134,9 @@
         }
 
         .alert-seuil1 { color: #9C27B0 !important; }
-        .alert-seuil1bis { color: #FF6F00 !important; }
-        .alert-seuil2 { color: #2E7D32 !important; }
-        .alert-seuil3 { color: #FF5722 !important; }
+        .alert-seuil1bis { color: #4CAF50 !important; }
+        .alert-seuil2 { color: #FFC107 !important; }
+        .alert-seuil3 { color: #FF9800 !important; }
         .alert-seuil4 { color: #D32F2F !important; animation: blink 1s infinite; }
 
         @keyframes blink {
@@ -160,21 +160,21 @@
         }
 
         .alert-box.seuil1bis {
-            background: #FFF8E1;
-            color: #FF6F00;
-            border-color: #FF6F00;
+            background: #E8F5E8;
+            color: #4CAF50;
+            border-color: #4CAF50;
         }
 
         .alert-box.seuil2 {
-            background: #E8F5E8;
-            color: #2E7D32;
-            border-color: #2E7D32;
+            background: #FFFDE7;
+            color: #FFC107;
+            border-color: #FFC107;
         }
 
         .alert-box.seuil3 {
-            background: #FBE9E7;
-            color: #FF5722;
-            border-color: #FF5722;
+            background: #FFF3E0;
+            color: #FF9800;
+            border-color: #FF9800;
         }
 
         .alert-box.seuil4 {
@@ -305,15 +305,15 @@
                         <span>Seuil de vigilance 1: 160 cm (1.60m)</span>
                     </div>
                     <div class="threshold-item">
-                        <div class="threshold-color" style="background: #FF6F00;"></div>
+                        <div class="threshold-color" style="background: #4CAF50;"></div>
                         <span>Seuil de vigilance 1bis: 280 cm (2.80m)</span>
                     </div>
                     <div class="threshold-item">
-                        <div class="threshold-color" style="background: #2E7D32;"></div>
+                        <div class="threshold-color" style="background: #FFC107;"></div>
                         <span>Seuil de vigilance 2: 360 cm (3.60m)</span>
                     </div>
                     <div class="threshold-item">
-                        <div class="threshold-color" style="background: #FF5722;"></div>
+                        <div class="threshold-color" style="background: #FF9800;"></div>
                         <span>Seuil de vigilance 3 (niveau de protection): 460 cm (4.60m)</span>
                     </div>
                     <div class="threshold-item">
@@ -401,10 +401,10 @@
         // Définition des 5 seuils avec leurs couleurs améliorées
         var thresholds = [
             { level: 1.60, color: '#9C27B0', name: 'Seuil 1', description: 'Surveillance renforcée' },        // Violet foncé
-            { level: 2.80, color: '#FF6F00', name: 'Seuil 1bis', description: 'Pré-alerte' },              // Orange foncé
-            { level: 3.60, color: '#2E7D32', name: 'Seuil 2', description: 'Vigilance' },                  // Vert foncé
-            { level: 4.60, color: '#FF5722', name: 'Seuil 3', description: 'Alerte' },                     // Rouge-orange
-            { level: 4.80, color: '#D32F2F', name: 'Seuil 4', description: 'Alerte critique' }             // Rouge intense
+            { level: 2.80, color: '#4CAF50', name: 'Seuil 1bis', description: 'Pré-alerte' },              // Vert
+            { level: 3.60, color: '#FFC107', name: 'Seuil 2', description: 'Vigilance' },                  // Jaune
+            { level: 4.60, color: '#FF9800', name: 'Seuil 3', description: 'Alerte' },                     // Orange
+            { level: 4.80, color: '#D32F2F', name: 'Seuil 4', description: 'Alerte critique' }             // Rouge
         ];
         
         var canvas, ctx;
