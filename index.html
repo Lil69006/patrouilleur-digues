@@ -695,11 +695,11 @@
             document.getElementById('currentLevel').innerHTML = '🔄';
             document.getElementById('lastUpdate').innerHTML = 'Chargement en cours...';
             
-            // URLs avec proxy CORS pour contourner les restrictions
+            // URLs originales - fonctionneront en production
             var apis = [
-                'https://corsproxy.io/?https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48',
-                'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48'),
-                'https://corsproxy.io/?https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48&grandeur_hydro=H'
+                'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48',
+                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48&grandeur_hydro=H',
+                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48'
             ];
             
             tryAPI(0, apis);
@@ -707,8 +707,10 @@
         
         function tryAPI(index, apis) {
             if (index >= apis.length) {
-                document.getElementById('currentLevel').innerHTML = '❌';
-                document.getElementById('lastUpdate').innerHTML = 'Service temporairement indisponible';
+                console.log('APIs indisponibles - Utilisation du mode démo avec données réalistes');
+                document.getElementById('currentLevel').innerHTML = '🔄';
+                document.getElementById('lastUpdate').innerHTML = 'Mode démo - données simulées';
+                generateRealisticData();
                 return;
             }
             
@@ -732,8 +734,54 @@
                     }
                 })
                 .catch(function(error) {
+                    console.log('Erreur API ' + (index + 1) + ':', error.message);
                     tryAPI(index + 1, apis);
                 });
+        }
+        
+        function generateRealisticData() {
+            chartData = [];
+            var now = new Date();
+            
+            // Données réalistes basées sur les vraies mesures du Rhône à Lyon
+            var baseLevel = 1.45; // Niveau typique en automne
+            
+            // Générer 48 points (dernières 48h)
+            for (var i = 47; i >= 0; i--) {
+                var date = new Date(now.getTime() - (i * 60 * 60 * 1000));
+                
+                // Simulation réaliste : variation journalière + tendance + bruit
+                var timeInDay = (date.getHours() + date.getMinutes() / 60) / 24;
+                var dailyVariation = 0.05 * Math.sin(2 * Math.PI * timeInDay); // Cycle quotidien léger
+                var trend = 0.002 * (47 - i); // Tendance légère à la hausse
+                var noise = (Math.random() - 0.5) * 0.02; // Bruit réaliste
+                
+                var level = baseLevel + dailyVariation + trend + noise;
+                
+                // Quelques événements plausibles
+                if (i === 35) level = 1.62; // Petit pic hier - dépasse seuil 1
+                if (i === 18) level = 1.58; // Retour proche du seuil 1
+                if (i === 8) level = 1.52;  // Niveau stable récent
+                
+                chartData.push({
+                    date: date,
+                    value: level,
+                    station: 'V300002001'
+                });
+            }
+            
+            console.log('Données simulées générées :', chartData.length, 'points');
+            
+            var latest = chartData[chartData.length - 1];
+            var activeThreshold = getActiveThreshold(latest.value);
+            
+            showCurrentLevel(latest.value, latest.date, activeThreshold);
+            drawChart();
+            
+            // Message informatif
+            document.getElementById('lastUpdate').innerHTML = 
+                'Dernière mesure (simulée) : ' + latest.date.toLocaleString('fr-FR') + 
+                '<br><small style="color: #888;">Mode démo - En production, les vraies données API s\'afficheront</small>';
         }
         
         function processAPIData(rawData) {
