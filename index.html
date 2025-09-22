@@ -133,7 +133,7 @@
             animation: blink 1s infinite;
         }
 
-        .alert-seuil1 { color: #9C27B0 !important; }
+        .alert-seuil1 { color: #7B1FA2 !important; }
         .alert-seuil1bis { color: #4CAF50 !important; }
         .alert-seuil2 { color: #FFC107 !important; }
         .alert-seuil3 { color: #FF9800 !important; }
@@ -155,8 +155,8 @@
 
         .alert-box.seuil1 {
             background: #F3E5F5;
-            color: #9C27B0;
-            border-color: #9C27B0;
+            color: #7B1FA2;
+            border-color: #7B1FA2;
         }
 
         .alert-box.seuil1bis {
@@ -301,7 +301,7 @@
                 <div class="thresholds-legend">
                     <h4 style="margin-bottom: 10px;">📏 Seuils de surveillance</h4>
                     <div class="threshold-item">
-                        <div class="threshold-color" style="background: #9C27B0;"></div>
+                        <div class="threshold-color" style="background: #7B1FA2;"></div>
                         <span>Seuil de vigilance 1: 160 cm (1.60m)</span>
                     </div>
                     <div class="threshold-item">
@@ -388,7 +388,7 @@
             <a href="https://drive.google.com/drive/folders/1deKB9iZ3gYfjndRiJY3Dyod8UQw3kzTA" class="btn btn-success" target="_blank">
                 📄 Documents d'Astreinte
             </a>
-            <a href="https://docs.google.com/spreadsheets/d/1DHt0dOl-bFUE5TxNsH33UVqwarC1mSEv/edit?usp=drive_link&ouid=117931034611088760506&rtpof=true&sd=true" target="_blank" class="btn btn-success">
+            <a href="https://docs.google.com/spreadsheets/d/1DHt0dOl-bFUE5TxNsH33UVqwarC1mSEv/edit?usp=drive_link&ouid=117931034611088760506&rtpof=true&sd=true" target="_blank">
                 📅 Planning d'Astreinte
             </a>
         </div>
@@ -398,9 +398,9 @@
     <script>
         var chartData = [];
         
-        // Définition des 5 seuils avec leurs nouvelles couleurs
+        // Définition des 5 seuils avec leurs nouvelles couleurs distinctes
         var thresholds = [
-            { level: 1.60, color: '#9C27B0', name: 'Seuil 1', description: 'Surveillance renforcée' },
+            { level: 1.60, color: '#7B1FA2', name: 'Seuil 1', description: 'Surveillance renforcée' },
             { level: 2.80, color: '#4CAF50', name: 'Seuil 1bis', description: 'Pré-alerte' },
             { level: 3.60, color: '#FFC107', name: 'Seuil 2', description: 'Vigilance' },
             { level: 4.60, color: '#FF9800', name: 'Seuil 3', description: 'Alerte' },
@@ -585,6 +585,40 @@
                 if (threshold.level >= minValue && threshold.level <= maxValue) {
                     var thresholdY = padding + graphHeight - (graphHeight * (threshold.level - minValue) / valueRange);
                     
+                    ctx.strokeStyle = threshold.color;
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(padding, thresholdY);
+                    ctx.lineTo(width - padding, thresholdY);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    
+                    ctx.fillStyle = threshold.color;
+                    ctx.font = 'bold 11px Arial';
+                    ctx.textAlign = 'left';
+                    var labelX = padding + 5 + (i * 120); // Décaler les étiquettes pour éviter les chevauchements
+                    if (labelX > width - padding - 100) labelX = padding + 5;
+                    ctx.fillText(threshold.name + ' (' + (threshold.level * 100).toFixed(0) + 'cm)', labelX, thresholdY - 5);
+                }
+            }
+            
+            // Grille verticale (heures)
+            if (dateRange > 0) {
+                var fourHours = 4 * 60 * 60 * 1000;
+                var timeStep = Math.max(fourHours, dateRange / 6);
+                
+                for (var time = minDate; time <= maxDate; time += timeStep) {
+                    var x = padding + (graphWidth * (time - minDate) / dateRange);
+                    ctx.strokeStyle = '#e9ecef';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(x, padding);
+                    ctx.lineTo(x, height - padding);
+                    ctx.stroke();
+                    
+                    var date = new Date(time);
+                    ctx.fillStyle = '#666';
                     ctx.font = '11px Arial';
                     ctx.textAlign = 'center';
                     ctx.fillText(date.getHours().toString().padStart(2, '0') + 'h', x, height - padding + 15);
@@ -695,7 +729,6 @@
             document.getElementById('currentLevel').innerHTML = '🔄';
             document.getElementById('lastUpdate').innerHTML = 'Chargement en cours...';
             
-            // URLs originales - fonctionneront en production
             var apis = [
                 'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48',
                 'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48&grandeur_hydro=H',
@@ -707,10 +740,8 @@
         
         function tryAPI(index, apis) {
             if (index >= apis.length) {
-                console.log('APIs indisponibles - Utilisation du mode démo avec données réalistes');
-                document.getElementById('currentLevel').innerHTML = '🔄';
-                document.getElementById('lastUpdate').innerHTML = 'Mode démo - données simulées';
-                generateRealisticData();
+                document.getElementById('currentLevel').innerHTML = '❌';
+                document.getElementById('lastUpdate').innerHTML = 'Service temporairement indisponible';
                 return;
             }
             
@@ -734,54 +765,8 @@
                     }
                 })
                 .catch(function(error) {
-                    console.log('Erreur API ' + (index + 1) + ':', error.message);
                     tryAPI(index + 1, apis);
                 });
-        }
-        
-        function generateRealisticData() {
-            chartData = [];
-            var now = new Date();
-            
-            // Données réalistes basées sur les vraies mesures du Rhône à Lyon
-            var baseLevel = 1.45; // Niveau typique en automne
-            
-            // Générer 48 points (dernières 48h)
-            for (var i = 47; i >= 0; i--) {
-                var date = new Date(now.getTime() - (i * 60 * 60 * 1000));
-                
-                // Simulation réaliste : variation journalière + tendance + bruit
-                var timeInDay = (date.getHours() + date.getMinutes() / 60) / 24;
-                var dailyVariation = 0.05 * Math.sin(2 * Math.PI * timeInDay); // Cycle quotidien léger
-                var trend = 0.002 * (47 - i); // Tendance légère à la hausse
-                var noise = (Math.random() - 0.5) * 0.02; // Bruit réaliste
-                
-                var level = baseLevel + dailyVariation + trend + noise;
-                
-                // Quelques événements plausibles
-                if (i === 35) level = 1.62; // Petit pic hier - dépasse seuil 1
-                if (i === 18) level = 1.58; // Retour proche du seuil 1
-                if (i === 8) level = 1.52;  // Niveau stable récent
-                
-                chartData.push({
-                    date: date,
-                    value: level,
-                    station: 'V300002001'
-                });
-            }
-            
-            console.log('Données simulées générées :', chartData.length, 'points');
-            
-            var latest = chartData[chartData.length - 1];
-            var activeThreshold = getActiveThreshold(latest.value);
-            
-            showCurrentLevel(latest.value, latest.date, activeThreshold);
-            drawChart();
-            
-            // Message informatif
-            document.getElementById('lastUpdate').innerHTML = 
-                'Dernière mesure (simulée) : ' + latest.date.toLocaleString('fr-FR') + 
-                '<br><small style="color: #888;">Mode démo - En production, les vraies données API s\'afficheront</small>';
         }
         
         function processAPIData(rawData) {
@@ -834,38 +819,4 @@
         }, 1000);
     </script>
 </body>
-</html>.strokeStyle = threshold.color;
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([5, 5]);
-                    ctx.beginPath();
-                    ctx.moveTo(padding, thresholdY);
-                    ctx.lineTo(width - padding, thresholdY);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-                    
-                    ctx.fillStyle = threshold.color;
-                    ctx.font = 'bold 11px Arial';
-                    ctx.textAlign = 'left';
-                    var labelX = padding + 5 + (i * 120); // Décaler les étiquettes pour éviter les chevauchements
-                    if (labelX > width - padding - 100) labelX = padding + 5;
-                    ctx.fillText(threshold.name + ' (' + (threshold.level * 100).toFixed(0) + 'cm)', labelX, thresholdY - 5);
-                }
-            }
-            
-            // Grille verticale (heures)
-            if (dateRange > 0) {
-                var fourHours = 4 * 60 * 60 * 1000;
-                var timeStep = Math.max(fourHours, dateRange / 6);
-                
-                for (var time = minDate; time <= maxDate; time += timeStep) {
-                    var x = padding + (graphWidth * (time - minDate) / dateRange);
-                    ctx.strokeStyle = '#e9ecef';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(x, padding);
-                    ctx.lineTo(x, height - padding);
-                    ctx.stroke();
-                    
-                    var date = new Date(time);
-                    ctx.fillStyle = '#666';
-                    ctx
+</html>
