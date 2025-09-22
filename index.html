@@ -493,8 +493,8 @@
                 // Appliquer la classe CSS correspondant au seuil
                 var cssClass = 'current-level';
                 if (activeThreshold.level === 1.60) cssClass += ' alert-seuil1';
-                else if (activeThreshold.level === 2.80 && activeThreshold.name === 'Seuil 1bis') cssClass += ' alert-seuil1bis';
-                else if (activeThreshold.level === 3.60 && activeThreshold.name === 'Seuil 2') cssClass += ' alert-seuil2';
+                else if (activeThreshold.level === 2.80) cssClass += ' alert-seuil1bis';
+                else if (activeThreshold.level === 3.60) cssClass += ' alert-seuil2';
                 else if (activeThreshold.level === 4.60) cssClass += ' alert-seuil3';
                 else if (activeThreshold.level === 4.80) cssClass += ' alert-seuil4';
                 
@@ -503,8 +503,8 @@
                 // Afficher l'alerte correspondante
                 var alertClass = 'alert-box';
                 if (activeThreshold.level === 1.60) alertClass += ' seuil1';
-                else if (activeThreshold.level === 2.80 && activeThreshold.name === 'Seuil 1bis') alertClass += ' seuil1bis';
-                else if (activeThreshold.level === 3.60 && activeThreshold.name === 'Seuil 2') alertClass += ' seuil2';
+                else if (activeThreshold.level === 2.80) alertClass += ' seuil1bis';
+                else if (activeThreshold.level === 3.60) alertClass += ' seuil2';
                 else if (activeThreshold.level === 4.60) alertClass += ' seuil3';
                 else if (activeThreshold.level === 4.80) alertClass += ' seuil4';
                 
