@@ -411,7 +411,7 @@
             <a href="https://drive.google.com/drive/folders/1deKB9iZ3gYfjndRiJY3Dyod8UQw3kzTA" class="btn btn-success" target="_blank">
                 📄 Documents d'Astreinte
             </a>
-            <a href="https://docs.google.com/spreadsheets/d/1DHt0dOl-bFUE5TxNsH33UVqwarC1mSEv/edit?usp=drive_link&ouid=117931034611088760506&rtpof=true&sd=true" target="_blank">
+            <a href="https://docs.google.com/spreadsheets/d/1DHt0dOl-bFUE5TxNsH33UVqwarC1mSEv/edit?usp=drive_link&ouid=117931034611088760506&rtpof=true&sd=true" class="btn btn-success" target="_blank">
                 📅 Planning d'Astreinte
             </a>
         </div>
@@ -419,6 +419,9 @@
 
     <!-- Script principal -->
     <script>
+        // Configuration avec votre URL Google Apps Script
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyPk6xoDabzo2oBoyPNyFAbPVuJgBGkYVhMNyK3zJAnOG_obFqo--f5CIX8VTyDTQE/exec';
+        
         var chartData = [];
         
         // Définition des 5 seuils avec leurs nouvelles couleurs distinctes
@@ -432,414 +435,208 @@
         
         var canvas, ctx;
         
+        // Nouvelle fonction declareIncident avec création Google Docs
         function declareIncident() {
-            var now = new Date();
-            var incidentId = 'INC_' + now.getTime();
-            var incidentDate = now.toLocaleDateString('fr-FR');
-            var incidentTime = now.toLocaleTimeString('fr-FR');
+            const now = new Date();
+            const incidentId = 'INC_' + now.getFullYear() + 
+                              (now.getMonth() + 1).toString().padStart(2, '0') +
+                              now.getDate().toString().padStart(2, '0') + '_' +
+                              now.getHours().toString().padStart(2, '0') +
+                              now.getMinutes().toString().padStart(2, '0') +
+                              now.getSeconds().toString().padStart(2, '0') + '_' +
+                              Math.random().toString(36).substr(2, 5).toUpperCase();
+            
+            const incidentDate = now.toLocaleDateString('fr-FR');
+            const incidentTime = now.toLocaleTimeString('fr-FR');
             
             console.log('🚨 Déclaration incident:', incidentId);
+            
+            // Afficher un message de chargement
+            showLoadingMessage();
             
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
-                        var gpsCoords = position.coords.latitude.toFixed(6) + ', ' + position.coords.longitude.toFixed(6);
-                        generateIncidentReport(incidentId, incidentDate, incidentTime, gpsCoords);
+                        const gpsCoords = position.coords.latitude.toFixed(6) + ', ' + position.coords.longitude.toFixed(6);
+                        createGoogleDocsReport(incidentId, incidentDate, incidentTime, gpsCoords);
                     },
                     function(error) {
                         console.log('Erreur GPS:', error);
-                        generateIncidentReport(incidentId, incidentDate, incidentTime, 'GPS non disponible');
+                        createGoogleDocsReport(incidentId, incidentDate, incidentTime, 'GPS non disponible');
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
                     }
                 );
             } else {
-                generateIncidentReport(incidentId, incidentDate, incidentTime, 'GPS non supporté');
+                createGoogleDocsReport(incidentId, incidentDate, incidentTime, 'GPS non supporté');
             }
         }
-        
-        function generateIncidentReport(id, date, time, gps) {
-            var rapport = '🚨 RAPPORT D\'INCIDENT - PATROUILLE DES DIGUES\n';
+
+        function createGoogleDocsReport(id, date, time, gps) {
+            // Récupérer les données d'eau actuelles si disponibles
+            const currentLevelElement = document.getElementById('currentLevel');
+            const waterLevel = currentLevelElement ? currentLevelElement.innerText.replace(' cm', '') : null;
+            
+            // Déterminer le niveau d'alerte actuel
+            let alertLevel = 'Normal';
+            if (waterLevel && waterLevel !== '--') {
+                const level = parseFloat(waterLevel) / 100; // Convertir en mètres
+                if (level >= 4.80) alertLevel = 'SEUIL 4 - DANGER CRITIQUE';
+                else if (level >= 4.60) alertLevel = 'SEUIL 3 - ALERTE';
+                else if (level >= 3.60) alertLevel = 'SEUIL 2 - VIGILANCE';
+                else if (level >= 2.80) alertLevel = 'SEUIL 1bis - PRÉ-ALERTE';
+                else if (level >= 1.60) alertLevel = 'SEUIL 1 - SURVEILLANCE RENFORCÉE';
+            }
+            
+            // Préparer les données pour l'envoi
+            const reportData = {
+                incidentId: id,
+                date: date,
+                time: time,
+                gps: gps,
+                agent: localStorage.getItem('agentName') || 'Patrouilleur d\'astreinte',
+                waterLevel: waterLevel !== '--' ? waterLevel : null,
+                alertLevel: alertLevel !== 'Normal' ? alertLevel : null
+            };
+            
+            // Envoyer les données à Google Apps Script
+            fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Important pour éviter les problèmes CORS
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(reportData)
+            })
+            .then(() => {
+                // Avec no-cors, on ne peut pas lire la réponse, mais on assume que ça a fonctionné
+                hideLoadingMessage();
+                showSuccessMessage(reportData);
+                
+                // Sauvegarder localement aussi
+                saveIncidentLocally(reportData);
+            })
+            .catch(error => {
+                console.error('Erreur lors de la création du document:', error);
+                hideLoadingMessage();
+                // En cas d'erreur, utiliser la méthode locale
+                generateLocalReport(reportData);
+            });
+        }
+
+        function generateLocalReport(data) {
+            let rapport = '🚨 RAPPORT D\'INCIDENT - PATROUILLE DES DIGUES\n';
             rapport += '═══════════════════════════════════════════════\n\n';
             rapport += '📋 INFORMATIONS AUTOMATIQUES\n';
             rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-            rapport += '• ID Incident: ' + id + '\n';
-            rapport += '• Date: ' + date + '\n';
-            rapport += '• Heure: ' + time + '\n';
-            rapport += '• GPS: ' + gps + '\n';
+            rapport += '• ID Incident: ' + data.incidentId + '\n';
+            rapport += '• Date: ' + data.date + '\n';
+            rapport += '• Heure: ' + data.time + '\n';
+            rapport += '• GPS: ' + data.gps + '\n';
+            if (data.gps !== 'GPS non disponible' && data.gps !== 'GPS non supporté') {
+                rapport += '• Lien Maps: https://maps.google.com/?q=' + data.gps + '\n';
+            }
             rapport += '• Zone: Lyon - Région Auvergne-Rhône-Alpes\n';
-            rapport += '• Agent: Patrouilleur d\'astreinte\n\n';
-            rapport += '⚠️ DESCRIPTION DE L\'INCIDENT\n';
-            console.log('📋 Rapport généré pour:', id);
+            rapport += '• Agent: ' + data.agent + '\n';
+            if (data.waterLevel) {
+                rapport += '• Hauteur d\'eau: ' + data.waterLevel + ' cm\n';
+            }
+            if (data.alertLevel) {
+                rapport += '• ⚠️ ALERTE: ' + data.alertLevel + '\n';
+            }
+            rapport += '\n⚠️ DESCRIPTION DE L\'INCIDENT\n';
+            rapport += '━━━━━━━━━━━━━━━━━━━━━━━━\n';
+            rapport += 'Type: [À compléter]\n';
+            rapport += 'Localisation précise: [À compléter]\n';
+            rapport += 'Description: [À compléter]\n';
+            rapport += '\n🔧 ACTIONS ENTREPRISES\n';
+            rapport += '━━━━━━━━━━━━━━━━━━━━━━━━\n';
+            rapport += '[À compléter]\n';
             
-            // Essayer de copier dans le presse-papier
+            // Copier dans le presse-papier
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(rapport).then(function() {
+                navigator.clipboard.writeText(rapport).then(() => {
                     console.log('✅ Rapport copié dans le presse-papier');
-                    alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nDate: ' + date + '\nHeure: ' + time + '\nGPS: ' + gps + '\n\n📋 Rapport copié dans le presse-papier!\nLe document va s\'ouvrir - collez avec Ctrl+V');
-                }).catch(function(error) {
-                    console.log('❌ Erreur copie presse-papier:', error);
-                    alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nDate: ' + date + '\nHeure: ' + time + '\nGPS: ' + gps + '\n\n⚠️ Copie automatique échouée\nLe document va s\'ouvrir');
+                    hideLoadingMessage();
+                    alert('🚨 INCIDENT ENREGISTRÉ LOCALEMENT!\n\n' +
+                          'ID: ' + data.incidentId + '\n' +
+                          'GPS: ' + data.gps + '\n\n' +
+                          '📋 Rapport copié dans le presse-papier!\n' +
+                          'Le document modèle va s\'ouvrir - collez avec Ctrl+V');
+                }).catch(error => {
+                    console.error('Erreur copie:', error);
+                    hideLoadingMessage();
+                    showManualInstructions(data, rapport);
                 });
             } else {
-                alert('🚨 INCIDENT ENREGISTRÉ!\n\nID: ' + id + '\nDate: ' + date + '\nHeure: ' + time + '\nGPS: ' + gps + '\n\n📄 Le document va s\'ouvrir');
+                hideLoadingMessage();
+                showManualInstructions(data, rapport);
             }
             
-            // Ouvrir le document Google
-            setTimeout(function() {
+            // Sauvegarder localement
+            saveIncidentLocally(data);
+            
+            // Ouvrir le document Google template après un délai
+            setTimeout(() => {
                 window.open('https://docs.google.com/document/d/1noVZoJXTRZhPxUgIgMmXy1exlvEX4D_l1iKgFVYniVs/edit?usp=sharing', '_blank');
-            }, 1000);
+            }, 1500);
         }
-        
-        function getActiveThreshold(value) {
-            // Retourne le seuil le plus élevé qui est dépassé
-            var activeThreshold = null;
-            for (var i = 0; i < thresholds.length; i++) {
-                if (value >= thresholds[i].level) {
-                    if (!activeThreshold || thresholds[i].level > activeThreshold.level) {
-                        activeThreshold = thresholds[i];
-                    }
-                }
-            }
-            return activeThreshold;
-        }
-        
-        function showCurrentLevel(value, date, activeThreshold) {
-            var levelDiv = document.getElementById('currentLevel');
-            var updateDiv = document.getElementById('lastUpdate');
-            var alertDiv = document.getElementById('alertZone');
-            var infoDiv = document.getElementById('infoZone');
-            
-            var heightCm = (value * 100).toFixed(1);
-            levelDiv.innerHTML = heightCm + ' cm';
-            updateDiv.innerHTML = 'Dernière mesure: ' + new Date(date).toLocaleString('fr-FR');
-            
-            if (activeThreshold) {
-                // Appliquer la classe CSS correspondant au seuil
-                var cssClass = 'current-level';
-                if (activeThreshold.level === 1.60) cssClass += ' alert-seuil1';
-                else if (activeThreshold.level === 2.80 && activeThreshold.name === 'Seuil 1bis') cssClass += ' alert-seuil1bis';
-                else if (activeThreshold.level === 3.60 && activeThreshold.name === 'Seuil 2') cssClass += ' alert-seuil2';
-                else if (activeThreshold.level === 4.60) cssClass += ' alert-seuil3';
-                else if (activeThreshold.level === 4.80) cssClass += ' alert-seuil4';
+
+        function saveIncidentLocally(data) {
+            try {
+                // Récupérer les incidents existants
+                let incidents = JSON.parse(localStorage.getItem('incidents') || '[]');
                 
-                levelDiv.className = cssClass;
-                
-                // Afficher l'alerte correspondante
-                var alertClass = 'alert-box';
-                if (activeThreshold.level === 1.60) alertClass += ' seuil1';
-                else if (activeThreshold.level === 2.80 && activeThreshold.name === 'Seuil 1bis') alertClass += ' seuil1bis';
-                else if (activeThreshold.level === 3.60 && activeThreshold.name === 'Seuil 2') alertClass += ' seuil2';
-                else if (activeThreshold.level === 4.60) alertClass += ' seuil3';
-                else if (activeThreshold.level === 4.80) alertClass += ' seuil4';
-                
-                alertDiv.innerHTML = '🚨 ' + activeThreshold.name.toUpperCase() + ' DÉPASSÉ!<br>' + 
-                                   'Niveau: ' + heightCm + 'cm - ' + activeThreshold.description;
-                alertDiv.className = alertClass;
-                alertDiv.style.display = 'block';
-                infoDiv.style.display = 'none';
-            } else {
-                levelDiv.className = 'current-level';
-                alertDiv.style.display = 'none';
-                infoDiv.innerHTML = '✅ Station V300002001 - Surveillance continue<br>📊 ' + chartData.length + ' mesures disponibles<br>💧 Niveau normal - Aucun seuil dépassé';
-                infoDiv.className = 'info-box';
-                infoDiv.style.display = 'block';
-            }
-        }
-        
-        function drawChart() {
-            if (chartData.length === 0) return;
-            
-            canvas = document.getElementById('waterChart');
-            ctx = canvas.getContext('2d');
-            
-            var width = canvas.width;
-            var height = canvas.height;
-            var padding = 60;
-            var graphWidth = width - 2 * padding;
-            var graphHeight = height - 2 * padding;
-            
-            var values = chartData.map(function(item) { return item.value; });
-            var minValue = Math.min.apply(Math, values);
-            var maxValue = Math.max.apply(Math, values);
-            
-            // Étendre la plage pour inclure tous les seuils
-            var maxThreshold = Math.max.apply(Math, thresholds.map(function(t) { return t.level; }));
-            if (maxThreshold > maxValue) {
-                maxValue = maxThreshold + 0.2;
-            }
-            
-            var valueRange = maxValue - minValue;
-            if (valueRange < 0.5) {
-                var center = (minValue + maxValue) / 2;
-                minValue = center - 0.25;
-                maxValue = center + 0.25;
-                valueRange = 0.5;
-            }
-            
-            var dates = chartData.map(function(item) { return item.date.getTime(); });
-            var minDate = Math.min.apply(Math, dates);
-            var maxDate = Math.max.apply(Math, dates);
-            var dateRange = maxDate - minDate;
-            
-            ctx.clearRect(0, 0, width, height);
-            ctx.fillStyle = '#f8f9fa';
-            ctx.fillRect(0, 0, width, height);
-            
-            // Grille horizontale
-            ctx.strokeStyle = '#e9ecef';
-            ctx.lineWidth = 1;
-            
-            for (var i = 0; i <= 8; i++) {
-                var y = padding + (graphHeight * i / 8);
-                ctx.beginPath();
-                ctx.moveTo(padding, y);
-                ctx.lineTo(width - padding, y);
-                ctx.stroke();
-                
-                var value = maxValue - (valueRange * i / 8);
-                ctx.fillStyle = '#666';
-                ctx.font = '12px Arial';
-                ctx.textAlign = 'right';
-                ctx.fillText((value * 100).toFixed(0) + 'cm', padding - 5, y + 4);
-            }
-            
-            // Dessiner tous les seuils
-            for (var i = 0; i < thresholds.length; i++) {
-                var threshold = thresholds[i];
-                if (threshold.level >= minValue && threshold.level <= maxValue) {
-                    var thresholdY = padding + graphHeight - (graphHeight * (threshold.level - minValue) / valueRange);
-                    
-                    ctx.strokeStyle = threshold.color;
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([5, 5]);
-                    ctx.beginPath();
-                    ctx.moveTo(padding, thresholdY);
-                    ctx.lineTo(width - padding, thresholdY);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-                    
-                    ctx.fillStyle = threshold.color;
-                    ctx.font = 'bold 11px Arial';
-                    ctx.textAlign = 'left';
-                    var labelX = padding + 5 + (i * 120); // Décaler les étiquettes pour éviter les chevauchements
-                    if (labelX > width - padding - 100) labelX = padding + 5;
-                    ctx.fillText(threshold.name + ' (' + (threshold.level * 100).toFixed(0) + 'cm)', labelX, thresholdY - 5);
-                }
-            }
-            
-            // Grille verticale (heures)
-            if (dateRange > 0) {
-                var fourHours = 4 * 60 * 60 * 1000;
-                var timeStep = Math.max(fourHours, dateRange / 6);
-                
-                for (var time = minDate; time <= maxDate; time += timeStep) {
-                    var x = padding + (graphWidth * (time - minDate) / dateRange);
-                    ctx.strokeStyle = '#e9ecef';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(x, padding);
-                    ctx.lineTo(x, height - padding);
-                    ctx.stroke();
-                    
-                    var date = new Date(time);
-                    ctx.fillStyle = '#666';
-                    ctx.font = '11px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(date.getHours().toString().padStart(2, '0') + 'h', x, height - padding + 15);
-                }
-            }
-            
-            // Courbe principale
-            ctx.strokeStyle = '#667eea';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            
-            for (var i = 0; i < chartData.length; i++) {
-                var item = chartData[i];
-                var x = dateRange > 0 ? padding + (graphWidth * (item.date.getTime() - minDate) / dateRange) : padding + graphWidth / 2;
-                var y = padding + graphHeight - (graphHeight * (item.value - minValue) / valueRange);
-                
-                if (i === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
-                }
-            }
-            ctx.stroke();
-            
-            // Points sur la courbe avec couleurs selon les seuils
-            for (var i = 0; i < chartData.length; i++) {
-                var item = chartData[i];
-                var x = dateRange > 0 ? padding + (graphWidth * (item.date.getTime() - minDate) / dateRange) : padding + graphWidth / 2;
-                var y = padding + graphHeight - (graphHeight * (item.value - minValue) / valueRange);
-                
-                var activeThreshold = getActiveThreshold(item.value);
-                var pointColor = activeThreshold ? activeThreshold.color : '#667eea';
-                var pointSize = activeThreshold ? 6 : 4;
-                
-                ctx.fillStyle = pointColor;
-                ctx.beginPath();
-                ctx.arc(x, y, pointSize, 0, 2 * Math.PI);
-                ctx.fill();
-                
-                // Bordure blanche pour les points d'alerte
-                if (activeThreshold) {
-                    ctx.strokeStyle = 'white';
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                }
-            }
-            
-            // Titre du graphique
-            ctx.fillStyle = '#2c3e50';
-            ctx.font = 'bold 16px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Station V300002001 - Hauteur d\'eau avec seuils', width / 2, 25);
-            
-            // Statistiques
-            var avgValue = values.reduce(function(sum, val) { return sum + val; }, 0) / values.length;
-            var activePoints = chartData.filter(function(item) { return getActiveThreshold(item.value); }).length;
-            
-            var stats = 'Points: ' + chartData.length + 
-                       ' | Min: ' + (minValue * 100).toFixed(1) + 'cm' +
-                       ' | Max: ' + (maxValue * 100).toFixed(1) + 'cm' +
-                       ' | Moyenne: ' + (avgValue * 100).toFixed(1) + 'cm' +
-                       ' | Alertes: ' + activePoints;
-            
-            document.getElementById('chartStats').innerHTML = stats;
-            document.getElementById('chartInfo').style.display = 'block';
-            
-            // Interaction clic sur le graphique
-            canvas.onclick = function(event) {
-                var rect = canvas.getBoundingClientRect();
-                var scaleX = canvas.width / rect.width;
-                var scaleY = canvas.height / rect.height;
-                var x = (event.clientX - rect.left) * scaleX;
-                var y = (event.clientY - rect.top) * scaleY;
-                
-                var closestPoint = null;
-                var minDistance = Infinity;
-                
-                for (var i = 0; i < chartData.length; i++) {
-                    var item = chartData[i];
-                    var pointX = dateRange > 0 ? padding + (graphWidth * (item.date.getTime() - minDate) / dateRange) : padding + graphWidth / 2;
-                    var pointY = padding + graphHeight - (graphHeight * (item.value - minValue) / valueRange);
-                    
-                    var distance = Math.sqrt(Math.pow(x - pointX, 2) + Math.pow(y - pointY, 2));
-                    
-                    if (distance < minDistance && distance < 30) {
-                        minDistance = distance;
-                        closestPoint = item;
-                    }
-                }
-                
-                if (closestPoint) {
-                    var activeThreshold = getActiveThreshold(closestPoint.value);
-                    var info = '📊 ' + closestPoint.date.toLocaleString('fr-FR') + 
-                              ' | Hauteur: ' + (closestPoint.value * 100).toFixed(1) + 'cm';
-                    
-                    if (activeThreshold) {
-                        info += ' | 🚨 ' + activeThreshold.name + ' (' + activeThreshold.description + ')';
-                    } else {
-                        info += ' | ✅ Niveau normal';
-                    }
-                    
-                    document.getElementById('clickInfo').innerHTML = info;
-                }
-            };
-        }
-        
-        function loadWaterData() {
-            document.getElementById('currentLevel').innerHTML = '🔄';
-            document.getElementById('lastUpdate').innerHTML = 'Chargement en cours...';
-            
-            var apis = [
-                'https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48',
-                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/obs_elab?code_entite=V300002001&format=json&size=48&grandeur_hydro=H',
-                'https://hubeau.eaufrance.fr/api/v2/hydrometrie/observations_tr?code_entite=V300002001&format=json&size=48'
-            ];
-            
-            tryAPI(0, apis);
-        }
-        
-        function tryAPI(index, apis) {
-            if (index >= apis.length) {
-                document.getElementById('currentLevel').innerHTML = '❌';
-                document.getElementById('lastUpdate').innerHTML = 'Service temporairement indisponible';
-                return;
-            }
-            
-            var apiUrl = apis[index];
-            
-            fetch(apiUrl)
-                .then(function(response) {
-                    if (response.status === 200 || response.status === 206) {
-                        return response.json();
-                    }
-                    throw new Error('HTTP ' + response.status);
-                })
-                .then(function(data) {
-                    if (!data.data || !Array.isArray(data.data) || data.data.length === 0) {
-                        throw new Error('Pas de données');
-                    }
-                    
-                    var success = processAPIData(data.data);
-                    if (!success) {
-                        tryAPI(index + 1, apis);
-                    }
-                })
-                .catch(function(error) {
-                    tryAPI(index + 1, apis);
+                // Ajouter le nouvel incident
+                incidents.push({
+                    ...data,
+                    timestamp: new Date().toISOString()
                 });
-        }
-        
-        function processAPIData(rawData) {
-            chartData = [];
-            var now = new Date();
-            var sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-            
-            for (var i = 0; i < rawData.length; i++) {
-                var item = rawData[i];
                 
-                var dateField = item.date_obs_elab || item.date_obs || item.date_observation;
-                var valueField = item.resultat_obs_elab || item.resultat_obs || item.resultat_observation;
-                
-                if (dateField && valueField !== undefined && valueField !== null) {
-                    var dateObj = new Date(dateField);
-                    var valueNum = parseFloat(valueField);
-                    
-                    if (valueNum > 10) {
-                        valueNum = valueNum / 1000;
-                    }
-                    
-                    if (!isNaN(dateObj.getTime()) && !isNaN(valueNum) && valueNum > 0 && dateObj >= sevenDaysAgo) {
-                        chartData.push({
-                            date: dateObj,
-                            value: valueNum,
-                            station: 'V300002001'
-                        });
-                    }
+                // Garder seulement les 50 derniers incidents
+                if (incidents.length > 50) {
+                    incidents = incidents.slice(-50);
                 }
+                
+                // Sauvegarder
+                localStorage.setItem('incidents', JSON.stringify(incidents));
+                console.log('✅ Incident sauvegardé localement');
+            } catch (error) {
+                console.error('Erreur sauvegarde locale:', error);
             }
-            
-            if (chartData.length === 0) {
-                return false;
-            }
-            
-            chartData.sort(function(a, b) { return b.date - a.date; });
-            
-            var latest = chartData[0];
-            var activeThreshold = getActiveThreshold(latest.value);
-            
-            showCurrentLevel(latest.value, latest.date, activeThreshold);
-            drawChart();
-            
-            return true;
         }
-        
-        // Chargement automatique au démarrage
-        setTimeout(function() {
-            loadWaterData();
-        }, 1000);
-    </script>
-</body>
-</html>
+
+        function showLoadingMessage() {
+            // Créer un overlay de chargement
+            const overlay = document.createElement('div');
+            overlay.id = 'loadingOverlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            `;
+            
+            const message = document.createElement('div');
+            message.style.cssText = `
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                text-align: center;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            `;
+            message.innerHTML = `
+                <h3 style="color: #e74c3c; margin-bottom: 15px;">🚨 Création du rapport en cours...</h3>
+                <p>Récupération GPS et création du document Google Docs</p>
+                <div style="margin-top: 20px;">
+                    <div style="width: 200px; height: 4px; background: #eee; border-radius: 2px; overflow: hidden;">
+                        <div style="width: 50%; height: 100%; background: linear-gradient(90deg, #e74c3c, #c0392b);
