@@ -137,68 +137,6 @@
             text-align: center;
         }
 
-        .alert-high {
-            color: #c62828 !important;
-            animation: blink 1s infinite;
-        }
-
-        .alert-seuil1 { color: #7B1FA2 !important; }
-        .alert-seuil1bis { color: #4CAF50 !important; }
-        .alert-seuil2 { color: #FFC107 !important; }
-        .alert-seuil3 { color: #FF9800 !important; }
-        .alert-seuil4 { color: #D32F2F !important; animation: blink 1s infinite; }
-
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0.5; }
-        }
-
-        .alert-box {
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            font-weight: bold;
-            text-align: center;
-            border: 2px solid;
-        }
-
-        .alert-box.seuil1 {
-            background: #F3E5F5;
-            color: #7B1FA2;
-            border-color: #7B1FA2;
-        }
-
-        .alert-box.seuil1bis {
-            background: #E8F5E8;
-            color: #4CAF50;
-            border-color: #4CAF50;
-        }
-
-        .alert-box.seuil2 {
-            background: #FFFDE7;
-            color: #FFC107;
-            border-color: #FFC107;
-        }
-
-        .alert-box.seuil3 {
-            background: #FFF3E0;
-            color: #FF9800;
-            border-color: #FF9800;
-        }
-
-        .alert-box.seuil4 {
-            background: #FFEBEE;
-            color: #D32F2F;
-            border-color: #D32F2F;
-            animation: pulse-alert 2s infinite;
-        }
-
-        @keyframes pulse-alert {
-            0% { background: #FFEBEE; }
-            50% { background: #FFCDD2; }
-            100% { background: #FFEBEE; }
-        }
-
         .info-box {
             background: #e8f5e8;
             color: #2e7d32;
@@ -217,35 +155,6 @@
             text-align: center;
             border: 2px solid #d32f2f;
             font-weight: bold;
-        }
-
-        .chart-canvas {
-            width: 100%;
-            max-width: 800px;
-            height: 300px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin: 20px 0;
-            cursor: crosshair;
-        }
-
-        .chart-info {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border-left: 4px solid #667eea;
-        }
-
-        .load-btn {
-            background: #2196f3;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 10px 5px;
         }
 
         .thresholds-legend {
@@ -269,12 +178,42 @@
             margin-right: 10px;
             border-radius: 2px;
         }
+
+        .incident-display {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .incident-display h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .incident-info {
+            color: #333;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .copy-btn {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
         
         @media (max-width: 480px) {
             .container { padding: 10px; }
             .section { padding: 15px; }
             .current-level { font-size: 36px; }
-            .chart-canvas { height: 250px; }
         }
     </style>
 </head>
@@ -285,7 +224,7 @@
     
     <div class="container">
         <div class="status-bar">
-            📅 <script>document.write(new Date().toLocaleString('fr-FR'));</script> | 📍 Lyon - Région Auvergne-Rhône-Alpes
+            📅 <span id="currentDateTime"></span> | 📍 Lyon - Région Auvergne-Rhône-Alpes
         </div>
         
         <!-- Bouton d'urgence -->
@@ -293,29 +232,35 @@
             <h2>🚨 Déclaration désordre</h2>
             
             <button class="btn emergency-button" style="width: 100%; padding: 20px;" onclick="declareIncident()">
-                🚨 Déclaration Désordre 🚨
+                🚨 DÉCLARATION DÉSORDRE 🚨
             </button>
             
-            <a href="https://docs.google.com/document/d/1noVZoJXTRZhPxUgIgMmXy1exlvEX4D_l1iKgFVYniVs/edit?usp=sharing" class="btn btn-warning" target="_blank">
-                📝 Modification de la déclaration d'incidents
+            <div id="incidentDisplay" class="incident-display">
+                <h3>📋 Dernier incident déclaré</h3>
+                <div id="incidentInfo" class="incident-info"></div>
+                <button class="copy-btn" onclick="copyIncidentToClipboard()">📋 Copier le rapport</button>
+            </div>
+            
+            <a href="https://docs.google.com/document/d/1noVZoJXTRZhPxUgIgMmXy1exlvEX4D_l1iKgFVYniVs/edit?usp=sharing" 
+               class="btn btn-warning" 
+               target="_blank"
+               id="modifyReportBtn">
+                📝 Modifier le rapport d'incident
             </a>
         </div>
         
         <!-- Monitoring Station V300002001 -->
         <div class="section">
-            <h2>📊 Station Pont Morand Lyon - Monitoring 24h</h2>
+            <h2>📊 Station Pont Morand Lyon - V300002001</h2>
             
             <div class="water-level">
                 <div style="text-align: center;">
-                    <h3>💧 Hauteur d'eau actuelle</h3>
+                    <h3>💧 Hauteur d'eau</h3>
                     <div id="waterDisplay">
                         <div class="current-level" id="currentLevel">--</div>
-                        <div id="lastUpdate" style="color: #666; font-size: 14px;">Chargement...</div>
+                        <div id="lastUpdate" style="color: #666; font-size: 14px;">En attente des données...</div>
                     </div>
                 </div>
-                
-                <div id="alertZone" style="display: none;"></div>
-                <div id="infoZone" style="display: none;"></div>
                 
                 <!-- Légende des seuils -->
                 <div class="thresholds-legend">
@@ -342,17 +287,8 @@
                     </div>
                 </div>
                 
-                <!-- Graphique Canvas -->
-                <div style="text-align: center;">
-                    <canvas id="waterChart" class="chart-canvas" width="800" height="300"></canvas>
-                    <div id="chartInfo" class="chart-info" style="display: none;">
-                        <div id="clickInfo">Cliquez sur le graphique pour voir les détails d'un point</div>
-                        <div id="chartStats" style="margin-top: 10px; font-size: 14px; color: #666;"></div>
-                    </div>
-                </div>
-                
                 <div style="text-align: center; margin-top: 20px;">
-                    <button class="load-btn" onclick="loadWaterData()">
+                    <button class="btn btn-secondary" onclick="loadWaterData()">
                         🔄 Actualiser les données
                     </button>
                 </div>
@@ -391,7 +327,7 @@
         <!-- Formulaires -->
         <div class="section">
             <h2>📋 Formulaires de Visite</h2>
-            <div style="background: #ffebee; color: #d32f2f; padding: 15px; border-radius: 10px; margin: 15px 0; text-align: center; border: 2px solid #d32f2f; font-weight: bold;">
+            <div class="info-box-warning">
                 📝 Remplir les formulaires de visite en fin de tournée
             </div>
             <a href="https://docs.google.com/spreadsheets/d/1wV50ZsyoDJhcf5Lja5rl1S9TxsOauadMHmyo9slFQGs/edit?gid=0#gid=0" class="btn btn-secondary" target="_blank">
@@ -419,224 +355,229 @@
 
     <!-- Script principal -->
     <script>
-        // Configuration avec votre URL Google Apps Script
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyPk6xoDabzo2oBoyPNyFAbPVuJgBGkYVhMNyK3zJAnOG_obFqo--f5CIX8VTyDTQE/exec';
+        // Variables globales
+        var lastIncidentReport = '';
+        var googleDocUrl = 'https://docs.google.com/document/d/1noVZoJXTRZhPxUgIgMmXy1exlvEX4D_l1iKgFVYniVs/edit?usp=sharing';
         
-        var chartData = [];
+        // Mise à jour de la date/heure
+        function updateDateTime() {
+            var now = new Date();
+            document.getElementById('currentDateTime').textContent = now.toLocaleString('fr-FR');
+        }
         
-        // Définition des 5 seuils avec leurs nouvelles couleurs distinctes
-        var thresholds = [
-            { level: 1.60, color: '#7B1FA2', name: 'Seuil 1', description: 'Surveillance renforcée' },
-            { level: 2.80, color: '#4CAF50', name: 'Seuil 1bis', description: 'Pré-alerte' },
-            { level: 3.60, color: '#FFC107', name: 'Seuil 2', description: 'Vigilance' },
-            { level: 4.60, color: '#FF9800', name: 'Seuil 3', description: 'Alerte' },
-            { level: 4.80, color: '#D32F2F', name: 'Seuil 4', description: 'Alerte critique' }
-        ];
+        // Mettre à jour toutes les secondes
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
         
-        var canvas, ctx;
-        
-        // Nouvelle fonction declareIncident avec création Google Docs
+        // Fonction principale de déclaration d'incident
         function declareIncident() {
-            const now = new Date();
-            const incidentId = 'INC_' + now.getFullYear() + 
-                              (now.getMonth() + 1).toString().padStart(2, '0') +
-                              now.getDate().toString().padStart(2, '0') + '_' +
-                              now.getHours().toString().padStart(2, '0') +
-                              now.getMinutes().toString().padStart(2, '0') +
-                              now.getSeconds().toString().padStart(2, '0') + '_' +
-                              Math.random().toString(36).substr(2, 5).toUpperCase();
+            var now = new Date();
             
-            const incidentDate = now.toLocaleDateString('fr-FR');
-            const incidentTime = now.toLocaleTimeString('fr-FR');
+            // Générer un ID unique avec date et heure
+            var incidentId = 'INC-' + 
+                now.getFullYear() + 
+                ('0' + (now.getMonth() + 1)).slice(-2) +
+                ('0' + now.getDate()).slice(-2) + '-' +
+                ('0' + now.getHours()).slice(-2) +
+                ('0' + now.getMinutes()).slice(-2) +
+                ('0' + now.getSeconds()).slice(-2) + '-' +
+                Math.random().toString(36).substr(2, 4).toUpperCase();
+            
+            var incidentDate = now.toLocaleDateString('fr-FR');
+            var incidentTime = now.toLocaleTimeString('fr-FR');
             
             console.log('🚨 Déclaration incident:', incidentId);
             
-            // Afficher un message de chargement
-            showLoadingMessage();
-            
+            // Essayer de récupérer la position GPS
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
-                        const gpsCoords = position.coords.latitude.toFixed(6) + ', ' + position.coords.longitude.toFixed(6);
-                        createGoogleDocsReport(incidentId, incidentDate, incidentTime, gpsCoords);
+                        var gpsCoords = position.coords.latitude.toFixed(6) + ', ' + position.coords.longitude.toFixed(6);
+                        var gpsLink = 'https://maps.google.com/?q=' + gpsCoords;
+                        generateIncidentReport(incidentId, incidentDate, incidentTime, gpsCoords, gpsLink);
                     },
                     function(error) {
                         console.log('Erreur GPS:', error);
-                        createGoogleDocsReport(incidentId, incidentDate, incidentTime, 'GPS non disponible');
+                        generateIncidentReport(incidentId, incidentDate, incidentTime, 'Position GPS non disponible', '');
                     },
                     {
                         enableHighAccuracy: true,
-                        timeout: 10000,
+                        timeout: 5000,
                         maximumAge: 0
                     }
                 );
             } else {
-                createGoogleDocsReport(incidentId, incidentDate, incidentTime, 'GPS non supporté');
+                generateIncidentReport(incidentId, incidentDate, incidentTime, 'GPS non supporté', '');
             }
         }
-
-        function createGoogleDocsReport(id, date, time, gps) {
-            // Récupérer les données d'eau actuelles si disponibles
-            const currentLevelElement = document.getElementById('currentLevel');
-            const waterLevel = currentLevelElement ? currentLevelElement.innerText.replace(' cm', '') : null;
+        
+        function generateIncidentReport(id, date, time, gps, gpsLink) {
+            var rapport = '════════════════════════════════════════\n';
+            rapport += '🚨 RAPPORT D\'INCIDENT - PATROUILLE DIGUE\n';
+            rapport += '════════════════════════════════════════\n\n';
             
-            // Déterminer le niveau d'alerte actuel
-            let alertLevel = 'Normal';
-            if (waterLevel && waterLevel !== '--') {
-                const level = parseFloat(waterLevel) / 100; // Convertir en mètres
-                if (level >= 4.80) alertLevel = 'SEUIL 4 - DANGER CRITIQUE';
-                else if (level >= 4.60) alertLevel = 'SEUIL 3 - ALERTE';
-                else if (level >= 3.60) alertLevel = 'SEUIL 2 - VIGILANCE';
-                else if (level >= 2.80) alertLevel = 'SEUIL 1bis - PRÉ-ALERTE';
-                else if (level >= 1.60) alertLevel = 'SEUIL 1 - SURVEILLANCE RENFORCÉE';
-            }
-            
-            // Préparer les données pour l'envoi
-            const reportData = {
-                incidentId: id,
-                date: date,
-                time: time,
-                gps: gps,
-                agent: localStorage.getItem('agentName') || 'Patrouilleur d\'astreinte',
-                waterLevel: waterLevel !== '--' ? waterLevel : null,
-                alertLevel: alertLevel !== 'Normal' ? alertLevel : null
-            };
-            
-            // Envoyer les données à Google Apps Script
-            fetch(APPS_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors', // Important pour éviter les problèmes CORS
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(reportData)
-            })
-            .then(() => {
-                // Avec no-cors, on ne peut pas lire la réponse, mais on assume que ça a fonctionné
-                hideLoadingMessage();
-                showSuccessMessage(reportData);
-                
-                // Sauvegarder localement aussi
-                saveIncidentLocally(reportData);
-            })
-            .catch(error => {
-                console.error('Erreur lors de la création du document:', error);
-                hideLoadingMessage();
-                // En cas d'erreur, utiliser la méthode locale
-                generateLocalReport(reportData);
-            });
-        }
-
-        function generateLocalReport(data) {
-            let rapport = '🚨 RAPPORT D\'INCIDENT - PATROUILLE DES DIGUES\n';
-            rapport += '═══════════════════════════════════════════════\n\n';
             rapport += '📋 INFORMATIONS AUTOMATIQUES\n';
-            rapport += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-            rapport += '• ID Incident: ' + data.incidentId + '\n';
-            rapport += '• Date: ' + data.date + '\n';
-            rapport += '• Heure: ' + data.time + '\n';
-            rapport += '• GPS: ' + data.gps + '\n';
-            if (data.gps !== 'GPS non disponible' && data.gps !== 'GPS non supporté') {
-                rapport += '• Lien Maps: https://maps.google.com/?q=' + data.gps + '\n';
+            rapport += '────────────────────────────────\n';
+            rapport += '• ID Incident: ' + id + '\n';
+            rapport += '• Date: ' + date + '\n';
+            rapport += '• Heure: ' + time + '\n';
+            rapport += '• Position GPS: ' + gps + '\n';
+            if (gpsLink) {
+                rapport += '• Lien Maps: ' + gpsLink + '\n';
             }
             rapport += '• Zone: Lyon - Région Auvergne-Rhône-Alpes\n';
-            rapport += '• Agent: ' + data.agent + '\n';
-            if (data.waterLevel) {
-                rapport += '• Hauteur d\'eau: ' + data.waterLevel + ' cm\n';
-            }
-            if (data.alertLevel) {
-                rapport += '• ⚠️ ALERTE: ' + data.alertLevel + '\n';
-            }
-            rapport += '\n⚠️ DESCRIPTION DE L\'INCIDENT\n';
-            rapport += '━━━━━━━━━━━━━━━━━━━━━━━━\n';
-            rapport += 'Type: [À compléter]\n';
-            rapport += 'Localisation précise: [À compléter]\n';
-            rapport += 'Description: [À compléter]\n';
-            rapport += '\n🔧 ACTIONS ENTREPRISES\n';
-            rapport += '━━━━━━━━━━━━━━━━━━━━━━━━\n';
-            rapport += '[À compléter]\n';
+            rapport += '• Station référence: V300002001 - Pont Morand\n';
+            rapport += '• Agent: [NOM AGENT]\n\n';
             
-            // Copier dans le presse-papier
+            rapport += '⚠️ DESCRIPTION DU DÉSORDRE\n';
+            rapport += '────────────────────────────────\n';
+            rapport += '• Type de désordre:\n';
+            rapport += '  ☐ Érosion/Affouillement\n';
+            rapport += '  ☐ Fissure/Tassement\n';
+            rapport += '  ☐ Glissement/Éboulement\n';
+            rapport += '  ☐ Infiltration/Suintement\n';
+            rapport += '  ☐ Débordement\n';
+            rapport += '  ☐ Obstacle/Embâcle\n';
+            rapport += '  ☐ Dégradation d\'ouvrage\n';
+            rapport += '  ☐ Autre: _______________\n\n';
+            
+            rapport += '• Localisation précise:\n';
+            rapport += '  _________________________________\n\n';
+            
+            rapport += '• Description détaillée:\n';
+            rapport += '  _________________________________\n';
+            rapport += '  _________________________________\n';
+            rapport += '  _________________________________\n\n';
+            
+            rapport += '🔧 ACTIONS ENTREPRISES\n';
+            rapport += '────────────────────────────────\n';
+            rapport += '  ☐ Sécurisation du périmètre\n';
+            rapport += '  ☐ Information des autorités\n';
+            rapport += '  ☐ Mise en place signalisation\n';
+            rapport += '  ☐ Intervention d\'urgence\n';
+            rapport += '  ☐ Surveillance renforcée\n\n';
+            
+            rapport += '📸 PHOTOS\n';
+            rapport += '────────────────────────────────\n';
+            rapport += '  ☐ Photos prises (nombre: ___)\n';
+            rapport += '  ☐ À joindre au rapport\n\n';
+            
+            rapport += '📊 NIVEAU D\'URGENCE\n';
+            rapport += '────────────────────────────────\n';
+            rapport += '  ☐ 🔴 Critique - Intervention immédiate\n';
+            rapport += '  ☐ 🟠 Urgent - Intervention sous 24h\n';
+            rapport += '  ☐ 🟡 Important - Intervention sous 48h\n';
+            rapport += '  ☐ 🟢 Modéré - Surveillance renforcée\n\n';
+            
+            rapport += '════════════════════════════════════════\n';
+            rapport += 'Signature agent: _________________ \n';
+            rapport += 'Date/Heure: ' + date + ' ' + time + '\n';
+            rapport += '════════════════════════════════════════\n';
+            
+            // Sauvegarder le rapport
+            lastIncidentReport = rapport;
+            
+            // Afficher le rapport
+            document.getElementById('incidentInfo').textContent = rapport;
+            document.getElementById('incidentDisplay').style.display = 'block';
+            
+            // Copier automatiquement dans le presse-papier
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(rapport).then(() => {
-                    console.log('✅ Rapport copié dans le presse-papier');
-                    hideLoadingMessage();
-                    alert('🚨 INCIDENT ENREGISTRÉ LOCALEMENT!\n\n' +
-                          'ID: ' + data.incidentId + '\n' +
-                          'GPS: ' + data.gps + '\n\n' +
-                          '📋 Rapport copié dans le presse-papier!\n' +
-                          'Le document modèle va s\'ouvrir - collez avec Ctrl+V');
-                }).catch(error => {
-                    console.error('Erreur copie:', error);
-                    hideLoadingMessage();
-                    showManualInstructions(data, rapport);
+                navigator.clipboard.writeText(rapport).then(function() {
+                    alert('✅ INCIDENT DÉCLARÉ!\n\n' +
+                          '📋 ID: ' + id + '\n' +
+                          '📍 GPS: ' + gps + '\n' +
+                          '📅 Date: ' + date + '\n' +
+                          '🕐 Heure: ' + time + '\n\n' +
+                          '✅ Le rapport a été copié dans le presse-papier.\n' +
+                          '📝 Cliquez sur "Modifier le rapport d\'incident" pour coller et compléter le rapport dans Google Docs.');
+                }).catch(function(err) {
+                    console.error('Erreur lors de la copie:', err);
+                    showManualCopyInstructions();
                 });
             } else {
-                hideLoadingMessage();
-                showManualInstructions(data, rapport);
+                showManualCopyInstructions();
             }
             
-            // Sauvegarder localement
-            saveIncidentLocally(data);
-            
-            // Ouvrir le document Google template après un délai
-            setTimeout(() => {
-                window.open('https://docs.google.com/document/d/1noVZoJXTRZhPxUgIgMmXy1exlvEX4D_l1iKgFVYniVs/edit?usp=sharing', '_blank');
-            }, 1500);
+            // Sauvegarder en localStorage
+            saveIncidentToLocalStorage(id, date, time, gps, rapport);
         }
-
-        function saveIncidentLocally(data) {
+        
+        function copyIncidentToClipboard() {
+            if (lastIncidentReport && navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(lastIncidentReport).then(function() {
+                    alert('✅ Rapport copié dans le presse-papier!');
+                }).catch(function(err) {
+                    console.error('Erreur lors de la copie:', err);
+                    alert('❌ Erreur lors de la copie. Sélectionnez et copiez manuellement le texte.');
+                });
+            } else {
+                alert('❌ Copie non disponible. Sélectionnez et copiez manuellement le texte.');
+            }
+        }
+        
+        function showManualCopyInstructions() {
+            alert('📋 INCIDENT DÉCLARÉ!\n\n' +
+                  '⚠️ La copie automatique n\'est pas disponible.\n\n' +
+                  'Instructions:\n' +
+                  '1. Sélectionnez et copiez le rapport affiché\n' +
+                  '2. Cliquez sur "Modifier le rapport d\'incident"\n' +
+                  '3. Collez le rapport dans le document Google Docs\n' +
+                  '4. Complétez les informations manquantes');
+        }
+        
+        function saveIncidentToLocalStorage(id, date, time, gps, rapport) {
             try {
-                // Récupérer les incidents existants
-                let incidents = JSON.parse(localStorage.getItem('incidents') || '[]');
-                
-                // Ajouter le nouvel incident
+                var incidents = JSON.parse(localStorage.getItem('incidents') || '[]');
                 incidents.push({
-                    ...data,
+                    id: id,
+                    date: date,
+                    time: time,
+                    gps: gps,
+                    rapport: rapport,
                     timestamp: new Date().toISOString()
                 });
                 
-                // Garder seulement les 50 derniers incidents
-                if (incidents.length > 50) {
-                    incidents = incidents.slice(-50);
+                // Garder seulement les 20 derniers incidents
+                if (incidents.length > 20) {
+                    incidents = incidents.slice(-20);
                 }
                 
-                // Sauvegarder
                 localStorage.setItem('incidents', JSON.stringify(incidents));
+                localStorage.setItem('lastIncidentId', id);
                 console.log('✅ Incident sauvegardé localement');
-            } catch (error) {
-                console.error('Erreur sauvegarde locale:', error);
+            } catch (e) {
+                console.error('Erreur sauvegarde localStorage:', e);
             }
         }
-
-        function showLoadingMessage() {
-            // Créer un overlay de chargement
-            const overlay = document.createElement('div');
-            overlay.id = 'loadingOverlay';
-            overlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.7);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 9999;
-            `;
+        
+        // Fonction pour charger les données d'eau
+        function loadWaterData() {
+            document.getElementById('currentLevel').textContent = 'Chargement...';
+            document.getElementById('lastUpdate').textContent = 'Récupération des données...';
             
-            const message = document.createElement('div');
-            message.style.cssText = `
-                background: white;
-                padding: 30px;
-                border-radius: 15px;
-                text-align: center;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            `;
-            message.innerHTML = `
-                <h3 style="color: #e74c3c; margin-bottom: 15px;">🚨 Création du rapport en cours...</h3>
-                <p>Récupération GPS et création du document Google Docs</p>
-                <div style="margin-top: 20px;">
-                    <div style="width: 200px; height: 4px; background: #eee; border-radius: 2px; overflow: hidden;">
-                        <div style="width: 50%; height: 100%; background: linear-gradient(90deg, #e74c3c, #c0392b);
+            // Simuler un chargement (remplacer par l'API quand elle sera disponible)
+            setTimeout(function() {
+                document.getElementById('currentLevel').textContent = 'Service indisponible';
+                document.getElementById('lastUpdate').textContent = 'API temporairement hors ligne';
+            }, 2000);
+        }
+        
+        // Charger automatiquement au démarrage
+        window.onload = function() {
+            updateDateTime();
+            
+            // Vérifier s'il y a un dernier incident en mémoire
+            try {
+                var incidents = JSON.parse(localStorage.getItem('incidents') || '[]');
+                if (incidents.length > 0) {
+                    var lastIncident = incidents[incidents.length - 1];
+                    console.log('Dernier incident trouvé:', lastIncident.id);
+                }
+            } catch (e) {
+                console.error('Erreur lecture localStorage:', e);
+            }
+        };
+    </script>
+</body>
+</html>
